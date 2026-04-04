@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Book an Appointment — Shiny Paws</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink-main:   #F2D2D2;
+    --pink-light:  #F8E4E4;
+    --pink-warm:   #EECFCF;
+    --lilac:       #C9B8FF;
+    --lilac-dusty: #D4B8E0;
+    --purple:      #3D2060;
+    --purple-mid:  #5c3a8a;
+    --purple-soft: #7a56a8;
+    --bg:          #fdf5f5;
+    --surface:     #ffffff;
+    --border:      #e8d0d0;
+    --border-mid:  #d4b8d4;
+    --radius:      14px;
+    --radius-sm:   9px;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--purple); min-height: 100vh; }
+
+  #sp-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(30,10,50,0.55); z-index: 9999;
+    align-items: center; justify-content: center;
+    padding: 1rem; backdrop-filter: blur(3px);
+  }
+  #sp-overlay.open { display: flex; }
+
+  #sp-modal {
+    background: var(--bg); border-radius: 20px;
+    width: 100%; max-width: 980px; max-height: 92vh;
+    overflow-y: auto; position: relative;
+    box-shadow: 0 24px 60px rgba(61,32,96,0.25);
+  }
+
+  #standalone-header {
+    background: var(--purple); padding: 1.1rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-radius: 20px 20px 0 0;
+  }
+  .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--pink-light); }
+  .logo span { color: var(--lilac); }
+  .header-addr { font-size: 12px; color: var(--lilac-dusty); }
+
+  #back-btn {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.12); border: 0.5px solid rgba(255,255,255,0.25);
+    color: var(--pink-light); font-size: 12px; font-weight: 500;
+    cursor: pointer; padding: 6px 12px; border-radius: 20px;
+    font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+    white-space: nowrap;
+  }
+  #back-btn:hover { background: rgba(255,255,255,0.22); }
+
+  #prefill-banner {
+    display: none; background: #f3efff;
+    border-bottom: 0.5px solid var(--lilac);
+    padding: 0.75rem 1.5rem; font-size: 12px;
+    color: var(--purple-mid); align-items: center; gap: 8px;
+  }
+  #prefill-banner.visible { display: flex; }
+
+  .container {
+    padding: 1.5rem;
+    display: grid; grid-template-columns: 1.1fr 1fr;
+    gap: 1.25rem; align-items: start;
+  }
+  @media (max-width: 680px) {
+    .container { grid-template-columns: 1fr; }
+    #standalone-header { flex-direction: column; gap: 4px; }
+  }
+
+  .card {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: var(--radius); padding: 1.4rem;
+  }
+
+  h2 { font-family: 'DM Serif Display', serif; font-size: 17px; font-weight: 400; color: var(--purple); margin-bottom: 1rem; }
+  .slabel { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-soft); margin-bottom: 0.5rem; font-weight: 500; }
+
+  .cat-tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 0.8rem; }
+  .cat-tab {
+    padding: 5px 13px; border: 0.5px solid var(--lilac-dusty);
+    border-radius: 20px; font-size: 12px; cursor: pointer;
+    background: var(--pink-light); color: var(--purple-soft);
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .cat-tab.active { background: var(--purple); color: var(--pink-light); border-color: var(--purple); }
+  .cat-tab:hover:not(.active) { background: var(--pink-warm); }
+
+  .service-card {
+    background: var(--pink-light); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.75rem 0.9rem;
+    margin-bottom: 0.5rem; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s; display: none;
+  }
+  .service-card.visible { display: block; }
+  .service-card.selected { border: 2px solid var(--lilac); background: #f3efff; }
+  .service-card:hover:not(.selected) { background: var(--pink-warm); border-color: var(--border-mid); }
+
+  .srow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .sname { font-size: 13px; font-weight: 500; color: var(--purple); }
+  .sdesc { font-size: 11px; color: var(--purple-soft); margin-top: 2px; }
+  .sprice { font-size: 13px; font-weight: 500; color: var(--purple); white-space: nowrap; }
+
+  .addon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 0.5rem; }
+  .addon-card {
+    background: var(--pink-light); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 0.65rem 0.8rem;
+    cursor: pointer; display: flex; justify-content: space-between;
+    align-items: center; gap: 6px; transition: border-color 0.15s, background 0.15s;
+  }
+  .addon-card.picked { border: 2px solid var(--lilac); background: #f3efff; }
+  .addon-card:hover:not(.picked) { background: var(--pink-warm); border-color: var(--border-mid); }
+  .addon-name { font-size: 12px; font-weight: 500; color: var(--purple); }
+  .addon-price { font-size: 11px; color: var(--purple-soft); margin-top: 1px; }
+  .addon-check { font-size: 13px; color: var(--purple-mid); display: none; }
+  .addon-card.picked .addon-check { display: inline; }
+
+  .divider { height: 0.5px; background: var(--border); margin: 1rem 0; }
+  .field { margin-bottom: 0.8rem; }
+  label { display: block; font-size: 11px; color: var(--purple-soft); margin-bottom: 4px; font-weight: 500; }
+
+  input, select {
+    width: 100%; padding: 9px 12px;
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
+    font-size: 13px; background: #fff; color: var(--purple);
+    font-family: 'DM Sans', sans-serif; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
+  }
+  input:focus, select:focus { border-color: var(--lilac); box-shadow: 0 0 0 3px rgba(201,184,255,0.25); }
+  input::placeholder { color: var(--lilac-dusty); }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* Apple Pay */
+  .express-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--purple-soft);
+    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.6rem;
+  }
+  .express-label::before, .express-label::after { content:''; flex:1; height:0.5px; background:var(--border); }
+
+  #payment-request-btn { min-height: 44px; border-radius: var(--radius-sm); overflow: hidden; }
+
+  /* Shown locally or when Apple Pay unavailable */
+  #apple-pay-notice {
+    background: var(--pink-light); border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 12px; color: var(--purple-soft); text-align: center;
+    display: none;
+  }
+
+  .or-divider {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; color: var(--purple-soft); margin: 0.9rem 0;
+  }
+  .or-divider::before, .or-divider::after { content:''; flex:1; height:0.5px; background:var(--border); }
+
+  /* Stripe Card Element */
+  .stripe-field {
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
+    padding: 10px 12px; background: #fff;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .stripe-field.focused { border-color: var(--lilac); box-shadow: 0 0 0 3px rgba(201,184,255,0.25); }
+  .stripe-field.error { border-color: #c0392b; }
+
+  /* Fallback plain card fields (shown when Stripe can't load) */
+  #fallback-card { display: none; }
+
+  #stripe-errors { font-size: 11px; color: #c0392b; margin-top: 5px; min-height: 16px; }
+
+  .promo-row { display: flex; gap: 7px; }
+  .promo-row input { flex: 1; }
+  .apply-btn {
+    padding: 9px 15px; background: var(--pink-main);
+    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
+    font-size: 12px; font-weight: 500; cursor: pointer; color: var(--purple);
+    white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: background 0.15s;
+  }
+  .apply-btn:hover { background: var(--pink-warm); }
+
+  .pmsg-ok  { font-size: 11px; color: #3a7050; margin-top: 4px; }
+  .pmsg-err { font-size: 11px; color: #a03030; margin-top: 4px; }
+
+  .sum-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--purple-soft); margin-bottom: 7px; }
+  .sum-row.total { font-size: 15px; font-weight: 500; color: var(--purple); margin-top: 4px; }
+  .sum-row.disc { color: #3a7050; }
+
+  .pay-btn {
+    width: 100%; padding: 13px; background: var(--purple);
+    color: var(--pink-light); border: none; border-radius: var(--radius);
+    font-size: 15px; font-weight: 500; cursor: pointer;
+    font-family: 'DM Serif Display', serif; letter-spacing: 0.02em;
+    transition: opacity 0.15s, transform 0.1s; margin-top: 1rem;
+  }
+  .pay-btn:hover { opacity: 0.88; }
+  .pay-btn:active { transform: scale(0.99); }
+  .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .secure { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--purple-soft); justify-content: center; margin-top: 0.65rem; }
+  .chips { display: flex; gap: 5px; margin-bottom: 9px; flex-wrap: wrap; }
+  .chip { font-size: 10px; padding: 3px 9px; border: 0.5px solid var(--border); border-radius: 4px; color: var(--purple-soft); background: var(--pink-light); }
+
+  .addon-only-note {
+    font-size: 12px; color: var(--purple-soft); font-style: italic;
+    padding: 0.65rem 0.9rem; background: var(--pink-light);
+    border: 0.5px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 0.65rem; display: none;
+  }
+
+  /* Local testing notice */
+  #local-notice {
+    background: #fff8e6; border: 1px solid #f0c040;
+    border-radius: var(--radius-sm); padding: 10px 14px;
+    font-size: 12px; color: #7a5a00; margin-bottom: 1rem;
+    line-height: 1.6; display: none;
+  }
+  #local-notice code { background: #ffeea0; padding: 1px 5px; border-radius: 3px; }
+
+  #success-screen {
+    display: none; text-align: center;
+    padding: 3rem 2rem; background: var(--surface);
+    border-radius: 0 0 20px 20px;
+  }
+  .check-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #f3efff; border: 2px solid var(--lilac);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; color: var(--purple); margin: 0 auto 1.25rem;
+  }
+  #success-screen h2 { font-size: 24px; margin-bottom: 0.75rem; font-family: 'DM Serif Display', serif; }
+  #success-screen p  { font-size: 14px; color: var(--purple-soft); line-height: 1.6; }
+  #booking-ref { font-size: 12px; color: var(--lilac-dusty); margin-top: 0.75rem; }
+  .close-success-btn {
+    margin-top: 1.5rem; padding: 10px 28px;
+    background: var(--purple); color: var(--pink-light);
+    border: none; border-radius: var(--radius);
+    font-family: 'DM Serif Display', serif; font-size: 14px;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .close-success-btn:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<div id="sp-overlay" class="open">
+  <div id="sp-modal">
+
+    <div id="standalone-header">
+      <button id="back-btn" onclick="goBack()" title="Back to main site">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="logo">Shiny <span>Paws</span></div>
+      <div class="header-addr">Pet Styling Studio &nbsp;·&nbsp; Gardena, CA</div>
+    </div>
+
+    <div id="prefill-banner">
+      <span>✦</span>
+      <span>Pre-filled from your selection: <strong id="prefill-label"></strong></span>
+    </div>
+
+    <div id="checkout-body">
+      <div class="container">
+
+        <!-- LEFT -->
+        <div>
+          <div class="card">
+            <h2>Select your service</h2>
+            <div class="slabel">Category</div>
+            <div class="cat-tabs">
+              <button class="cat-tab active" onclick="filterCat('grooming',this)">Full grooming</button>
+              <button class="cat-tab" onclick="filterCat('bath',this)">Bath only</button>
+              <button class="cat-tab" onclick="filterCat('daycare',this)">Day care</button>
+              <button class="cat-tab" onclick="filterCat('addons',this)">Add-ons only</button>
+            </div>
+            <div class="addon-only-note" id="addon-only-note">No base service needed — choose any add-ons below and we'll take care of the rest.</div>
+            <div id="service-list">
+              <div class="service-card visible selected" onclick="pick(this,'Full Grooming — Small',100)" data-cat="grooming" data-value="Full Grooming - Small"><div class="srow"><div><div class="sname">Full grooming — small</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$100+</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Full Grooming — Medium',120)" data-cat="grooming" data-value="Full Grooming - Medium"><div class="srow"><div><div class="sname">Full grooming — medium</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$120+</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Full Grooming — Large',150)" data-cat="grooming" data-value="Full Grooming - Large"><div class="srow"><div><div class="sname">Full grooming — large</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$150+</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Full Grooming — Extra Large',170)" data-cat="grooming" data-value="Full Grooming - Extra Large"><div class="srow"><div><div class="sname">Full grooming — extra large</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$170+</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Small',60)" data-cat="bath" data-value="Bath Only - Small"><div class="srow"><div><div class="sname">Bath only — small</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$60+</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Medium',75)" data-cat="bath" data-value="Bath Only - Medium"><div class="srow"><div><div class="sname">Bath only — medium</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$75+</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Large',85)" data-cat="bath" data-value="Bath Only - Large"><div class="srow"><div><div class="sname">Bath only — large</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$85+</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Extra Large',100)" data-cat="bath" data-value="Bath Only - Extra Large"><div class="srow"><div><div class="sname">Bath only — extra large</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$100+</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — XXL',120)" data-cat="bath" data-value="Bath Only - XXL"><div class="srow"><div><div class="sname">Bath only — extra extra large</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$120+</div></div></div>
+              <div class="service-card" onclick="pick(this,'Day Care — 1 Hour',15)" data-cat="daycare" data-value="Day Care - 1 Hour"><div class="srow"><div><div class="sname">Day care — 1 hour</div><div class="sdesc">Supervised play &amp; socialization</div></div><div class="sprice">$15</div></div></div>
+              <div class="service-card" onclick="pick(this,'Day Care — Half Day',30)" data-cat="daycare" data-value="Day Care - Half Day"><div class="srow"><div><div class="sname">Day care — half day</div><div class="sdesc">Up to 5 hours supervised play</div></div><div class="sprice">$30</div></div></div>
+              <div class="service-card" onclick="pick(this,'Day Care — Full Day',50)" data-cat="daycare" data-value="Day Care - Full Day"><div class="srow"><div><div class="sname">Day care — full day</div><div class="sdesc">All-day supervised care</div></div><div class="sprice">$50</div></div></div>
+              <div class="service-card" onclick="pick(this,'Overnight Boarding',80)" data-cat="daycare" data-value="Overnight Boarding"><div class="srow"><div><div class="sname">Overnight boarding</div><div class="sdesc">Overnight stay with attentive care</div></div><div class="sprice">$80</div></div></div>
+            </div>
+            <div class="divider"></div>
+            <div class="slabel">Add-ons <span style="text-transform:none;letter-spacing:0;font-weight:400;font-style:italic"> — optional, select any</span></div>
+            <div class="addon-grid">
+              <div class="addon-card" onclick="toggleAddon(this,'Nail trim',18)"><div><div class="addon-name">Nail trim</div><div class="addon-price">$18</div></div><span class="addon-check">✓</span></div>
+              <div class="addon-card" onclick="toggleAddon(this,'Ear cleaning',15)"><div><div class="addon-name">Ear cleaning</div><div class="addon-price">$15</div></div><span class="addon-check">✓</span></div>
+              <div class="addon-card" onclick="toggleAddon(this,'Eye cleaning',12)"><div><div class="addon-name">Eye cleaning</div><div class="addon-price">$12</div></div><span class="addon-check">✓</span></div>
+              <div class="addon-card" onclick="toggleAddon(this,'Anal gland expression',20)"><div><div class="addon-name">Anal gland expression</div><div class="addon-price">$20</div></div><span class="addon-check">✓</span></div>
+              <div class="addon-card" onclick="toggleAddon(this,'Teeth brushing',15)"><div><div class="addon-name">Teeth brushing</div><div class="addon-price">$15</div></div><span class="addon-check">✓</span></div>
+              <div class="addon-card" onclick="toggleAddon(this,'De-shedding treatment',25)"><div><div class="addon-name">De-shedding treatment</div><div class="addon-price">$25</div></div><span class="addon-check">✓</span></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:1.25rem">
+            <h2>Appointment &amp; pet info</h2>
+            <div class="row2">
+              <div class="field"><label>Date</label><input type="date" id="appt-date" /></div>
+              <div class="field"><label>Time</label><select><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option></select></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label>Pet name</label><input type="text" placeholder="Buddy" /></div>
+              <div class="field"><label>Breed</label><input type="text" placeholder="Poodle" /></div>
+            </div>
+            <div class="field"><label>Special notes</label><input type="text" placeholder="Sensitive skin, nervous around dryers..." /></div>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="card">
+            <h2>Your details</h2>
+
+            <!-- Shown only when opened as a local file -->
+            <div id="local-notice">
+              🧪 <strong>Local preview mode.</strong> Stripe and Apple Pay load only on a live domain.
+              Upload to Netlify and replace <code>YOUR_STRIPE_KEY</code> in the script to go live.
+            </div>
+
+            <div class="row2">
+              <div class="field"><label>First name</label><input type="text" id="fname" placeholder="Jane" /></div>
+              <div class="field"><label>Last name</label><input type="text" id="lname" placeholder="Smith" /></div>
+            </div>
+            <div class="field"><label>Email</label><input type="email" id="email" placeholder="jane@email.com" /></div>
+            <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(310) 555-0100" /></div>
+            <div class="field"><label>Address</label><input type="text" placeholder="1234 Main St" /></div>
+            <div class="row2">
+              <div class="field"><label>City</label><input type="text" placeholder="Gardena" /></div>
+              <div class="field"><label>ZIP</label><input type="text" placeholder="90247" maxlength="5" /></div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="slabel">Payment</div>
+
+            <!-- Apple Pay (only renders on live domain in Safari with Apple Pay) -->
+            <div id="express-wrap">
+              <div class="express-label">Express checkout</div>
+              <div id="payment-request-btn"></div>
+              <div id="apple-pay-notice"></div>
+            </div>
+            <div id="or-divider" class="or-divider" style="display:none">or pay by card</div>
+
+            <div class="chips"><span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span><span class="chip">Discover</span></div>
+
+            <!-- Stripe Card Element (live) -->
+            <div id="stripe-card-wrap" class="field" style="display:none">
+              <label>Card details</label>
+              <div id="stripe-card-element" class="stripe-field"></div>
+              <div id="stripe-errors"></div>
+            </div>
+
+            <!-- Fallback plain fields (local preview / Stripe unavailable) -->
+            <div id="fallback-card">
+              <div class="field"><label>Card number</label><input type="text" id="card-num" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" /></div>
+              <div class="row3">
+                <div class="field"><label>Expiry</label><input type="text" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)" /></div>
+                <div class="field"><label>CVC</label><input type="text" placeholder="123" maxlength="4" /></div>
+                <div class="field"><label>ZIP</label><input type="text" placeholder="90247" maxlength="5" /></div>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+            <div class="slabel">Promo code</div>
+            <div class="promo-row">
+              <input type="text" id="promo-input" placeholder="Enter promo code" oninput="clearPromo()" />
+              <button class="apply-btn" onclick="applyPromo()">Apply</button>
+            </div>
+            <div id="promo-msg"></div>
+
+            <div class="divider"></div>
+            <div class="slabel">Order summary</div>
+            <div class="sum-row" id="base-row"><span id="sname-sum">Full Grooming — Small</span><span id="sprice-sum">$100.00</span></div>
+            <div id="addons-summary"></div>
+            <div class="sum-row disc" id="disc-row" style="display:none"><span>Promo discount</span><span id="disc-val"></span></div>
+            <div class="sum-row"><span>Tax (9.5%)</span><span id="tax-val">$9.50</span></div>
+            <div class="divider" style="margin:0.65rem 0"></div>
+            <div class="sum-row total"><span>Total due today</span><span id="total-val">$109.50</span></div>
+
+            <button class="pay-btn" id="pay-btn" onclick="pay()">Book &amp; pay now</button>
+            <div class="secure">
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x="0.6" y="5" width="8.8" height="7" rx="1.2" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 5V3.5a2.5 2.5 0 0 1 5 0V5" stroke="currentColor" stroke-width="1.1"/></svg>
+              Secured by Stripe &nbsp;·&nbsp; 256-bit TLS encryption
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="success-screen">
+      <div class="check-circle">✓</div>
+      <h2>Booking confirmed!</h2>
+      <p>A confirmation email has been sent.<br>We look forward to seeing your pup at Shiny Paws in Gardena!</p>
+      <div id="booking-ref"></div>
+      <button class="close-success-btn" onclick="goBack()">← Back to home</button>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   SHINY PAWS CHECKOUT
+   Replace YOUR_STRIPE_PUBLISHABLE_KEY with your real key from:
+   https://dashboard.stripe.com/apikeys
+   ═══════════════════════════════════════════════════════════ */
+const STRIPE_KEY = 'YOUR_STRIPE_PUBLISHABLE_KEY';
+
+let stripeInstance = null;
+let cardElement    = null;
+let paymentRequest = null;
+let stripeReady    = false;
+
+// Detect if running as a local file (file:// protocol)
+const isLocal = location.protocol === 'file:';
+
+function initStripe() {
+  if (isLocal) {
+    // Local file — Stripe won't load, show friendly notice + fallback fields
+    document.getElementById('local-notice').style.display = 'block';
+    document.getElementById('express-wrap').style.display = 'none';
+    document.getElementById('or-divider').style.display   = 'none';
+    document.getElementById('fallback-card').style.display = 'block';
+    return;
+  }
+
+  if (typeof Stripe === 'undefined') {
+    // Stripe script failed to load on a live domain — show fallback silently
+    document.getElementById('express-wrap').style.display  = 'none';
+    document.getElementById('or-divider').style.display    = 'none';
+    document.getElementById('fallback-card').style.display = 'block';
+    return;
+  }
+
+  // ── Stripe loaded successfully ──
+  stripeReady    = true;
+  stripeInstance = Stripe(STRIPE_KEY);
+  const elements = stripeInstance.elements();
+
+  // Card Element
+  cardElement = elements.create('card', {
+    style: {
+      base: {
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '14px',
+        color: '#3D2060',
+        '::placeholder': { color: '#D4B8E0' },
+        iconColor: '#7a56a8',
+      },
+      invalid: { color: '#c0392b', iconColor: '#c0392b' }
+    },
+    hidePostalCode: true
+  });
+
+  document.getElementById('stripe-card-wrap').style.display = 'block';
+  cardElement.mount('#stripe-card-element');
+
+  cardElement.on('focus',  () => document.getElementById('stripe-card-element').classList.add('focused'));
+  cardElement.on('blur',   () => document.getElementById('stripe-card-element').classList.remove('focused'));
+  cardElement.on('change', e => {
+    const el  = document.getElementById('stripe-card-element');
+    const err = document.getElementById('stripe-errors');
+    if (e.error) { el.classList.add('error'); err.textContent = e.error.message; }
+    else         { el.classList.remove('error'); err.textContent = ''; }
+  });
+
+  // Apple Pay via Payment Request Button
+  paymentRequest = stripeInstance.paymentRequest({
+    country: 'US', currency: 'usd',
+    total: { label: 'Shiny Paws · ' + selName, amount: getTotalCents() },
+    requestPayerName: true, requestPayerEmail: true, requestPayerPhone: true,
+  });
+
+  const prButton = elements.create('paymentRequestButton', {
+    paymentRequest,
+    style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '46px' } }
+  });
+
+  paymentRequest.canMakePayment().then(result => {
+    if (result) {
+      prButton.mount('#payment-request-btn');
+      document.getElementById('or-divider').style.display = 'flex';
+    } else {
+      // Apple Pay not available — hide the whole express section silently
+      document.getElementById('express-wrap').style.display = 'none';
+      document.getElementById('or-divider').style.display   = 'none';
+    }
+  });
+
+  paymentRequest.on('paymentmethod', async (ev) => {
+    // Uncomment when backend is ready:
+    // const res = await fetch('/.netlify/functions/create-payment-intent', {
+    //   method: 'POST', headers: {'Content-Type':'application/json'},
+    //   body: JSON.stringify({ amount: getTotalCents(), currency: 'usd' })
+    // });
+    // const { clientSecret } = await res.json();
+    // const { error } = await stripeInstance.confirmCardPayment(clientSecret,
+    //   { payment_method: ev.paymentMethod.id }, { handleActions: false });
+    // if (error) { ev.complete('fail'); return; }
+    ev.complete('success');
+    showSuccess();
+  });
+}
+
+// ── STATE ────────────────────────────────────────────────────────────
+let basePrice = 100, discount = 0, selName = 'Full Grooming — Small';
+const addons = {}, TAX = 0.095;
+
+function getTotalCents() {
+  const at = Object.values(addons).reduce((a,b)=>a+b,0);
+  return Math.round((Math.max(0, basePrice+at-discount) * (1+TAX)) * 100);
+}
+
+// ── PUBLIC API ───────────────────────────────────────────────────────
+function openSPCheckout() {
+  document.getElementById('sp-overlay').classList.add('open');
+  document.getElementById('sp-modal').scrollTop = 0;
+  document.body.style.overflow = 'hidden';
+}
+
+function openBookingWith(service, details, serviceValue) {
+  openSPCheckout();
+  document.getElementById('prefill-label').textContent = serviceValue || service;
+  document.getElementById('prefill-banner').classList.add('visible');
+  const cards = document.querySelectorAll('.service-card');
+  let matched = false;
+  cards.forEach(card => {
+    if (card.dataset.value && card.dataset.value.toLowerCase() === (serviceValue||'').toLowerCase()) {
+      const cat = card.dataset.cat;
+      const tabMap = {grooming:0,bath:1,daycare:2,addons:3};
+      const tabs = document.querySelectorAll('.cat-tab');
+      if (tabs[tabMap[cat]]) filterCat(cat, tabs[tabMap[cat]]);
+      card.click(); matched = true;
+    }
+  });
+  if (!matched) {
+    const tabs = document.querySelectorAll('.cat-tab');
+    filterCat(service==='Day Care'?'daycare':'grooming', tabs[service==='Day Care'?2:0]);
+  }
+}
+
+function openZone(zone) { if (zone==='booking') openSPCheckout(); }
+
+// ── NAVIGATION ───────────────────────────────────────────────────────
+// goBack() sends user back to main site
+// Change 'index.html' if your main file has a different name
+function goBack() {
+  window.location.href = 'shinypaws_v32.html';
+}
+
+function closeSPCheckout() {
+  goBack();
+}
+
+// ── SERVICES ─────────────────────────────────────────────────────────
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.service-card').forEach(c=>{
+    c.classList.remove('visible','selected');
+    if (c.dataset.cat===cat) c.classList.add('visible');
+  });
+  discount=0;
+  document.getElementById('promo-msg').innerHTML='';
+  document.getElementById('promo-input').value='';
+  const note = document.getElementById('addon-only-note');
+  if (cat==='addons') {
+    basePrice=0; selName='Add-ons only';
+    document.getElementById('base-row').style.display='none';
+    note.style.display='block';
+  } else {
+    document.getElementById('base-row').style.display='flex';
+    note.style.display='none';
+    const first = document.querySelector('.service-card.visible');
+    if (first) first.click();
+  }
+  updateSum();
+}
+
+function pick(el, name, price) {
+  document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  basePrice=price; selName=name; discount=0;
+  document.getElementById('promo-msg').innerHTML='';
+  document.getElementById('promo-input').value='';
+  document.getElementById('base-row').style.display='flex';
+  updateSum();
+}
+
+function toggleAddon(el, name, price) {
+  if (addons[name]) { delete addons[name]; el.classList.remove('picked'); }
+  else { addons[name]=price; el.classList.add('picked'); }
+  updateSum();
+}
+
+function updateSum() {
+  const at=Object.values(addons).reduce((a,b)=>a+b,0);
+  const gross=basePrice+at, net=Math.max(0,gross-discount);
+  const tax=net*TAX, total=net+tax;
+  document.getElementById('sname-sum').textContent=selName;
+  document.getElementById('sprice-sum').textContent=basePrice>0?'$'+basePrice.toFixed(2):'';
+  const ac=document.getElementById('addons-summary'); ac.innerHTML='';
+  Object.entries(addons).forEach(([n,p])=>{
+    const r=document.createElement('div'); r.className='sum-row';
+    r.innerHTML='<span style="padding-left:8px;font-size:12px">+ '+n+'</span><span>$'+p.toFixed(2)+'</span>';
+    ac.appendChild(r);
+  });
+  const dr=document.getElementById('disc-row');
+  if (discount>0){dr.style.display='flex';document.getElementById('disc-val').textContent='-$'+discount.toFixed(2);}
+  else dr.style.display='none';
+  document.getElementById('tax-val').textContent='$'+tax.toFixed(2);
+  document.getElementById('total-val').textContent='$'+total.toFixed(2);
+  if (paymentRequest) paymentRequest.update({total:{label:'Shiny Paws · '+selName,amount:getTotalCents()}});
+}
+
+function applyPromo() {
+  const code=document.getElementById('promo-input').value.trim().toUpperCase();
+  const msg=document.getElementById('promo-msg');
+  const codes={WELCOME10:{pct:0.10,label:'10% off'},PETSPA20:{pct:0.20,label:'20% off'},FIRSTVISIT:{flat:15,label:'$15 off'}};
+  const gross=basePrice+Object.values(addons).reduce((a,b)=>a+b,0);
+  if (codes[code]){
+    const c=codes[code];
+    discount=c.flat?Math.min(c.flat,gross):Math.round(gross*c.pct*100)/100;
+    msg.className='pmsg-ok'; msg.textContent='Code applied: '+c.label; updateSum();
+  } else {
+    discount=0; updateSum();
+    msg.className='pmsg-err'; msg.textContent='Invalid code. Try WELCOME10 or PETSPA20.';
+  }
+}
+function clearPromo(){document.getElementById('promo-msg').innerHTML='';}
+function fmtCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v.replace(/(.{4})/g,'$1 ').trim();}
+function fmtExp(el){let v=el.value.replace(/\D/g,'');if(v.length>=3)v=v.substring(0,2)+' / '+v.substring(2,4);el.value=v;}
+
+async function pay() {
+  const gross=basePrice+Object.values(addons).reduce((a,b)=>a+b,0);
+  if (gross===0){alert('Please select at least one service or add-on.');return;}
+
+  const btn=document.getElementById('pay-btn');
+  btn.disabled=true; btn.textContent='Processing…';
+
+  if (stripeReady && cardElement) {
+    // ── LIVE STRIPE PAYMENT ──
+    // Uncomment when backend is ready:
+    // try {
+    //   const res = await fetch('/.netlify/functions/create-payment-intent', {
+    //     method:'POST', headers:{'Content-Type':'application/json'},
+    //     body: JSON.stringify({ amount: getTotalCents(), currency:'usd',
+    //       receipt_email: document.getElementById('email').value })
+    //   });
+    //   const { clientSecret } = await res.json();
+    //   const { error } = await stripeInstance.confirmCardPayment(clientSecret, {
+    //     payment_method: { card: cardElement, billing_details: {
+    //       name: document.getElementById('fname').value+' '+document.getElementById('lname').value,
+    //       email: document.getElementById('email').value,
+    //       phone: document.getElementById('phone').value,
+    //     }}
+    //   });
+    //   if (error) {
+    //     document.getElementById('stripe-errors').textContent=error.message;
+    //     btn.disabled=false; btn.textContent='Book & pay now'; return;
+    //   }
+    //   showSuccess(); return;
+    // } catch(e) {
+    //   document.getElementById('stripe-errors').textContent='Payment failed. Please try again.';
+    //   btn.disabled=false; btn.textContent='Book & pay now'; return;
+    // }
+  }
+
+  // Demo / local fallback
+  setTimeout(()=>{ showSuccess(); }, 900);
+}
+
+function showSuccess() {
+  document.getElementById('checkout-body').style.display='none';
+  document.getElementById('success-screen').style.display='block';
+  document.getElementById('booking-ref').textContent='Booking reference: #SP-'+Math.floor(100000+Math.random()*900000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+const today=new Date().toISOString().split('T')[0];
+document.getElementById('appt-date').min=today;
+document.getElementById('appt-date').value=today;
+updateSum();
+
+document.getElementById('sp-overlay').addEventListener('click',function(e){
+  if(e.target===this) closeSPCheckout();
+});
+
+// Load Stripe safely — won't crash if blocked or offline
+(function loadStripe() {
+  if (isLocal) { initStripe(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://js.stripe.com/v3/';
+  s.onload = initStripe;
+  s.onerror = initStripe; // falls back to plain fields if Stripe can't load
+  document.head.appendChild(s);
+})();
+</script>
+
+</body>
+</html>
