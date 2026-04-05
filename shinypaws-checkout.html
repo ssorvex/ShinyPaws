@@ -705,9 +705,70 @@ function showSuccess() {
     if (!booked.includes(time)) booked.push(time);
     localStorage.setItem(key, JSON.stringify(booked));
   }
-  document.getElementById('checkout-body').style.display='none';
-  document.getElementById('success-screen').style.display='block';
-  document.getElementById('booking-ref').textContent='Booking reference: #SP-'+Math.floor(100000+Math.random()*900000);
+
+  // Collect booking details
+  const ref = '#SP-' + Math.floor(100000 + Math.random() * 900000);
+  const fname    = document.getElementById('fname')  ? document.getElementById('fname').value  : '';
+  const lname    = document.getElementById('lname')  ? document.getElementById('lname').value  : '';
+  const email    = document.getElementById('email')  ? document.getElementById('email').value  : '';
+  const phone    = document.getElementById('phone')  ? document.getElementById('phone').value  : '';
+  const petName  = document.querySelector('input[placeholder="Buddy"]')   ? document.querySelector('input[placeholder="Buddy"]').value   : '';
+  const breed    = document.querySelector('input[placeholder="Poodle"]')  ? document.querySelector('input[placeholder="Poodle"]').value  : '';
+  const notes    = document.querySelector('input[placeholder="Sensitive skin, nervous around dryers..."]') ? document.querySelector('input[placeholder="Sensitive skin, nervous around dryers..."]').value : '';
+  const addonList = Object.keys(addons).join(', ') || 'None';
+  const bookingData = {
+    reference:    ref,
+    name:         fname + ' ' + lname,
+    email:        email,
+    phone:        phone,
+    service:      selName,
+    addons:       addonList,
+    date:         date,
+    time:         time,
+    pet_name:     petName,
+    breed:        breed,
+    notes:        notes,
+    total:        document.getElementById('total-val').textContent,
+    submitted_at: new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})
+  };
+
+  // ── FORMSPREE — sends you an email notification ──────────────────
+  fetch('https://formspree.io/f/mgopplba', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(bookingData)
+  }).catch(err => console.log('Formspree error:', err));
+
+  // ── GOOGLE SHEETS — logs every booking to your spreadsheet ───────
+  // Step 1: Create a Google Sheet
+  // Step 2: Go to Extensions → Apps Script → paste the script below → Save & Deploy
+  // Step 3: Replace YOUR_GOOGLE_SCRIPT_URL below with your Web App URL
+  //
+  // Apps Script code to paste:
+  // function doPost(e) {
+  //   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  //   var data = JSON.parse(e.postData.contents);
+  //   sheet.appendRow([
+  //     data.submitted_at, data.reference, data.name, data.email,
+  //     data.phone, data.service, data.addons, data.date, data.time,
+  //     data.pet_name, data.breed, data.notes, data.total
+  //   ]);
+  //   return ContentService.createTextOutput('OK');
+  // }
+  //
+  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzk_OshQbx_n0wHhR5n8w_dY9v97agpACpDFm9b8ym84-O6Z66B519Ya5wl0hK0J_PK/exec';
+  if (GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_URL') {
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    }).catch(err => console.log('Sheets error:', err));
+  }
+
+  document.getElementById('checkout-body').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+  document.getElementById('booking-ref').textContent = 'Booking reference: ' + ref;
 }
 
 function refreshBookedSlots() {
