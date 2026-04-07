@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Studio | Shiny Paws — Pasadena, CA</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --pink:       #F2D2D2;
+  --pink-light: #F8E4E4;
+  --pink-warm:  #EECFCF;
+  --lilac:      #C9B8FF;
+  --lilac-dust: #D4B8E0;
+  --purple:     #3D2060;
+  --purple-mid: #6040A0;
+  --purple-soft:#8B6FC5;
+  --white:      #FFFFFF;
+  --muted:      #7A5FA0;
+  --nav-h:      72px;
+  --radius:     20px;
+  --radius-lg:  32px;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--pink-light);color:var(--purple);line-height:1.6;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  height:var(--nav-h);
+  background:rgba(248,228,228,0.92);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(61,32,96,0.08);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 5%;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+  font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;
+  color:var(--purple);letter-spacing:0.01em;flex-shrink:0;
+}
+.logo-paw{
+  width:38px;height:38px;border-radius:12px;
+  background:var(--purple);display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.nav-links{display:flex;gap:1.8rem;list-style:none}
+.nav-links a{
+  text-decoration:none;font-size:0.82rem;font-weight:700;
+  color:var(--purple);letter-spacing:0.05em;text-transform:uppercase;
+  transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--purple-soft)}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-book{
+  background:var(--purple);color:var(--pink-light);
+  padding:10px 22px;border-radius:100px;
+  text-decoration:none;font-size:0.82rem;font-weight:700;
+  letter-spacing:0.04em;transition:background 0.2s,transform 0.15s;
+  white-space:nowrap;
+}
+.nav-book:hover{background:var(--purple-mid);transform:translateY(-1px)}
+.nav-back{
+  text-decoration:none;font-size:0.82rem;font-weight:700;
+  color:var(--purple);letter-spacing:0.04em;
+  display:flex;align-items:center;gap:5px;
+  opacity:0.7;transition:opacity 0.2s;
+}
+.nav-back:hover{opacity:1}
+
+/* Hamburger */
+.hamburger{
+  display:none;flex-direction:column;gap:5px;cursor:pointer;
+  background:none;border:none;padding:6px;z-index:400;
+}
+.hamburger span{
+  display:block;width:24px;height:2px;background:var(--purple);
+  border-radius:2px;transition:transform 0.3s,opacity 0.3s;
+}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* Mobile drawer */
+.mobile-menu{
+  display:none;position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;
+  background:rgba(248,228,228,0.98);backdrop-filter:blur(24px);
+  z-index:250;flex-direction:column;align-items:center;justify-content:center;gap:2rem;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.mobile-menu.open{opacity:1;pointer-events:all}
+.mobile-menu a{
+  font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;
+  color:var(--purple);text-decoration:none;letter-spacing:0.02em;
+  transition:color 0.2s;
+}
+.mobile-menu a:hover{color:var(--purple-soft)}
+.mobile-book{
+  background:var(--purple)!important;color:var(--pink-light)!important;
+  padding:14px 36px!important;border-radius:100px;font-size:1rem!important;
+  font-family:'Nunito',sans-serif!important;font-weight:700!important;
+}
+
+/* ── HERO ── */
+.hero{
+  margin-top:var(--nav-h);min-height:95vh;
+  display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  padding:5rem 5%;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--pink-light) 55%,var(--pink) 100%);
+}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.4;pointer-events:none;z-index:0}
+.b1{width:500px;height:500px;background:var(--lilac);top:-120px;right:-100px}
+.b2{width:300px;height:300px;background:var(--pink-warm);bottom:-60px;left:-60px}
+.hero-text{position:relative;z-index:2}
+.chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--purple);color:var(--pink-light);
+  font-size:0.74rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  padding:7px 18px;border-radius:100px;margin-bottom:2rem;
+}
+.hero h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(3rem,5.5vw,5.2rem);line-height:1.05;
+  color:var(--purple);margin-bottom:1.5rem;font-weight:600;
+}
+.hero h1 em{font-style:italic;color:var(--purple-mid)}
+.hero-sub{font-size:1.05rem;color:var(--muted);max-width:460px;line-height:1.9;margin-bottom:2.5rem}
+.hero-btns{display:flex;gap:1rem;flex-wrap:wrap}
+.btn-filled{background:var(--purple);color:var(--pink-light);padding:14px 30px;border-radius:100px;text-decoration:none;font-weight:700;font-size:0.9rem;transition:background 0.2s,transform 0.15s}
+.btn-filled:hover{background:var(--purple-mid);transform:translateY(-2px)}
+.btn-soft{background:var(--lilac);color:var(--purple);padding:14px 30px;border-radius:100px;text-decoration:none;font-weight:700;font-size:0.9rem;transition:filter 0.2s,transform 0.15s}
+.btn-soft:hover{filter:brightness(0.92);transform:translateY(-2px)}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3rem;flex-wrap:wrap}
+.hstat-n{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:600;color:var(--purple);line-height:1}
+.hstat-l{font-size:0.74rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.hero-visual{position:relative;z-index:2;display:flex;align-items:center;justify-content:center}
+.hero-orb{
+  width:min(440px,90%);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,var(--lilac) 0%,var(--lilac-dust) 45%,var(--pink-warm) 100%);
+  display:flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:0 30px 80px rgba(201,184,255,0.4);
+  animation:floatY 5s ease-in-out infinite;
+}
+.hero-orb::before{content:'';position:absolute;inset:-12px;border-radius:50%;border:2px dashed rgba(61,32,96,0.15)}
+.orb-img{width:75%;height:75%;object-fit:cover;border-radius:50%}
+.orb-emoji{font-size:9rem;filter:drop-shadow(0 8px 24px rgba(61,32,96,0.2))}
+.float-pill{
+  position:absolute;background:var(--white);border-radius:100px;padding:10px 18px;
+  box-shadow:0 8px 30px rgba(61,32,96,0.15);display:flex;align-items:center;gap:10px;
+  font-size:0.82rem;font-weight:700;color:var(--purple);white-space:nowrap;
+}
+.fp1{bottom:10%;left:-2rem}
+.fp2{top:12%;right:-2rem}
+.fp-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0}
+.fp-p{background:var(--pink)}
+.fp-l{background:var(--lilac)}
+
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* ── MARQUEE ── */
+.marquee-strip{background:var(--purple);padding:14px 0;overflow:hidden;white-space:nowrap}
+.marquee-inner{display:inline-flex;animation:marquee 28s linear infinite}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.mi{display:inline-flex;align-items:center;gap:12px;padding:0 2.5rem;font-size:0.8rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--pink-light)}
+.mi::after{content:'✦';opacity:0.4;margin-left:2.5rem}
+
+/* ── SECTIONS ── */
+section{padding:6rem 5%;position:relative}
+.stag{font-size:0.74rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--purple-soft);margin-bottom:0.7rem}
+.stitle{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3.5vw,3rem);line-height:1.15;color:var(--purple);margin-bottom:1rem;font-weight:600}
+.ssub{font-size:0.97rem;color:var(--muted);max-width:520px;line-height:1.85}
+.shdr{margin-bottom:3.5rem}
+
+/* ── SERVICES ── */
+.services{background:var(--pink-light)}
+.services-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.25rem}
+.svc{
+  background:var(--white);border-radius:var(--radius-lg);padding:2rem 1.8rem;
+  border:1.5px solid rgba(61,32,96,0.06);transition:transform 0.25s,box-shadow 0.25s;
+  position:relative;overflow:hidden;
+}
+.svc::before{content:'';position:absolute;top:0;right:0;width:110px;height:110px;background:radial-gradient(circle,var(--pink) 0%,transparent 70%);opacity:0.5;border-radius:0 var(--radius-lg) 0 100%}
+.svc:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(61,32,96,0.1)}
+.svc-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin-bottom:1.2rem}
+.ic-l{background:var(--lilac)}
+.ic-p{background:var(--pink)}
+.ic-d{background:var(--lilac-dust)}
+.ic-w{background:var(--pink-warm)}
+.svc h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--purple);margin-bottom:0.5rem}
+.svc p{font-size:0.87rem;color:var(--muted);line-height:1.8;margin-bottom:1.2rem}
+.svc-price{font-size:0.78rem;font-weight:700;letter-spacing:0.05em;color:var(--purple);background:var(--pink);display:inline-block;padding:4px 14px;border-radius:100px;margin-bottom:1rem}
+.svc-link{font-size:0.84rem;font-weight:700;color:var(--purple-soft);text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:gap 0.2s,color 0.2s}
+.svc-link:hover{gap:10px;color:var(--purple)}
+
+/* ── ABOUT ── */
+.about{background:var(--purple);display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;overflow:hidden}
+.ab3{width:400px;height:400px;background:var(--purple-mid);top:-100px;right:-100px;opacity:0.3;filter:blur(80px)}
+.about-img-wrap{position:relative;z-index:1}
+.about-card-big{
+  border-radius:var(--radius-lg);aspect-ratio:4/5;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,var(--lilac),var(--lilac-dust));
+  position:relative;box-shadow:0 30px 70px rgba(0,0,0,0.25);
+}
+.about-card-big img{width:100%;height:100%;object-fit:cover}
+.about-card-big .ab-emoji{font-size:10rem;position:relative;z-index:1}
+.ab-badge{
+  position:absolute;bottom:2rem;left:-2rem;
+  background:var(--pink-light);border-radius:var(--radius);padding:1.2rem 1.5rem;
+  box-shadow:0 12px 40px rgba(0,0,0,0.2);z-index:2;
+}
+.ab-n{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:600;color:var(--purple);line-height:1}
+.ab-l{font-size:0.74rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
+.about-text{position:relative;z-index:1}
+.about-text .stag{color:var(--lilac)}
+.about-text .stitle{color:var(--pink-light)}
+.about-text p{color:rgba(255,255,255,0.72);line-height:1.9;font-size:0.97rem;margin-bottom:1rem}
+.cklist{list-style:none;margin:1.5rem 0 2rem;display:flex;flex-direction:column;gap:0.75rem}
+.cklist li{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.9);font-size:0.93rem;font-weight:500}
+.ck{width:24px;height:24px;border-radius:50%;flex-shrink:0;background:var(--lilac);display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:800;color:var(--purple)}
+
+/* ── GALLERY ── */
+.gallery{background:var(--pink)}
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:220px 220px;gap:1rem;margin-top:3rem}
+.gi{border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer}
+.gi:first-child{grid-column:span 2;grid-row:span 2;border-radius:var(--radius-lg)}
+.gi:nth-child(4){grid-column:span 2}
+.gi-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;transition:transform 0.4s ease;position:relative}
+.gi img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;position:absolute;inset:0}
+.gi:hover .gi-inner,.gi:hover img{transform:scale(1.06)}
+.gi-label{position:absolute;bottom:0;left:0;right:0;padding:0.8rem 1rem;background:linear-gradient(to top,rgba(61,32,96,0.75),transparent);color:var(--pink-light);font-size:0.8rem;font-weight:700;letter-spacing:0.05em;opacity:0;transition:opacity 0.3s}
+.gi:hover .gi-label{opacity:1}
+.ga{background:linear-gradient(135deg,var(--lilac),var(--lilac-dust))}
+.gb{background:linear-gradient(135deg,var(--pink-warm),var(--pink))}
+.gc{background:linear-gradient(135deg,var(--lilac-dust),var(--lilac))}
+.gd{background:linear-gradient(135deg,var(--pink),var(--lilac))}
+.ge{background:linear-gradient(135deg,var(--purple-soft),var(--lilac))}
+.gf{background:linear-gradient(135deg,var(--pink-warm),var(--lilac-dust))}
+.gallery-note{margin-top:1.5rem;font-size:0.82rem;color:var(--muted);font-style:italic}
+
+/* ── INSTAGRAM ── */
+.instagram{background:var(--pink-light)}
+.ig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;margin-top:3rem}
+.ig-tile{
+  aspect-ratio:1;border-radius:var(--radius);overflow:hidden;
+  position:relative;cursor:pointer;background:var(--pink-warm);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;
+}
+.ig-tile img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform 0.4s}
+.ig-tile:hover img{transform:scale(1.07)}
+.ig-overlay{
+  position:absolute;inset:0;background:rgba(61,32,96,0.55);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  opacity:0;transition:opacity 0.3s;
+}
+.ig-tile:hover .ig-overlay{opacity:1}
+.ig-overlay span{color:var(--white);font-size:0.8rem;font-weight:700;letter-spacing:0.05em}
+.ig-overlay .ig-heart{font-size:1.4rem}
+.ig-cta-row{display:flex;align-items:center;justify-content:center;margin-top:2rem;gap:1rem;flex-wrap:wrap}
+.ig-follow-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--purple);color:var(--pink-light);
+  padding:13px 28px;border-radius:100px;text-decoration:none;
+  font-weight:700;font-size:0.9rem;transition:background 0.2s,transform 0.15s;
+}
+.ig-follow-btn:hover{background:var(--purple-mid);transform:translateY(-2px)}
+.ig-discount{font-size:0.85rem;color:var(--muted);font-style:italic}
+
+/* ── PRICING ── */
+.pricing{background:var(--pink-warm)}
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem}
+.pc{background:var(--white);border-radius:var(--radius-lg);padding:2rem 1.8rem;border:1.5px solid rgba(61,32,96,0.07);position:relative;transition:transform 0.25s}
+.pc:hover{transform:translateY(-4px)}
+.pc.feat{background:var(--purple);border-color:transparent}
+.pc-tag{font-size:0.71rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--purple-soft);margin-bottom:0.4rem}
+.pc.feat .pc-tag{color:var(--lilac)}
+.pc-name{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--purple);margin-bottom:1rem}
+.pc.feat .pc-name{color:var(--pink-light)}
+.pc-amt{font-family:'Cormorant Garamond',serif;font-size:3.2rem;font-weight:600;color:var(--purple);line-height:1}
+.pc.feat .pc-amt{color:var(--white)}
+.pc-from{font-size:0.78rem;color:var(--muted);margin-bottom:0.5rem}
+.pc.feat .pc-from{color:rgba(255,255,255,0.6)}
+.pc-desc{font-size:0.87rem;color:var(--muted);line-height:1.75;margin-bottom:1.5rem}
+.pc.feat .pc-desc{color:rgba(255,255,255,0.7)}
+.pop-tag{position:absolute;top:1.4rem;right:1.4rem;background:var(--lilac);color:var(--purple);font-size:0.69rem;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;padding:4px 12px;border-radius:100px}
+.pc-btn{display:block;text-align:center;text-decoration:none;padding:12px;border-radius:100px;font-weight:700;font-size:0.87rem;transition:all 0.2s}
+.pc-out{border:2px solid var(--purple);color:var(--purple)}
+.pc-out:hover{background:var(--purple);color:var(--pink-light)}
+.pc-fill{background:var(--lilac);color:var(--purple)}
+.pc-fill:hover{filter:brightness(0.92)}
+
+/* ── TESTIMONIALS ── */
+.testimonials{background:var(--pink-light)}
+.rv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.25rem}
+.rv{background:var(--white);border-radius:var(--radius-lg);padding:1.8rem;border:1.5px solid rgba(61,32,96,0.06)}
+.rv-stars{font-size:0.9rem;letter-spacing:3px;color:var(--purple);margin-bottom:1rem}
+.rv-text{font-size:0.9rem;line-height:1.85;color:var(--muted);margin-bottom:1.3rem;font-style:italic}
+.rv-who{display:flex;align-items:center;gap:10px}
+.rv-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.82rem;color:var(--purple)}
+.rv-name{font-weight:700;font-size:0.9rem;color:var(--purple)}
+.rv-pet{font-size:0.75rem;color:var(--muted)}
+
+/* ── FAQ ── */
+.faq{background:var(--pink)}
+.faq-list{max-width:780px;display:flex;flex-direction:column;gap:1rem;margin-top:3rem}
+.faq-item{background:var(--white);border-radius:var(--radius);border:1.5px solid rgba(61,32,96,0.07);overflow:hidden}
+.faq-q{width:100%;background:none;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:1.3rem 1.5rem;text-align:left;font-family:'Nunito',sans-serif;font-size:0.97rem;font-weight:700;color:var(--purple)}
+.faq-arr{width:26px;height:26px;border-radius:50%;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--purple);flex-shrink:0;transition:transform 0.3s,background 0.2s}
+.faq-item.open .faq-arr{transform:rotate(45deg);background:var(--lilac)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height 0.35s ease,padding 0.3s;font-size:0.9rem;color:var(--muted);line-height:1.85;padding:0 1.5rem}
+.faq-item.open .faq-a{max-height:300px;padding:0 1.5rem 1.3rem}
+
+/* ── MAP ── */
+.map-section{background:var(--purple);padding:6rem 5%}
+.map-section .stag{color:var(--lilac)}
+.map-section .stitle{color:var(--pink-light)}
+.map-section .ssub{color:rgba(255,255,255,0.65)}
+.map-wrap{
+  display:grid;grid-template-columns:1fr 2fr;gap:2.5rem;align-items:start;margin-top:3rem;
+}
+.map-info{display:flex;flex-direction:column;gap:1.2rem}
+.md{display:flex;align-items:flex-start;gap:14px}
+.md-icon{width:44px;height:44px;border-radius:14px;flex-shrink:0;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.md-label{font-size:0.71rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--lilac-dust);margin-bottom:2px}
+.md-val{font-weight:600;font-size:0.95rem;color:var(--pink-light)}
+.map-frame{border-radius:var(--radius-lg);overflow:hidden;height:380px;border:2px solid rgba(255,255,255,0.1);position:relative;background:var(--purple-mid)}
+.map-frame iframe{width:100%;height:100%;border:none;display:block}
+.map-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:rgba(255,255,255,0.6);font-size:0.9rem;text-align:center;padding:2rem}
+.map-placeholder .map-icon{font-size:3rem}
+
+/* ── CONTACT ── */
+.contact{background:var(--pink-light);display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.cinfo .stitle{color:var(--purple)}
+.cinfo p{color:var(--muted);font-size:0.97rem;line-height:1.85;margin-bottom:2rem}
+.cd{display:flex;align-items:flex-start;gap:14px;margin-bottom:1.3rem}
+.cd-icon{width:44px;height:44px;border-radius:14px;flex-shrink:0;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.cd-label{font-size:0.71rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.cd-val{font-weight:600;font-size:0.95rem;color:var(--purple)}
+.cform{display:flex;flex-direction:column;gap:1rem}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg label{font-size:0.79rem;font-weight:700;color:var(--purple);letter-spacing:0.04em}
+.fg input,.fg select,.fg textarea{
+  padding:12px 16px;border:1.5px solid rgba(61,32,96,0.15);border-radius:12px;
+  font-family:'Nunito',sans-serif;font-size:0.92rem;background:var(--white);
+  color:var(--purple);outline:none;transition:border 0.2s;
+}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--purple)}
+.fg textarea{resize:vertical;min-height:110px}
+.fg input::placeholder,.fg textarea::placeholder{color:var(--muted);opacity:0.6}
+.csub{
+  background:var(--purple);color:var(--pink-light);
+  border:none;padding:14px 30px;border-radius:100px;
+  font-family:'Nunito',sans-serif;font-size:0.93rem;font-weight:700;
+  cursor:pointer;transition:background 0.2s,transform 0.15s;align-self:flex-start;
+}
+.csub:hover{background:var(--purple-mid);transform:translateY(-2px)}
+
+/* ── FOOTER ── */
+footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
+.ft{display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
+.ft-brand{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--pink-light);margin-bottom:0.8rem}
+.ft-sub{font-size:0.87rem;line-height:1.8;max-width:300px}
+.ft-col h4{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--pink-light);margin-bottom:1rem;font-weight:700}
+.ft-col ul{list-style:none;display:flex;flex-direction:column;gap:0.6rem}
+.ft-col a{text-decoration:none;color:rgba(255,255,255,0.55);font-size:0.87rem;transition:color 0.2s}
+.ft-col a:hover{color:var(--pink-light)}
+.soc-row{display:flex;gap:0.75rem;margin-top:1.2rem}
+.soc{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-size:0.9rem;text-decoration:none;transition:background 0.2s}
+.soc:hover{background:var(--lilac)}
+.fb{border-top:1px solid rgba(255,255,255,0.1);padding-top:1.2rem;display:flex;justify-content:space-between;font-size:0.78rem;flex-wrap:wrap;gap:0.5rem}
+
+/* ── FADE-IN ── */
+.fade-up{opacity:0;transform:translateY(18px);transition:opacity 0.55s ease,transform 0.55s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:960px){
+  .nav-links,.nav-book{display:none}
+  .hamburger{display:flex}
+  .mobile-menu{display:flex}
+  .hero{grid-template-columns:1fr;text-align:center;padding:4rem 5%}
+  .b1,.b2{display:none}
+  .hero-sub,.hero-desc{margin:0 auto 2.5rem}
+  .hero-btns{justify-content:center}
+  .hero-stats{justify-content:center}
+  .hero-visual{margin-top:3rem}
+  .fp1,.fp2{display:none}
+  .about{grid-template-columns:1fr}
+  .ab-badge{left:0;right:0;bottom:-1rem;margin:0 auto;width:fit-content;position:relative;margin-top:1.5rem}
+  .gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .gi:first-child{grid-column:span 2;height:300px}
+  .gi:nth-child(4){grid-column:span 1}
+  .map-wrap{grid-template-columns:1fr}
+  .map-frame{height:300px}
+  .contact{grid-template-columns:1fr}
+  .ft{grid-template-columns:1fr;gap:2rem}
+  .frow{grid-template-columns:1fr}
+  .ig-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:520px){
+  .ig-grid{grid-template-columns:repeat(2,1fr)}
+  .gallery-grid{grid-template-columns:1fr;grid-template-rows:auto}
+  .gi:first-child{grid-column:span 1;height:240px}
+  .gi:nth-child(4){grid-column:span 1}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="/" class="nav-logo"><div class="logo-paw">🐾</div>Shiny Paws</a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/" class="nav-back">← Home</a>
+    <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="nav-book">Book Now →</a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#about" onclick="closeMenu()">About</a>
+  <a href="#gallery" onclick="closeMenu()">Gallery</a>
+  <a href="#pricing" onclick="closeMenu()">Pricing</a>
+  <a href="#faq" onclick="closeMenu()">FAQ</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+  <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="mobile-book">Book Now →</a>
+  <a href="/" style="font-size:1rem;opacity:0.6;">← Back to Home</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="hero-text">
+    <div class="chip">✨ Pasadena's Cutest Pet Studio</div>
+    <h1>Where Every Pet<br>Gets Their <em>Glow-Up</em></h1>
+    <p class="hero-sub">Premium grooming, daycare & boarding for dogs and cats — delivered with love, expertise, and only the finest products. Your pet deserves to shine.</p>
+    <div class="hero-btns">
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="btn-filled">Book an Appointment →</a>
+      <a href="#services" class="btn-soft">Explore Services</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hstat-n">15+</div><div class="hstat-l">Years Experience</div></div>
+      <div><div class="hstat-n">500+</div><div class="hstat-l">Happy Pets</div></div>
+      <div><div class="hstat-n">⭐ 4.9</div><div class="hstat-l">Avg. Rating</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-orb">
+      <!-- REPLACE: swap emoji for <img class="orb-img" src="YOUR_HERO_DOG_PHOTO.jpg" alt="Groomed dog"> -->
+      <div class="orb-emoji">🐩</div>
+    </div>
+    <div class="float-pill fp1"><div class="fp-dot fp-p">✅</div>Certified Groomers</div>
+    <div class="float-pill fp2"><div class="fp-dot fp-l">⚡</div>Same-Day Booking</div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span class="mi">Certified Groomers</span><span class="mi">Organic Shampoos</span><span class="mi">Same-Day Service</span><span class="mi">Emergency Care</span><span class="mi">Satisfaction Guaranteed</span><span class="mi">Dogs & Cats Welcome</span><span class="mi">10% Instagram Discount</span>
+    <span class="mi">Certified Groomers</span><span class="mi">Organic Shampoos</span><span class="mi">Same-Day Service</span><span class="mi">Emergency Care</span><span class="mi">Satisfaction Guaranteed</span><span class="mi">Dogs & Cats Welcome</span><span class="mi">10% Instagram Discount</span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="services" id="services">
+  <div class="shdr">
+    <div class="stag">What We Offer</div>
+    <h2 class="stitle">Services Tailored for<br>Your Furry Family</h2>
+    <p class="ssub">Every service is designed around your pet's comfort, health, and happiness — using only the best products.</p>
+  </div>
+  <div class="services-grid">
+    <div class="svc fade-up">
+      <div class="svc-icon ic-l">✂️</div>
+      <h3>Hand Scissor Haircuts</h3>
+      <p>The finest cut available — fully hand-scissored for a tailored look that clippers can't match. Perfect for Poodles, Goldendoodles, Pomeranians & Maltese.</p>
+      <div class="svc-price">From $80</div>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="svc-link">Book this service →</a>
+    </div>
+    <div class="svc fade-up">
+      <div class="svc-icon ic-p">🛁</div>
+      <h3>Full Grooming Package</h3>
+      <p>The complete pampering experience: organic bath, blow dry, hand scissor cut, nail trim, ear cleaning & finishing spritz. The Shiny Paws signature.</p>
+      <div class="svc-price">From $100</div>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="svc-link">Book this service →</a>
+    </div>
+    <div class="svc fade-up">
+      <div class="svc-icon ic-d">🧴</div>
+      <h3>Bath & Brush</h3>
+      <p>A thorough bath with premium organic shampoo and a full brush-out. The essential care package to keep your pet's coat healthy and gleaming between grooms.</p>
+      <div class="svc-price">From $60</div>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="svc-link">Book this service →</a>
+    </div>
+    <div class="svc fade-up">
+      <div class="svc-icon ic-w">💅</div>
+      <h3>Nail Trimming</h3>
+      <p>Safe, stress-free nail care by trained professionals. We take every precaution to keep your pet calm and comfortable throughout the process.</p>
+      <div class="svc-price">From $20</div>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="svc-link">Book this service →</a>
+    </div>
+    <div class="svc fade-up">
+      <div class="svc-icon ic-p">🏠</div>
+      <h3>Daycare & Boarding</h3>
+      <p>Your pet's home away from home. Supervised play, cozy rest, and loads of love while you're away. Safe overnight boarding available.</p>
+      <div class="svc-price">From $45/day</div>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="svc-link">Book this service →</a>
+    </div>
+    <div class="svc fade-up">
+      <div class="svc-icon ic-l">🎓</div>
+      <h3>Groomer Training</h3>
+      <p>Turn your love for pets into a career. Our 6-week certification program covers all the hands-on skills needed to become a professional groomer.</p>
+      <div class="svc-price">Enroll Today</div>
+      <a href="#contact" class="svc-link">Learn more →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="blob ab3"></div>
+  <div class="about-img-wrap">
+    <div class="about-card-big">
+      <!-- REPLACE: <img src="YOUR_TEAM_OR_PET_PHOTO.jpg" alt="Shiny Paws Studio"> -->
+      <div class="ab-emoji">🐶</div>
+    </div>
+    <div class="ab-badge">
+      <div class="ab-n">15+</div>
+      <div class="ab-l">Years of Expert<br>Grooming Care</div>
+    </div>
+  </div>
+  <div class="about-text">
+    <div class="stag">Our Story</div>
+    <h2 class="stitle">Family-Owned,<br>Pet-Obsessed,<br>Community-Proud</h2>
+    <p>Shiny Paws is a family- and minority-owned pet grooming salon in Pasadena, CA — backed by over 15 years of hands-on grooming expertise and a whole lot of heart.</p>
+    <p>We use only premium organic products, top-of-the-line hand scissors, and modern equipment to make sure every pet leaves looking — and feeling — their absolute best.</p>
+    <ul class="cklist">
+      <li><div class="ck">✓</div>Emergency grooming within 1 hour</li>
+      <li><div class="ck">✓</div>Same-day appointments when available</li>
+      <li><div class="ck">✓</div>Certified & trained grooming staff</li>
+      <li><div class="ck">✓</div>100% organic shampoos & premium products</li>
+      <li><div class="ck">✓</div>Satisfaction guaranteed — every single time</li>
+    </ul>
+    <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="btn-soft">Book With Us →</a>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="gallery" id="gallery">
+  <div class="stag">Fresh from the Studio</div>
+  <h2 class="stitle">Happy Pets, Shiny Results</h2>
+  <p class="ssub">A peek at some of our most recent groom transformations — every pet that leaves our studio is a little masterpiece.</p>
+  <div class="gallery-grid">
+    <!-- REPLACE each .gi-inner emoji with: <img src="photo.jpg" alt="description"> inside the .gi div -->
+    <div class="gi ga"><div class="gi-inner">🐩</div><div class="gi-label">Poodle — Full Groom</div></div>
+    <div class="gi gb"><div class="gi-inner">🐱</div><div class="gi-label">Persian — Bath & Brush</div></div>
+    <div class="gi gc"><div class="gi-inner">🐕</div><div class="gi-label">Goldendoodle — Scissor Cut</div></div>
+    <div class="gi gd"><div class="gi-inner">🦮</div><div class="gi-label">Retriever — Daycare Day</div></div>
+    <div class="gi ge"><div class="gi-inner">🐶</div><div class="gi-label">Maltese — Full Package</div></div>
+    <div class="gi gf"><div class="gi-inner">🐈</div><div class="gi-label">Domestic — Nail Trim</div></div>
+  </div>
+  <p class="gallery-note">📸 Photos will be updated as soon as your real pet photos are ready to upload.</p>
+</section>
+
+<!-- INSTAGRAM FEED -->
+<section class="instagram" id="instagram">
+  <div class="shdr">
+    <div class="stag">Follow Along</div>
+    <h2 class="stitle">We're on Instagram</h2>
+    <p class="ssub">Follow <strong>@shinypaws</strong> for daily transformations, pet tips, and an exclusive <strong>10% discount</strong> on your next service when you show us your follow at check-in.</p>
+  </div>
+  <div class="ig-grid">
+    <!-- REPLACE: swap .ig-tile emoji content with <img src="ig-photo.jpg"> inside each tile -->
+    <!-- When you connect a real Instagram feed, replace this entire grid with the embed code -->
+    <div class="ig-tile ga"><span>🐩</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+    <div class="ig-tile gb"><span>🐶</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+    <div class="ig-tile gc"><span>🐱</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+    <div class="ig-tile gd"><span>🦮</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+    <div class="ig-tile ge"><span>🐕</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+    <div class="ig-tile gf"><span>🐈</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+  </div>
+  <div class="ig-cta-row">
+    <a href="https://instagram.com/YOUR_HANDLE" target="_blank" class="ig-follow-btn">📷 Follow @shinypaws</a>
+    <span class="ig-discount">Show us your follow in-studio for 10% off!</span>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="shdr">
+    <div class="stag">Transparent Pricing</div>
+    <h2 class="stitle">Simple, Honest Pricing</h2>
+    <p class="ssub">No hidden fees. Free estimates within 2 days. Follow us on Instagram for a 10% discount!</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="pc fade-up">
+      <div class="pc-tag">Essential</div>
+      <div class="pc-name">Bath & Brush</div>
+      <div class="pc-amt">$60</div>
+      <div class="pc-from">Starting price · varies by size & breed</div>
+      <p class="pc-desc">A thorough organic shampoo bath plus full brush-out. Perfect routine maintenance between full grooms.</p>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="pc-btn pc-out">Book This</a>
+    </div>
+    <div class="pc feat fade-up">
+      <div class="pop-tag">Most Popular</div>
+      <div class="pc-tag">Best Value</div>
+      <div class="pc-name">Bath & Trim</div>
+      <div class="pc-amt">$85</div>
+      <div class="pc-from">Starting price · varies by size & breed</div>
+      <p class="pc-desc">Everything in Bath & Brush plus a tidy trim. Includes nail trimming, ear cleaning, and finishing mist.</p>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="pc-btn pc-fill">Book This</a>
+    </div>
+    <div class="pc fade-up">
+      <div class="pc-tag">Luxury</div>
+      <div class="pc-name">Full Grooming</div>
+      <div class="pc-amt">$100</div>
+      <div class="pc-from">Starting price · varies by size & breed</div>
+      <p class="pc-desc">The ultimate Shiny Paws experience. Hand scissor cut, organic bath, blow dry, nails, ears — the full works.</p>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="pc-btn pc-out">Book This</a>
+    </div>
+    <div class="pc fade-up">
+      <div class="pc-tag">Daily Care</div>
+      <div class="pc-name">Daycare</div>
+      <div class="pc-amt">$45</div>
+      <div class="pc-from">Per day · overnight available</div>
+      <p class="pc-desc">A safe, supervised, and loving environment for your pet to play and rest while you're out.</p>
+      <a href="YOUR_BOOKING_URL_HERE" target="_blank" class="pc-btn pc-out">Book This</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials" id="reviews">
+  <div class="shdr">
+    <div class="stag">Client Love</div>
+    <h2 class="stitle">What Pet Parents Are Saying</h2>
+    <p class="ssub">Our happiest clients have four legs — but their humans seem pretty pleased too.</p>
+  </div>
+  <div class="rv-grid">
+    <div class="rv fade-up">
+      <div class="rv-stars">★★★★★</div>
+      <p class="rv-text">"My Goldendoodle Biscuit came out looking like an actual show dog. The hand-scissor cut was immaculate — I've tried four other groomers in Pasadena and nothing comes close to Shiny Paws."</p>
+      <div class="rv-who"><div class="rv-av" style="background:var(--lilac)">SR</div><div><div class="rv-name">Sarah R.</div><div class="rv-pet">Biscuit — Goldendoodle</div></div></div>
+    </div>
+    <div class="rv fade-up">
+      <div class="rv-stars">★★★★★</div>
+      <p class="rv-text">"Called at noon needing emergency grooming before a family event — they had my Pom ready within the hour. Stunning results and she was completely calm. Unbelievable team."</p>
+      <div class="rv-who"><div class="rv-av" style="background:var(--pink-warm)">MK</div><div><div class="rv-name">Michael K.</div><div class="rv-pet">Coco — Pomeranian</div></div></div>
+    </div>
+    <div class="rv fade-up">
+      <div class="rv-stars">★★★★★</div>
+      <p class="rv-text">"Daycare changed my anxious rescue dog's life. She wags her tail when we pull into the parking lot now. The staff is so patient and loving. We're here every single week."</p>
+      <div class="rv-who"><div class="rv-av" style="background:var(--lilac-dust)">JL</div><div><div class="rv-name">Jessica L.</div><div class="rv-pet">Mango — Mixed Breed</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="shdr">
+    <div class="stag">Got Questions?</div>
+    <h2 class="stitle">Frequently Asked Questions</h2>
+    <p class="ssub">Everything you need to know before your pet's first visit to Shiny Paws.</p>
+  </div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Do I need to make an appointment?<div class="faq-arr">+</div></button>
+      <div class="faq-a">Appointments are strongly recommended. We do offer same-day service when availability allows, and emergency grooming within one hour for urgent needs. Book directly through our website's checkout page.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">What breeds do you specialize in?<div class="faq-arr">+</div></button>
+      <div class="faq-a">We specialize in hand scissor grooming for Poodles, Goldendoodles, Pomeranians, and Maltese — but we welcome all breeds and sizes of dogs and cats. Every pet receives personalized, gentle care.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">What products do you use?<div class="faq-arr">+</div></button>
+      <div class="faq-a">We use exclusively premium organic shampoos and conditioners that are gentle on sensitive skin and safe for all coat types. No harsh chemicals or synthetic fragrances — ever.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">How long does a grooming session take?<div class="faq-arr">+</div></button>
+      <div class="faq-a">Timing varies by service and breed. A basic Bath & Brush typically takes 1–2 hours, while a Full Grooming session may take 2–4 hours. We'll always provide an estimate when you book.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">Do you offer a satisfaction guarantee?<div class="faq-arr">+</div></button>
+      <div class="faq-a">Absolutely. Your satisfaction and your pet's happiness are our top priority. If you're not 100% happy with the result, let us know and we'll make it right. Free estimates are provided within 2 days of inquiry.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFaq(this)">How do I get the Instagram discount?<div class="faq-arr">+</div></button>
+      <div class="faq-a">Simply follow @shinypaws on Instagram and show us your follow at check-in to receive 10% off your service. Keep an eye on our stories for flash deals and seasonal promotions too!</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP & LOCATION -->
+<section class="map-section" id="location">
+  <div class="stag">Find Us</div>
+  <h2 class="stitle">Visit Shiny Paws</h2>
+  <p class="ssub">Conveniently located in the heart of Pasadena, CA. Easy parking available on-site.</p>
+  <div class="map-wrap">
+    <div class="map-info">
+      <div class="md"><div class="md-icon">📍</div><div><div class="md-label">Address</div><div class="md-val">985 E Green St<br>Pasadena, CA 91106</div></div></div>
+      <div class="md"><div class="md-icon">📞</div><div><div class="md-label">Phone</div><div class="md-val">1-626-463-8969</div></div></div>
+      <div class="md"><div class="md-icon">📧</div><div><div class="md-label">Email</div><div class="md-val">hello@shinypaws.com</div></div></div>
+      <div class="md"><div class="md-icon">🕐</div><div><div class="md-label">Hours</div><div class="md-val">Mon–Sat 9am–6pm<br>Sunday by appointment</div></div></div>
+      <div class="md"><div class="md-icon">🚗</div><div><div class="md-label">Parking</div><div class="md-val">Free on-site parking<br>Street parking available</div></div></div>
+    </div>
+    <div class="map-frame">
+      <!--
+        REPLACE THIS COMMENT with your Google Maps embed:
+        1. Go to maps.google.com
+        2. Search "985 E Green St, Pasadena, CA 91106"
+        3. Click Share → Embed a map → Copy HTML
+        4. Paste the <iframe ...> tag here and remove this comment block
+      -->
+      <div class="map-placeholder">
+        <div class="map-icon">🗺️</div>
+        <strong style="color:var(--pink-light);font-size:1rem">Google Map Goes Here</strong>
+        <span>Replace this block with your Google Maps embed iframe</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="cinfo">
+    <div class="stag">Get in Touch</div>
+    <h2 class="stitle">Let's Get Your Pet<br>Looking Their Best</h2>
+    <p>Have a question or want to learn more before booking? Send us a message — we love hearing from pet parents and will get back to you quickly.</p>
+    <div class="cd"><div class="cd-icon">📞</div><div><div class="cd-label">Phone</div><div class="cd-val">1-626-463-8969</div></div></div>
+    <div class="cd"><div class="cd-icon">📧</div><div><div class="cd-label">Email</div><div class="cd-val">hello@shinypaws.com</div></div></div>
+    <div class="cd"><div class="cd-icon">📍</div><div><div class="cd-label">Location</div><div class="cd-val">985 E Green St, Pasadena, CA 91106</div></div></div>
+    <div class="cd"><div class="cd-icon">🕐</div><div><div class="cd-label">Hours</div><div class="cd-val">Mon–Sat 9am–6pm · Sun by appt.</div></div></div>
+  </div>
+  <form class="cform" onsubmit="return false;">
+    <div class="frow">
+      <div class="fg"><label>First Name</label><input type="text" placeholder="Jane"></div>
+      <div class="fg"><label>Last Name</label><input type="text" placeholder="Smith"></div>
+    </div>
+    <div class="fg"><label>Email</label><input type="email" placeholder="jane@email.com"></div>
+    <div class="fg"><label>Phone</label><input type="tel" placeholder="(626) 555-0100"></div>
+    <div class="fg">
+      <label>Service Interested In</label>
+      <select>
+        <option value="">Select a service…</option>
+        <option>Hand Scissor Haircut</option>
+        <option>Full Grooming</option>
+        <option>Bath & Brush</option>
+        <option>Bath & Trim</option>
+        <option>Nail Trimming</option>
+        <option>Daycare & Boarding</option>
+        <option>Groomer Training</option>
+      </select>
+    </div>
+    <div class="fg"><label>Tell Us About Your Pet</label><textarea placeholder="Breed, size, coat type, any special needs or concerns…"></textarea></div>
+    <button type="submit" class="csub">Send Message →</button>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft">
+    <div>
+      <div class="ft-brand">🐾 Shiny Paws</div>
+      <p class="ft-sub">Family-owned pet grooming studio in Pasadena, CA. Premium grooming, daycare, boarding & groomer training — with love and expertise in every session.</p>
+      <div class="soc-row">
+        <a href="https://instagram.com/YOUR_HANDLE" target="_blank" class="soc">📷</a>
+        <a href="https://tiktok.com/@YOUR_HANDLE" target="_blank" class="soc">🎵</a>
+        <a href="https://facebook.com/YOUR_PAGE" target="_blank" class="soc">💬</a>
+      </div>
+    </div>
+    <div class="ft-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">Hand Scissor Cuts</a></li>
+        <li><a href="#services">Full Grooming</a></li>
+        <li><a href="#services">Bath & Brush</a></li>
+        <li><a href="#services">Nail Trimming</a></li>
+        <li><a href="#services">Daycare & Boarding</a></li>
+        <li><a href="#services">Groomer Training</a></li>
+      </ul>
+    </div>
+    <div class="ft-col">
+      <h4>Studio</h4>
+      <ul>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#instagram">Instagram</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="YOUR_BOOKING_URL_HERE" target="_blank">Book Now</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="fb">
+    <span>© 2025 Shiny Paws. All rights reserved.</span>
+    <span>Pasadena, CA · Licensed & Insured</span>
+  </div>
+</footer>
+
+<script>
+// Hamburger menu
+function toggleMenu(){
+  const h=document.getElementById('hamburger');
+  const m=document.getElementById('mobileMenu');
+  h.classList.toggle('open');
+  m.classList.toggle('open');
+  document.body.style.overflow=m.classList.contains('open')?'hidden':'';
+}
+function closeMenu(){
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// FAQ accordion
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));
+  if(!isOpen)item.classList.add('open');
+}
+
+// Scroll fade-in
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.12});
+document.querySelectorAll('.fade-up,.svc,.pc,.rv,.gi,.ig-tile,.faq-item').forEach(el=>{
+  el.classList.add('fade-up');
+  obs.observe(el);
+});
+</script>
+</body>
+</html>
