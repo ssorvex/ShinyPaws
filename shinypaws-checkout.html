@@ -420,6 +420,21 @@
 </div>
 
 
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+<script>
+// Firebase Configuration
+const firebaseConfig = {
+    databaseURL: "https://shiny-paws-default-rtdb.firebaseio.com"
+};
+
+// Initialize Firebase
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.database();
+}
+</script>
+
 <script>
 /* ═══════════════════════════════════════════════════════════
    SHINY PAWS CHECKOUT
@@ -738,6 +753,24 @@ function showSuccess() {
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(bookingData)
   }).catch(err => console.log('Formspree error:', err));
+
+  // ── FIREBASE — saves booking to admin dashboard database ───────
+  if (window.db) {
+    const firebaseBooking = {
+      customerName: fname + ' ' + lname,
+      customerEmail: email,
+      customerPhone: phone,
+      petName: petName,
+      petBreed: breed,
+      service: selName,
+      date: date,
+      time: time,
+      notes: notes,
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    window.db.ref('appointments').push(firebaseBooking).catch(err => console.log('Firebase error:', err));
+  }
 
   // ── GOOGLE SHEETS — logs every booking to your spreadsheet ───────
   // Step 1: Create a Google Sheet
