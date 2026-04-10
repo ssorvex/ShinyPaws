@@ -21,9 +21,13 @@ const SERVICE_DURATIONS = {
 
 // ==================== LOGIN ====================
 function login() {
+    console.log('Login function called');
     const password = document.getElementById("passwordInput").value;
+    console.log('Password entered:', password);
+    console.log('Expected password:', ADMIN_PASSWORD);
     
     if (password === ADMIN_PASSWORD) {
+        console.log('Password correct!');
         document.getElementById("loginScreen").classList.add("hidden");
         document.getElementById("dashboard").classList.add("active");
         loadAppointments();
@@ -32,6 +36,7 @@ function login() {
         document.getElementById("appointmentDate").valueAsDate = new Date();
         updateTimeSlots();
     } else {
+        console.log('Password incorrect!');
         document.getElementById("loginError").style.display = "block";
         setTimeout(() => {
             document.getElementById("loginError").style.display = "none";
