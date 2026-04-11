@@ -711,6 +711,7 @@ async function pay() {
 
 function showSuccess() {
   // Save the booked date+time to localStorage so it stays greyed out
+  // Use the date value directly from the input (YYYY-MM-DD format)
   const date = document.getElementById('appt-date').value;
   const timeEl = document.querySelector('#appt-time-select');
   const time = timeEl ? timeEl.value : '';

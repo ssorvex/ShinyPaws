@@ -56,7 +56,8 @@ function logout() {
 // ==================== APPOINTMENTS ====================
 function loadAppointments() {
     const dateFilter = document.getElementById("dateFilter").value;
-    const date = dateFilter ? new Date(dateFilter) : new Date();
+    // Use parseDate to correctly handle the date string without timezone conversion
+    const date = dateFilter ? parseDate(dateFilter) : new Date();
     const dateStr = formatDate(date);
 
     db.ref("appointments").orderByChild("date").equalTo(dateStr).on("value", (snapshot) => {
@@ -239,10 +240,21 @@ function selectTime(time) {
 
 // ==================== UTILITY FUNCTIONS ====================
 function formatDate(date) {
+    // Format date as YYYY-MM-DD using local timezone (Los Angeles)
+    // This ensures the date matches what the user selected in the checkout form
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
+}
+
+function parseDate(dateStr) {
+    // Parse a date string (YYYY-MM-DD) in local timezone without UTC conversion
+    // This prevents the 1-day shift caused by timezone differences
+    if (!dateStr) return new Date();
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date;
 }
 
 function timeToMinutes(timeStr) {
