@@ -2,21 +2,12 @@
 
 // ==================== TAB SWITCHING ====================
 function switchTab(tabName) {
-    // Hide all tabs
     const tabs = document.querySelectorAll('.tab-content');
     tabs.forEach(tab => tab.classList.remove('active'));
-
-    // Remove active class from all buttons
     const buttons = document.querySelectorAll('.tab-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-
-    // Show selected tab
     document.getElementById(tabName).classList.add('active');
-
-    // Add active class to clicked button
     event.target.classList.add('active');
-
-    // Load tab-specific data
     if (tabName === 'images') {
         loadSectionImages();
     } else if (tabName === 'content') {
@@ -31,20 +22,15 @@ function uploadImage() {
     const fileInput = document.getElementById('imageUpload');
     const section = document.getElementById('imageSection').value;
     const file = fileInput.files[0];
-
     if (!file) {
         showImageError('Please select an image file');
         return;
     }
-
     const reader = new FileReader();
     reader.onload = function(e) {
         const imageData = e.target.result;
         const timestamp = Date.now();
         const fileName = `${section}-${timestamp}-${file.name}`;
-
-        // Store in localStorage (for demo purposes)
-        // In production, upload to S3 or server
         const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
         images.push({
             id: timestamp,
@@ -53,7 +39,6 @@ function uploadImage() {
             uploadedAt: new Date().toLocaleString()
         });
         localStorage.setItem(`images_${section}`, JSON.stringify(images));
-
         showImageSuccess('Image uploaded successfully!');
         fileInput.value = '';
         loadSectionImages();
@@ -65,14 +50,12 @@ function loadSectionImages() {
     const section = document.getElementById('imageSection').value;
     const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
     const grid = document.getElementById('imageGrid');
-
     if (images.length === 0) {
         grid.innerHTML = '<div class="empty-state"><p>No images uploaded for this section yet</p></div>';
         return;
     }
-
     grid.innerHTML = images.map((img, index) => `
-        <div class="image-item" draggable="true" ondragstart="dragStart(event, '${section}', ${index})" ondragover="dragOver(event)" ondrop="dropImage(event, '${section}', ${index})" ondragend="dragEnd(event)">
+        <div class="image-item" draggable="true" data-image-id="${img.id}" data-section="${section}" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dropImage(event)" ondragend="dragEnd(event)">
             <div style="position: relative;">
                 <img src="${img.data}" alt="${img.name}" class="image-preview">
                 <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">#${index + 1}</div>
@@ -87,8 +70,6 @@ function loadSectionImages() {
             </div>
         </div>
     `).join('');
-    
-    // Add reorder instructions
     const instructions = document.createElement('div');
     instructions.style.cssText = 'background: #E3F2FD; color: #1976D2; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; text-align: center;';
     instructions.innerHTML = '💡 <strong>Drag and drop images to reorder them</strong>';
@@ -108,11 +89,9 @@ function deleteImage(section, id) {
 function useImage(section, id) {
     const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
     const image = images.find(img => img.id === id);
-    
     if (image) {
-        // In production, this would update the HTML file on the server
         console.log('Using image:', image.name);
-        showImageSuccess(`Image "${image.name}" is ready to use. Update your HTML to reference this image.`);
+        showImageSuccess(`Image "${image.name}" is ready to use.`);
     }
 }
 
@@ -150,13 +129,10 @@ function loadContentEditor() {
             'Experience': '15+ Years Experience'
         }
     };
-
     const container = document.getElementById('contentSections');
     container.innerHTML = '';
-
     for (const [section, fields] of Object.entries(contentData)) {
         let sectionHTML = `<div class="content-section"><h3>${section}</h3>`;
-        
         for (const [fieldName, fieldValue] of Object.entries(fields)) {
             const fieldId = `content_${section.replace(/\s+/g, '_')}_${fieldName.replace(/\s+/g, '_')}`;
             sectionHTML += `
@@ -166,7 +142,6 @@ function loadContentEditor() {
                 </div>
             `;
         }
-        
         sectionHTML += '</div>';
         container.innerHTML += sectionHTML;
     }
@@ -175,22 +150,16 @@ function loadContentEditor() {
 function saveAllContent() {
     const contentData = {};
     const fields = document.querySelectorAll('.content-field textarea');
-    
     fields.forEach(field => {
         const id = field.id;
         const value = field.value;
         contentData[id] = value;
     });
-
-    // Store in localStorage
     localStorage.setItem('websiteContent', JSON.stringify(contentData));
-
-    // Show success message
     const msg = document.createElement('div');
     msg.className = 'success-message show';
-    msg.textContent = 'All content saved successfully! Changes will be reflected on the website.';
+    msg.textContent = 'All content saved successfully!';
     document.querySelector('#content .card').appendChild(msg);
-
     setTimeout(() => msg.remove(), 3000);
 }
 
@@ -202,19 +171,12 @@ function loadPricingEditor() {
         { service: 'Full Grooming', duration: '90 min', price: '100' },
         { service: 'Daycare', duration: 'Full Day', price: '45' }
     ];
-
     const tbody = document.getElementById('pricingTable');
     tbody.innerHTML = pricingData.map((item, index) => `
         <tr>
-            <td>
-                <input type="text" id="service_${index}" value="${item.service}" />
-            </td>
-            <td>
-                <input type="text" id="duration_${index}" value="${item.duration}" />
-            </td>
-            <td>
-                <input type="number" id="price_${index}" value="${item.price}" step="0.01" />
-            </td>
+            <td><input type="text" id="service_${index}" value="${item.service}" /></td>
+            <td><input type="text" id="duration_${index}" value="${item.duration}" /></td>
+            <td><input type="number" id="price_${index}" value="${item.price}" step="0.01" /></td>
         </tr>
     `).join('');
 }
@@ -222,38 +184,26 @@ function loadPricingEditor() {
 function savePricing() {
     const pricingData = [];
     const rows = document.querySelectorAll('#pricingTable tr');
-
     rows.forEach((row, index) => {
         const service = document.getElementById(`service_${index}`).value;
         const duration = document.getElementById(`duration_${index}`).value;
         const price = document.getElementById(`price_${index}`).value;
-
         if (service && price) {
             pricingData.push({ service, duration, price });
         }
     });
-
-    // Store in localStorage
     localStorage.setItem('pricingData', JSON.stringify(pricingData));
-
-    // Show success message
     const msg = document.getElementById('pricingSuccessMessage');
     msg.textContent = 'Pricing updated successfully!';
     msg.classList.add('show');
     setTimeout(() => msg.classList.remove('show'), 3000);
-
-    console.log('Pricing saved:', pricingData);
 }
 
 // ==================== DRAG AND DROP REORDERING ====================
 let draggedItem = null;
-let draggedFromIndex = null;
-let draggedFromSection = null;
 
-function dragStart(event, section, index) {
+function dragStart(event) {
     draggedItem = event.currentTarget;
-    draggedFromIndex = index;
-    draggedFromSection = section;
     event.currentTarget.style.opacity = '0.5';
     event.dataTransfer.effectAllowed = 'move';
 }
@@ -261,10 +211,8 @@ function dragStart(event, section, index) {
 function dragOver(event) {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
-    
     const afterElement = getDragAfterElement(event.clientY);
     const grid = document.getElementById('imageGrid');
-    
     if (afterElement == null) {
         grid.appendChild(draggedItem);
     } else {
@@ -273,12 +221,11 @@ function dragOver(event) {
 }
 
 function getDragAfterElement(y) {
-    const draggableElements = [...document.querySelectorAll('.image-item:not(.dragging)')];
-    
+    const draggableElements = [...document.querySelectorAll('.image-item')];
     return draggableElements.reduce((closest, child) => {
+        if (child === draggedItem) return closest;
         const box = child.getBoundingClientRect();
         const offset = y - box.top - box.height / 2;
-        
         if (offset < 0 && offset > closest.offset) {
             return { offset: offset, element: child };
         } else {
@@ -287,30 +234,21 @@ function getDragAfterElement(y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-function dropImage(event, section, toIndex) {
+function dropImage(event) {
     event.preventDefault();
     event.stopPropagation();
-    
-    if (draggedFromSection === section && draggedFromIndex !== toIndex) {
-        const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
-        
-        // Remove from old position
-        const [movedImage] = images.splice(draggedFromIndex, 1);
-        
-        // Insert at new position
-        images.splice(toIndex, 0, movedImage);
-        
-        // Save reordered images
-        localStorage.setItem(`images_${section}`, JSON.stringify(images));
-        
-        showImageSuccess('Images reordered successfully!');
-        loadSectionImages();
-    }
+    const section = draggedItem.getAttribute('data-section');
+    const grid = document.getElementById('imageGrid');
+    const imageItems = [...grid.querySelectorAll('.image-item')];
+    const newOrder = imageItems.map(item => item.getAttribute('data-image-id'));
+    const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+    const reorderedImages = newOrder.map(id => images.find(img => img.id === parseInt(id)));
+    localStorage.setItem(`images_${section}`, JSON.stringify(reorderedImages));
+    showImageSuccess('Images reordered successfully!');
+    loadSectionImages();
 }
 
 function dragEnd(event) {
     event.currentTarget.style.opacity = '1';
     draggedItem = null;
-    draggedFromIndex = null;
-    draggedFromSection = null;
 }
