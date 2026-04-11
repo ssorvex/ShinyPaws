@@ -284,21 +284,36 @@ async function updatePricingOnWebsiteViaGitHub() {
  * Update images on website via GitHub (SECURE - prompts for token)
  */
 async function updateImageOnWebsiteViaGitHub(section, imageId) {
+    let msg = null;
     try {
         // Show loading state
-        const msg = document.createElement('div');
+        msg = document.createElement('div');
         msg.className = 'success-message show';
         msg.textContent = '🔐 Enter your GitHub token to continue...';
-        document.querySelector('#images .card').appendChild(msg);
+        const imagesCard = document.querySelector('#images .card');
+        if (imagesCard) {
+            imagesCard.appendChild(msg);
+        }
         
         // Prompt for token (secure - not stored)
         let token;
         try {
             token = promptForGitHubToken();
         } catch (error) {
-            msg.className = 'error-message show';
-            msg.textContent = `❌ ${error.message}`;
-            setTimeout(() => msg.remove(), 4000);
+            if (msg) {
+                msg.className = 'error-message show';
+                msg.textContent = `❌ ${error.message}`;
+                setTimeout(() => msg.remove(), 4000);
+            }
+            return;
+        }
+        
+        if (!token) {
+            if (msg) {
+                msg.className = 'error-message show';
+                msg.textContent = '❌ Token is required';
+                setTimeout(() => msg.remove(), 4000);
+            }
             return;
         }
         
@@ -311,25 +326,83 @@ async function updateImageOnWebsiteViaGitHub(section, imageId) {
         }
         
         // Load website files
-        msg.textContent = '📥 Fetching website files...';
-        const files = await loadWebsiteFiles(token);
+        if (msg) msg.textContent = '📥 Fetching website files...';
+        let files;
+        try {
+            files = await loadWebsiteFiles(token);
+        } catch (error) {
+            console.error('Failed to load files:', error);
+            if (msg) {
+                msg.className = 'error-message show';
+                msg.textContent = `❌ Failed to load files: ${error.message}`;
+                setTimeout(() => msg.remove(), 5000);
+            }
+            return;
+        }
+        
+        if (!files || !files.index) {
+            if (msg) {
+                msg.className = 'error-message show';
+                msg.textContent = '❌ Failed to load index.html';
+                setTimeout(() => msg.remove(), 4000);
+            }
+            return;
+        }
+        
+        // Update HTML with new image
+        if (msg) msg.textContent = '✏️ Updating image in HTML...';
+        let updatedIndex = files.index;
+        
+        // Replace hero image URL in the HTML
+        // Look for the hero image and replace its src
+        if (section === 'hero') {
+            // Find and replace hero image
+            updatedIndex = updatedIndex.replace(
+                /(<img[^>]*id="hero-poodle"[^>]*src=")[^"]*(")[^>]*>/g,
+                `$1${image.data}$2>`
+            );
+            
+            // Also try to replace by class if id doesn't work
+            updatedIndex = updatedIndex.replace(
+                /(<img[^>]*class="[^"]*hero[^"]*"[^>]*src=")[^"]*(")[^>]*>/g,
+                `$1${image.data}$2>`
+            );
+        }
+        
+        // Upload to GitHub
+        if (msg) msg.textContent = '📤 Uploading to GitHub...';
+        
+        const result = await uploadFileToGitHub(
+            'index.html',
+            updatedIndex,
+            generateCommitMessage(`Update ${section} image`),
+            token
+        );
         
         // Clear token from memory
         clearSensitiveData(token);
         token = null;
         
-        // For now, we'll just show a message that the image is ready
-        msg.className = 'success-message show';
-        msg.textContent = `✅ Image "${image.name}" is ready to use. You can now update the website content to use this image.`;
-        setTimeout(() => msg.remove(), 5000);
+        if (msg) {
+            msg.className = 'success-message show';
+            msg.textContent = `✅ Image "${image.name}" updated! Changes will appear in 1-2 minutes.`;
+            setTimeout(() => msg.remove(), 5000);
+        }
         
     } catch (error) {
         console.error('Update error:', error);
-        const msg = document.createElement('div');
-        msg.className = 'error-message show';
-        msg.textContent = `❌ Error: ${error.message}`;
-        document.querySelector('#images .card').appendChild(msg);
-        setTimeout(() => msg.remove(), 5000);
+        if (!msg) {
+            msg = document.createElement('div');
+            const imagesCard = document.querySelector('#images .card');
+            if (imagesCard) {
+                imagesCard.appendChild(msg);
+            }
+        }
+        if (msg) {
+            msg.className = 'error-message show';
+            msg.textContent = `❌ Error: ${error.message}`;
+            setTimeout(() => msg.remove(), 5000);
+        }
     }
 }
 
@@ -373,3 +446,8 @@ function clearUpdateLogs() {
     localStorage.removeItem('update_logs');
     console.log('Update logs cleared');
 }
+
+// Add debugging to console
+console.log('Admin panel loaded');
+console.log('GitHub functions available:', typeof updateContentOnWebsiteViaGitHub);
+console.log('GitHub API functions:', typeof getFileFromGitHub, typeof uploadFileToGitHub);
