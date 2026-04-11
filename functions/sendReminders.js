@@ -1,16 +1,17 @@
 /**
  * Shiny Paws - Automatic 24-Hour Reminder Cloud Function
+ * Uses SendGrid for FREE email sending (100 emails/day free tier)
  * 
  * This Firebase Cloud Function runs every hour and:
  * 1. Checks all appointments in the database
  * 2. Finds appointments that are exactly 24 hours away
- * 3. Sends email + SMS reminders to customers
+ * 3. Sends email reminders to customers (via SendGrid - FREE)
  * 4. Marks reminders as sent to avoid duplicates
  * 
  * Setup Instructions:
- * 1. Install Firebase CLI: npm install -g firebase-tools
- * 2. Login: firebase login
- * 3. Initialize: firebase init functions
+ * 1. Sign up for SendGrid: https://sendgrid.com (free account)
+ * 2. Get your API key from SendGrid dashboard
+ * 3. Set the API key: firebase functions:config:set sendgrid.api_key="YOUR_KEY"
  * 4. Deploy: firebase deploy --only functions
  */
 
@@ -55,11 +56,7 @@ exports.checkAndSendReminders = functions.https.onRequest(async (req, res) => {
           // Mark as reminded in database
           await db.ref(`appointments/${appointmentId}`).update({
             reminderSent: true,
-            reminderSentAt: admin.database.ServerValue.TIMESTAMP,
-            reminderChannels: {
-              email: true,
-              sms: false // SMS requires Twilio setup
-            }
+            reminderSentAt: admin.database.ServerValue.TIMESTAMP
           });
           remindersSent++;
         }
@@ -108,35 +105,68 @@ function parseAppointmentDateTime(dateStr, timeStr) {
 }
 
 /**
- * Send reminder email via Formspree
+ * Send reminder email via SendGrid (FREE - 100 emails/day)
  */
 async function sendReminderEmail(appointment) {
   try {
-    const reminderData = {
-      email: appointment.customerEmail,
-      name: appointment.customerName,
-      _subject: '⏰ Reminder: Your Shiny Paws Appointment Tomorrow!',
-      _template: 'table',
-      appointmentDate: appointment.date,
-      appointmentTime: appointment.time,
-      petName: appointment.petName,
-      service: appointment.service,
-      businessPhone: '(310) 290-4970',
-      businessEmail: 'info@shinypawsla.com',
-      message: `We're looking forward to seeing ${appointment.petName} tomorrow at ${appointment.time}! Please arrive 10 minutes early. If you need to reschedule, please call us as soon as possible.`
+    // Get SendGrid API key from environment
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    
+    if (!sendgridApiKey) {
+      console.warn('Warning: SendGrid API key not configured');
+      console.warn('To enable: firebase functions:config:set sendgrid.api_key="YOUR_KEY"');
+      return false;
+    }
+    
+    const emailContent = `
+      <h2>Appointment Reminder!</h2>
+      <p>Hi ${appointment.customerName},</p>
+      <p>We're looking forward to seeing <strong>${appointment.petName}</strong> tomorrow!</p>
+      
+      <h3>Appointment Details:</h3>
+      <ul>
+        <li><strong>Date:</strong> ${appointment.date}</li>
+        <li><strong>Time:</strong> ${appointment.time}</li>
+        <li><strong>Service:</strong> ${appointment.service}</li>
+      </ul>
+      
+      <p>Please arrive <strong>10 minutes early</strong>.</p>
+      <p>If you need to reschedule, please call us at <strong>(310) 290-4970</strong>.</p>
+      
+      <p>Best regards,<br/>Shiny Paws Team</p>
+    `;
+    
+    const emailData = {
+      personalizations: [
+        {
+          to: [{ email: appointment.customerEmail, name: appointment.customerName }],
+          subject: 'Reminder: Your Shiny Paws Appointment Tomorrow!'
+        }
+      ],
+      from: { email: 'noreply@shinypawsla.com', name: 'Shiny Paws' },
+      content: [
+        {
+          type: 'text/html',
+          value: emailContent
+        }
+      ]
     };
     
-    const response = await fetch('https://formspree.io/f/mgopplba', {
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reminderData)
+      headers: {
+        'Authorization': `Bearer ${sendgridApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(emailData)
     });
     
-    if (response.ok) {
-      console.log(`✅ Email reminder sent to ${appointment.customerEmail}`);
+    if (response.ok || response.status === 202) {
+      console.log(`Email reminder sent to ${appointment.customerEmail}`);
       return true;
     } else {
-      console.error(`❌ Failed to send email to ${appointment.customerEmail}`);
+      const error = await response.text();
+      console.error(`Failed to send email to ${appointment.customerEmail}: ${error}`);
       return false;
     }
   } catch (error) {
@@ -146,15 +176,14 @@ async function sendReminderEmail(appointment) {
 }
 
 /**
- * Optional: Scheduled function using Cloud Scheduler
- * Deploy with: firebase deploy --only functions
- * Then set up Cloud Scheduler to call this every hour
+ * Scheduled function using Cloud Scheduler
+ * Runs every hour automatically
  */
 exports.scheduledReminders = functions.pubsub
   .schedule('every 1 hours')
   .timeZone('America/Los_Angeles')
   .onRun(async (context) => {
-    console.log('🔔 Scheduled reminder check triggered');
+    console.log('Scheduled reminder check triggered');
     
     try {
       const db = admin.database();
@@ -173,7 +202,7 @@ exports.scheduledReminders = functions.pubsub
         const hoursUntil = (appointmentDateTime - now) / (1000 * 60 * 60);
         
         if (hoursUntil > 23 && hoursUntil < 25) {
-          console.log(`📧 Sending scheduled reminder for ${appointment.customerName}`);
+          console.log(`Sending scheduled reminder for ${appointment.customerName}`);
           
           const sent = await sendReminderEmail(appointment);
           if (sent) {
@@ -186,11 +215,11 @@ exports.scheduledReminders = functions.pubsub
         }
       }
       
-      console.log(`✅ Scheduled check complete. Sent ${remindersSent} reminders.`);
+      console.log(`Scheduled check complete. Sent ${remindersSent} reminders.`);
       return { remindersSent };
       
     } catch (error) {
-      console.error('❌ Error in scheduled reminder check:', error);
+      console.error('Error in scheduled reminder check:', error);
       throw error;
     }
   });

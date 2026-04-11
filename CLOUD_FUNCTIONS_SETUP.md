@@ -13,6 +13,18 @@ The Cloud Function automatically:
 
 ## Setup Steps
 
+### IMPORTANT: Get SendGrid API Key First
+
+1. Go to https://sendgrid.com
+2. Click **Sign Up** (free account)
+3. Complete the signup process
+4. Go to **Settings → API Keys**
+5. Click **Create API Key**
+6. Name it: `shiny-paws-reminders`
+7. Copy the API key (you'll need it in Step 5)
+
+---
+
 ### Step 1: Install Firebase CLI
 
 ```bash
@@ -47,7 +59,15 @@ npm install
 cd ..
 ```
 
-### Step 5: Deploy Cloud Functions
+### Step 5: Set SendGrid API Key
+
+```bash
+firebase functions:config:set sendgrid.api_key="YOUR_SENDGRID_API_KEY"
+```
+
+Replace `YOUR_SENDGRID_API_KEY` with the key you copied from SendGrid.
+
+### Step 6: Deploy Cloud Functions
 
 ```bash
 firebase deploy --only functions
@@ -55,7 +75,7 @@ firebase deploy --only functions
 
 This will deploy the `sendReminders` function to Firebase.
 
-### Step 6: Set Up Cloud Scheduler (Automatic Hourly Execution)
+### Step 7: Set Up Cloud Scheduler (Automatic Hourly Execution)
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Select your project: `shiny-paws-default`
@@ -75,7 +95,7 @@ This will deploy the `sendReminders` function to Firebase.
    ```
 10. Click **Save**
 
-### Step 7: Verify It's Working
+### Step 8: Verify It's Working
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
 2. Select your project
@@ -119,11 +139,13 @@ Or in Firebase Console:
 
 ## Costs
 
-Firebase Cloud Functions are **free** up to:
-- 2 million invocations per month
-- 400,000 GB-seconds of compute time per month
+**Everything is COMPLETELY FREE!** 🎉
 
-Since we're running once per hour (24 times/day = ~730 times/month), you'll be well within the free tier.
+- **SendGrid:** 100 emails/day free tier (covers your reminders)
+- **Firebase Cloud Functions:** 2 million invocations/month free (you use ~730)
+- **Cloud Scheduler:** 3 free jobs per month (you use 1)
+
+**Total Cost: $0/month**
 
 ## Next Steps
 
