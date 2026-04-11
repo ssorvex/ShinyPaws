@@ -777,7 +777,10 @@
                     
                     <div class="content-sections" id="contentSections"></div>
                     
-                    <button class="save-btn" onclick="saveAllContent()">Save All Changes</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="save-btn" onclick="saveAllContent()" style="flex: 1;">💾 Save Locally</button>
+                        <button class="save-btn" onclick="updateContentOnWebsite()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
+                    </div>
                 </div>
             </div>
 
@@ -799,7 +802,10 @@
                     </table>
                     
                     <div class="success-message" id="pricingSuccessMessage"></div>
-                    <button class="save-btn" onclick="savePricing()">Save Pricing</button>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="save-btn" onclick="savePricing()" style="flex: 1;">💾 Save Locally</button>
+                        <button class="save-btn" onclick="updatePricingOnWebsite()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
+                    </div>
                 </div>
             </div>
         </div>

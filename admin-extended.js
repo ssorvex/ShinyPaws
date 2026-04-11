@@ -202,6 +202,52 @@ function saveAllContent() {
     setTimeout(() => msg.remove(), 3000);
 }
 
+function updateContentOnWebsite() {
+    const contentData = {};
+    const fields = document.querySelectorAll('.content-field textarea');
+    fields.forEach(field => {
+        const id = field.id;
+        const value = field.value;
+        contentData[id] = value;
+    });
+    
+    // Show loading state
+    const msg = document.createElement('div');
+    msg.className = 'success-message show';
+    msg.textContent = '📝 Updating website...';
+    document.querySelector('#content .card').appendChild(msg);
+    
+    // Send each content update to backend
+    const updates = Object.entries(contentData).map(([elementId, text]) => {
+        return fetch('/api/update-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                page: 'studio',
+                elementId: elementId,
+                newText: text
+            })
+        });
+    });
+    
+    Promise.all(updates)
+        .then(responses => Promise.all(responses.map(r => r.json())))
+        .then(results => {
+            if (results.every(r => r.success)) {
+                msg.textContent = '✅ Website updated! All content is now live.';
+            } else {
+                msg.textContent = '⚠️ Some updates failed. Check console for details.';
+            }
+            setTimeout(() => msg.remove(), 4000);
+        })
+        .catch(error => {
+            msg.textContent = `❌ Error: ${error.message}`;
+            setTimeout(() => msg.remove(), 4000);
+        });
+}
+
 // ==================== PRICING EDITOR ====================
 function loadPricingEditor() {
     const pricingData = [
@@ -236,6 +282,50 @@ function savePricing() {
     msg.textContent = 'Pricing updated successfully!';
     msg.classList.add('show');
     setTimeout(() => msg.classList.remove('show'), 3000);
+}
+
+function updatePricingOnWebsite() {
+    const pricingData = [];
+    const rows = document.querySelectorAll('#pricingTable tr');
+    rows.forEach((row, index) => {
+        const service = document.getElementById(`service_${index}`).value;
+        const duration = document.getElementById(`duration_${index}`).value;
+        const price = document.getElementById(`price_${index}`).value;
+        if (service && price) {
+            pricingData.push({ service, duration, price });
+        }
+    });
+    
+    // Show loading state
+    const msg = document.getElementById('pricingSuccessMessage');
+    msg.textContent = '💰 Updating website pricing...';
+    msg.classList.add('show');
+    
+    // Send pricing update to backend
+    fetch('/api/update-text', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            page: 'index',
+            elementId: 'pricing_table',
+            newText: JSON.stringify(pricingData)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            msg.textContent = '✅ Pricing updated! Changes are now live on your website.';
+        } else {
+            msg.textContent = `❌ Error: ${data.error}`;
+        }
+        setTimeout(() => msg.classList.remove('show'), 4000);
+    })
+    .catch(error => {
+        msg.textContent = `❌ Error: ${error.message}`;
+        setTimeout(() => msg.classList.remove('show'), 4000);
+    });
 }
 
 // ==================== DRAG AND DROP REORDERING ====================
