@@ -748,7 +748,34 @@ function showSuccess() {
     submitted_at: new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})
   };
 
-  // ── FORMSPREE — sends you an email notification ──────────────────
+  // ── SEND CONFIRMATION EMAIL TO CUSTOMER ──────────────────
+  const customerConfirmationEmail = {
+    email: email,
+    name: fname + ' ' + lname,
+    _subject: '✅ Your Shiny Paws Appointment is Confirmed!',
+    _template: 'table',
+    reference: ref,
+    petName: petName,
+    petBreed: breed,
+    service: selName,
+    date: date,
+    time: time,
+    total: document.getElementById('total-val').textContent,
+    notes: notes,
+    businessPhone: '(310) 290-4970',
+    businessEmail: 'info@shinypawsla.com',
+    cancellationPolicy: 'Free cancellation up to 24 hours before your appointment. Cancellations within 24 hours may be subject to a fee.'
+  };
+  
+  fetch('https://formspree.io/f/mgopplba', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(customerConfirmationEmail)
+  }).then(() => {
+    console.log('✅ Confirmation email sent to customer');
+  }).catch(err => console.log('Email error:', err));
+  
+  // ── FORMSPREE — sends you (admin) an email notification ──────────────────
   fetch('https://formspree.io/f/mgopplba', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },

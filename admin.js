@@ -90,6 +90,7 @@ function displayAppointments(appointments) {
             <div class="appointment-actions">
                 ${apt.status !== 'completed' ? `<button class="btn-complete" onclick="updateStatus('${id}', 'completed')">✓ Complete</button>` : ''}
                 ${apt.status !== 'cancelled' ? `<button class="btn-cancel" onclick="updateStatus('${id}', 'cancelled')">✗ Cancel</button>` : ''}
+                ${!apt.reminderSent && apt.status !== 'cancelled' ? `<button class="btn-reminder" onclick="sendManualReminder('${id}')">📧 Send Reminder</button>` : ''}
                 <button class="btn-delete" onclick="deleteAppointment('${id}')">🗑️ Delete</button>
             </div>
         </div>
@@ -274,6 +275,134 @@ function showError(message) {
     el.textContent = message;
     el.classList.add("show");
     setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+// ==================== APPOINTMENT REMINDERS ====================
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mgopplba';
+
+/**
+ * Parse appointment date and time into a Date object (Los Angeles timezone)
+ */
+function parseAppointmentDateTime(dateStr, timeStr) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const date = new Date(year, month - 1, day, hours, minutes, 0);
+    return date;
+}
+
+/**
+ * Calculate hours until appointment
+ */
+function getHoursUntilAppointment(dateStr, timeStr) {
+    const appointmentTime = parseAppointmentDateTime(dateStr, timeStr);
+    const now = new Date();
+    const diffMs = appointmentTime - now;
+    const diffHours = diffMs / (1000 * 60 * 60);
+    return diffHours;
+}
+
+/**
+ * Send reminder email to customer
+ */
+async function sendReminderEmail(appointment, appointmentId) {
+    const reminderData = {
+        email: appointment.customerEmail,
+        name: appointment.customerName,
+        _subject: '⏰ Reminder: Your Shiny Paws Appointment Tomorrow!',
+        _template: 'table',
+        appointmentDate: appointment.date,
+        appointmentTime: appointment.time,
+        petName: appointment.petName,
+        service: appointment.service,
+        businessPhone: '(310) 290-4970',
+        businessEmail: 'info@shinypawsla.com',
+        message: `We're looking forward to seeing ${appointment.petName} tomorrow at ${appointment.time}!`
+    };
+
+    try {
+        const response = await fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reminderData)
+        });
+
+        if (response.ok) {
+            console.log(`✅ Reminder sent to ${appointment.customerEmail}`);
+            await db.ref(`appointments/${appointmentId}/reminderSent`).set(true);
+            return true;
+        } else {
+            console.error(`❌ Failed to send reminder to ${appointment.customerEmail}`);
+            return false;
+        }
+    } catch (error) {
+        console.error('Error sending reminder:', error);
+        return false;
+    }
+}
+
+/**
+ * Check all appointments and send reminders for those 24 hours away
+ */
+async function checkAndSendReminders() {
+    console.log('🔍 Checking for appointments needing reminders...');
+    
+    try {
+        const snapshot = await db.ref('appointments').once('value');
+        const appointments = snapshot.val() || {};
+        
+        let remindersSent = 0;
+        
+        for (const [appointmentId, appointment] of Object.entries(appointments)) {
+            if (appointment.reminderSent || appointment.status === 'cancelled') {
+                continue;
+            }
+            
+            const hoursUntilAppointment = getHoursUntilAppointment(appointment.date, appointment.time);
+            
+            if (hoursUntilAppointment > 23 && hoursUntilAppointment < 25) {
+                console.log(`📧 Sending reminder for ${appointment.customerName}`);
+                const sent = await sendReminderEmail(appointment, appointmentId);
+                if (sent) {
+                    remindersSent++;
+                }
+            }
+        }
+        
+        console.log(`✅ Reminder check complete. Sent ${remindersSent} reminders.`);
+        showSuccess(`Sent ${remindersSent} reminder(s)`);
+        return remindersSent;
+    } catch (error) {
+        console.error('Error checking appointments:', error);
+        showError('Error checking reminders');
+        return 0;
+    }
+}
+
+/**
+ * Manually send reminder for a specific appointment
+ */
+async function sendManualReminder(appointmentId) {
+    try {
+        const snapshot = await db.ref(`appointments/${appointmentId}`).once('value');
+        const appointment = snapshot.val();
+        
+        if (!appointment) {
+            showError('Appointment not found');
+            return false;
+        }
+        
+        const sent = await sendReminderEmail(appointment, appointmentId);
+        if (sent) {
+            showSuccess('Reminder sent successfully!');
+        } else {
+            showError('Failed to send reminder');
+        }
+        return sent;
+    } catch (error) {
+        console.error('Error sending manual reminder:', error);
+        showError('Error sending reminder');
+        return false;
+    }
 }
 
 // ==================== EVENT LISTENERS ====================

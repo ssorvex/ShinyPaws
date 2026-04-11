@@ -452,7 +452,10 @@
         <div class="container">
             <div class="header">
                 <h1>📅 Booking Management</h1>
-                <button class="logout-btn" onclick="logout()">Logout</button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="logout-btn" style="background: #4CAF50;" onclick="checkAndSendReminders()">📧 Send Reminders</button>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
             </div>
 
             <div class="dashboard-grid">
