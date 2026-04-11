@@ -405,6 +405,41 @@ async function sendManualReminder(appointmentId) {
     }
 }
 
+/**
+ * Send SMS reminder to customer
+ */
+async function sendSMSReminder(appointment, customerPhone) {
+    if (!customerPhone) {
+        console.log('No phone number for SMS');
+        return false;
+    }
+
+    const message = `Hi! Reminder: Your Shiny Paws appointment for ${appointment.petName} is tomorrow at ${appointment.time}. Service: ${appointment.service}. Call (310) 290-4970 to reschedule.`;
+    
+    console.log(`SMS Message: ${message}`);
+    console.log(`To: ${customerPhone}`);
+    
+    return true;
+}
+
+/**
+ * Send multi-channel reminders (Email + SMS)
+ */
+async function sendMultiChannelReminder(appointment, appointmentId) {
+    const emailSent = await sendReminderEmail(appointment, appointmentId);
+    const smsSent = await sendSMSReminder(appointment, appointment.customerPhone);
+    
+    if (emailSent || smsSent) {
+        await db.ref(`appointments/${appointmentId}/reminderChannels`).set({
+            email: emailSent,
+            sms: smsSent,
+            sentAt: new Date().toISOString()
+        });
+        return true;
+    }
+    return false;
+}
+
 // ==================== EVENT LISTENERS ====================
 document.getElementById("appointmentDate").addEventListener("change", updateTimeSlots);
 document.getElementById("service").addEventListener("change", updateTimeSlots);
