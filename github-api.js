@@ -113,9 +113,14 @@ async function uploadFileToGitHub(filePath, content, message, token) {
 
     const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
     
+    // Convert UTF-8 string to Base64 (handles special characters)
+    const utf8Bytes = new TextEncoder().encode(content);
+    const binaryString = String.fromCharCode.apply(null, utf8Bytes);
+    const base64Content = btoa(binaryString);
+    
     const body = {
       message: message || `Update ${filePath}`,
-      content: btoa(content), // Base64 encode
+      content: base64Content,
       branch: GITHUB_CONFIG.branch
     };
 
