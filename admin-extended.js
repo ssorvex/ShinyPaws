@@ -71,9 +71,12 @@ function loadSectionImages() {
         return;
     }
 
-    grid.innerHTML = images.map(img => `
-        <div class="image-item">
-            <img src="${img.data}" alt="${img.name}" class="image-preview">
+    grid.innerHTML = images.map((img, index) => `
+        <div class="image-item" draggable="true" ondragstart="dragStart(event, '${section}', ${index})" ondragover="dragOver(event)" ondrop="dropImage(event, '${section}', ${index})" ondragend="dragEnd(event)">
+            <div style="position: relative;">
+                <img src="${img.data}" alt="${img.name}" class="image-preview">
+                <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">#${index + 1}</div>
+            </div>
             <div class="image-info">
                 <strong>${img.name}</strong>
                 <br><small>${img.uploadedAt}</small>
@@ -84,6 +87,12 @@ function loadSectionImages() {
             </div>
         </div>
     `).join('');
+    
+    // Add reorder instructions
+    const instructions = document.createElement('div');
+    instructions.style.cssText = 'background: #E3F2FD; color: #1976D2; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px; text-align: center;';
+    instructions.innerHTML = '💡 <strong>Drag and drop images to reorder them</strong>';
+    grid.parentNode.appendChild(instructions);
 }
 
 function deleteImage(section, id) {
@@ -234,4 +243,74 @@ function savePricing() {
     setTimeout(() => msg.classList.remove('show'), 3000);
 
     console.log('Pricing saved:', pricingData);
+}
+
+// ==================== DRAG AND DROP REORDERING ====================
+let draggedItem = null;
+let draggedFromIndex = null;
+let draggedFromSection = null;
+
+function dragStart(event, section, index) {
+    draggedItem = event.currentTarget;
+    draggedFromIndex = index;
+    draggedFromSection = section;
+    event.currentTarget.style.opacity = '0.5';
+    event.dataTransfer.effectAllowed = 'move';
+}
+
+function dragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    
+    const afterElement = getDragAfterElement(event.clientY);
+    const grid = document.getElementById('imageGrid');
+    
+    if (afterElement == null) {
+        grid.appendChild(draggedItem);
+    } else {
+        grid.insertBefore(draggedItem, afterElement);
+    }
+}
+
+function getDragAfterElement(y) {
+    const draggableElements = [...document.querySelectorAll('.image-item:not(.dragging)')];
+    
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function dropImage(event, section, toIndex) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (draggedFromSection === section && draggedFromIndex !== toIndex) {
+        const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+        
+        // Remove from old position
+        const [movedImage] = images.splice(draggedFromIndex, 1);
+        
+        // Insert at new position
+        images.splice(toIndex, 0, movedImage);
+        
+        // Save reordered images
+        localStorage.setItem(`images_${section}`, JSON.stringify(images));
+        
+        showImageSuccess('Images reordered successfully!');
+        loadSectionImages();
+    }
+}
+
+function dragEnd(event) {
+    event.currentTarget.style.opacity = '1';
+    draggedItem = null;
+    draggedFromIndex = null;
+    draggedFromSection = null;
 }

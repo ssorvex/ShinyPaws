@@ -607,6 +607,21 @@
             opacity: 0.5;
         }
 
+        /* DRAG AND DROP STYLES */
+        .image-item[draggable="true"] {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .image-item[draggable="true"]:active {
+            cursor: grabbing;
+        }
+
+        .image-item[draggable="true"]:hover {
+            box-shadow: 0 8px 20px rgba(61, 32, 96, 0.2);
+            transform: translateY(-2px);
+        }
+
         .availability-slots {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
