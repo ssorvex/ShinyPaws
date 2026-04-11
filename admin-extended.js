@@ -1,0 +1,237 @@
+// Extended Admin Features: Images, Content, Pricing
+
+// ==================== TAB SWITCHING ====================
+function switchTab(tabName) {
+    // Hide all tabs
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    // Remove active class from all buttons
+    const buttons = document.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+
+    // Show selected tab
+    document.getElementById(tabName).classList.add('active');
+
+    // Add active class to clicked button
+    event.target.classList.add('active');
+
+    // Load tab-specific data
+    if (tabName === 'images') {
+        loadSectionImages();
+    } else if (tabName === 'content') {
+        loadContentEditor();
+    } else if (tabName === 'pricing') {
+        loadPricingEditor();
+    }
+}
+
+// ==================== IMAGE MANAGER ====================
+function uploadImage() {
+    const fileInput = document.getElementById('imageUpload');
+    const section = document.getElementById('imageSection').value;
+    const file = fileInput.files[0];
+
+    if (!file) {
+        showImageError('Please select an image file');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const imageData = e.target.result;
+        const timestamp = Date.now();
+        const fileName = `${section}-${timestamp}-${file.name}`;
+
+        // Store in localStorage (for demo purposes)
+        // In production, upload to S3 or server
+        const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+        images.push({
+            id: timestamp,
+            name: fileName,
+            data: imageData,
+            uploadedAt: new Date().toLocaleString()
+        });
+        localStorage.setItem(`images_${section}`, JSON.stringify(images));
+
+        showImageSuccess('Image uploaded successfully!');
+        fileInput.value = '';
+        loadSectionImages();
+    };
+    reader.readAsDataURL(file);
+}
+
+function loadSectionImages() {
+    const section = document.getElementById('imageSection').value;
+    const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+    const grid = document.getElementById('imageGrid');
+
+    if (images.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><p>No images uploaded for this section yet</p></div>';
+        return;
+    }
+
+    grid.innerHTML = images.map(img => `
+        <div class="image-item">
+            <img src="${img.data}" alt="${img.name}" class="image-preview">
+            <div class="image-info">
+                <strong>${img.name}</strong>
+                <br><small>${img.uploadedAt}</small>
+            </div>
+            <div style="padding: 10px; display: flex; gap: 5px;">
+                <button onclick="deleteImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
+                <button onclick="useImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Use</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteImage(section, id) {
+    if (confirm('Are you sure you want to delete this image?')) {
+        const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+        const filtered = images.filter(img => img.id !== id);
+        localStorage.setItem(`images_${section}`, JSON.stringify(filtered));
+        loadSectionImages();
+        showImageSuccess('Image deleted successfully!');
+    }
+}
+
+function useImage(section, id) {
+    const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+    const image = images.find(img => img.id === id);
+    
+    if (image) {
+        // In production, this would update the HTML file on the server
+        console.log('Using image:', image.name);
+        showImageSuccess(`Image "${image.name}" is ready to use. Update your HTML to reference this image.`);
+    }
+}
+
+function showImageSuccess(message) {
+    const msg = document.getElementById('imageSuccessMessage');
+    msg.textContent = message;
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 3000);
+}
+
+function showImageError(message) {
+    const msg = document.getElementById('imageErrorMessage');
+    msg.textContent = message;
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 3000);
+}
+
+// ==================== CONTENT EDITOR ====================
+function loadContentEditor() {
+    const contentData = {
+        'Home Page': {
+            'Hero Title': 'Where Every Pet Gets Their Glow-Up',
+            'Hero Subtitle': 'Premium grooming, daycare & boarding for dogs and cats',
+            'CTA Button': 'Book an Appointment'
+        },
+        'Services': {
+            'Section Title': 'Services Tailored for Your Furry Family',
+            'Bath & Brush': 'A restorative wash-and-brush session',
+            'Full Grooming': 'Organic bath, blow dry, hand-finished cut',
+            'Daycare': 'Calm, supervised home-away-from-home'
+        },
+        'About': {
+            'About Title': 'Family-Owned, Pet-Obsessed, Community-Proud',
+            'About Description': 'Shiny Paws is a family- and minority-owned grooming salon',
+            'Experience': '15+ Years Experience'
+        }
+    };
+
+    const container = document.getElementById('contentSections');
+    container.innerHTML = '';
+
+    for (const [section, fields] of Object.entries(contentData)) {
+        let sectionHTML = `<div class="content-section"><h3>${section}</h3>`;
+        
+        for (const [fieldName, fieldValue] of Object.entries(fields)) {
+            const fieldId = `content_${section.replace(/\s+/g, '_')}_${fieldName.replace(/\s+/g, '_')}`;
+            sectionHTML += `
+                <div class="content-field">
+                    <label>${fieldName}</label>
+                    <textarea id="${fieldId}">${fieldValue}</textarea>
+                </div>
+            `;
+        }
+        
+        sectionHTML += '</div>';
+        container.innerHTML += sectionHTML;
+    }
+}
+
+function saveAllContent() {
+    const contentData = {};
+    const fields = document.querySelectorAll('.content-field textarea');
+    
+    fields.forEach(field => {
+        const id = field.id;
+        const value = field.value;
+        contentData[id] = value;
+    });
+
+    // Store in localStorage
+    localStorage.setItem('websiteContent', JSON.stringify(contentData));
+
+    // Show success message
+    const msg = document.createElement('div');
+    msg.className = 'success-message show';
+    msg.textContent = 'All content saved successfully! Changes will be reflected on the website.';
+    document.querySelector('#content .card').appendChild(msg);
+
+    setTimeout(() => msg.remove(), 3000);
+}
+
+// ==================== PRICING EDITOR ====================
+function loadPricingEditor() {
+    const pricingData = [
+        { service: 'Bath & Brush', duration: '45 min', price: '60' },
+        { service: 'Bath & Trim', duration: '60 min', price: '85' },
+        { service: 'Full Grooming', duration: '90 min', price: '100' },
+        { service: 'Daycare', duration: 'Full Day', price: '45' }
+    ];
+
+    const tbody = document.getElementById('pricingTable');
+    tbody.innerHTML = pricingData.map((item, index) => `
+        <tr>
+            <td>
+                <input type="text" id="service_${index}" value="${item.service}" />
+            </td>
+            <td>
+                <input type="text" id="duration_${index}" value="${item.duration}" />
+            </td>
+            <td>
+                <input type="number" id="price_${index}" value="${item.price}" step="0.01" />
+            </td>
+        </tr>
+    `).join('');
+}
+
+function savePricing() {
+    const pricingData = [];
+    const rows = document.querySelectorAll('#pricingTable tr');
+
+    rows.forEach((row, index) => {
+        const service = document.getElementById(`service_${index}`).value;
+        const duration = document.getElementById(`duration_${index}`).value;
+        const price = document.getElementById(`price_${index}`).value;
+
+        if (service && price) {
+            pricingData.push({ service, duration, price });
+        }
+    });
+
+    // Store in localStorage
+    localStorage.setItem('pricingData', JSON.stringify(pricingData));
+
+    // Show success message
+    const msg = document.getElementById('pricingSuccessMessage');
+    msg.textContent = 'Pricing updated successfully!';
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 3000);
+
+    console.log('Pricing saved:', pricingData);
+}
