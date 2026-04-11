@@ -420,8 +420,8 @@
 </div>
 
 
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
 <script>
 // Firebase Configuration
 const firebaseConfig = {
@@ -769,7 +769,16 @@ function showSuccess() {
       status: 'pending',
       createdAt: new Date().toISOString()
     };
-    window.db.ref('appointments').push(firebaseBooking).catch(err => console.log('Firebase error:', err));
+    window.db.ref('appointments').push(firebaseBooking)
+      .then(() => {
+        console.log('✅ Booking saved to Firebase successfully');
+      })
+      .catch(err => {
+        console.error('❌ Firebase error:', err);
+        console.error('Booking data:', firebaseBooking);
+      });
+  } else {
+    console.warn('⚠️ Firebase not initialized - booking may not be saved to admin dashboard');
   }
 
   // ── GOOGLE SHEETS — logs every booking to your spreadsheet ───────
