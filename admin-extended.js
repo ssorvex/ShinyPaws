@@ -110,7 +110,7 @@ function updateImageOnWebsite(section, id) {
     showImageSuccess('Updating website...');
     
     // Send to backend
-    fetch('/api/update-image', {
+    fetch('http://localhost:3000/api/update-image', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -302,7 +302,7 @@ function updatePricingOnWebsite() {
     msg.classList.add('show');
     
     // Send pricing update to backend
-    fetch('/api/update-text', {
+    fetch('http://localhost:3000/api/update-text', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
