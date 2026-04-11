@@ -64,9 +64,12 @@ function loadSectionImages() {
                 <strong>${img.name}</strong>
                 <br><small>${img.uploadedAt}</small>
             </div>
-            <div style="padding: 10px; display: flex; gap: 5px;">
-                <button onclick="deleteImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
-                <button onclick="useImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Use</button>
+            <div style="padding: 10px; display: flex; gap: 5px; flex-direction: column;">
+                <button onclick="updateImageOnWebsite('${section}', ${img.id})" style="width: 100%; padding: 8px; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">🌐 Update Website</button>
+                <div style="display: flex; gap: 5px;">
+                    <button onclick="deleteImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
+                    <button onclick="useImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Use</button>
+                </div>
             </div>
         </div>
     `).join('');
@@ -93,6 +96,42 @@ function useImage(section, id) {
         console.log('Using image:', image.name);
         showImageSuccess(`Image "${image.name}" is ready to use.`);
     }
+}
+
+function updateImageOnWebsite(section, id) {
+    const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+    const image = images.find(img => img.id === id);
+    if (!image) {
+        showImageError('Image not found');
+        return;
+    }
+    
+    // Show loading state
+    showImageSuccess('Updating website...');
+    
+    // Send to backend
+    fetch('/api/update-image', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            page: 'studio', // or 'index' depending on which page
+            elementId: `${section}-image-${id}`,
+            imageUrl: image.data
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showImageSuccess(`✅ Website updated! Image "${image.name}" is now live.`);
+        } else {
+            showImageError(`Error: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        showImageError(`Failed to update: ${error.message}`);
+    });
 }
 
 function showImageSuccess(message) {
