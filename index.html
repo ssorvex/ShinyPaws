@@ -313,11 +313,18 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
 
 
 /* Zone positions */
-#z-contact  {left:8%;top:65%;width:8%;height:10%;border-radius:50%;}
-#z-daycare  {left:72%;top:58%;width:8%;height:10%;border-radius:50%;}
-#z-grooming  {left:18%;top:12%;width:8%;height:10%;border-radius:50%;}
-#z-booking  {left:32%;top:40%;width:8%;height:10%;border-radius:50%;}
-#z-about  {left:75%;top:15%;width:8%;height:10%;border-radius:50%;}
+#z-contact  {left:8%;top:65%;width:12%;height:12%;border-radius:50%;}
+#z-daycare  {left:70%;top:58%;width:12%;height:12%;border-radius:50%;}
+#z-grooming  {left:16%;top:10%;width:12%;height:12%;border-radius:50%;}
+#z-booking  {left:30%;top:38%;width:12%;height:12%;border-radius:50%;}
+#z-about  {left:73%;top:12%;width:12%;height:12%;border-radius:50%;}
+@media(max-width:768px){
+  #z-contact  {left:6%;top:68%;width:14%;height:14%;}
+  #z-daycare  {left:68%;top:60%;width:14%;height:14%;}
+  #z-grooming  {left:14%;top:8%;width:14%;height:14%;}
+  #z-booking  {left:28%;top:40%;width:14%;height:14%;}
+  #z-about  {left:71%;top:10%;width:14%;height:14%;}
+}
 /* OVERLAYS */
 .overlay{position:fixed;inset:0;background:rgba(61,32,96,.42);backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
