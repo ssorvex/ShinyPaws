@@ -353,19 +353,23 @@ async function updateImageOnWebsiteViaGitHub(section, imageId) {
         if (msg) msg.textContent = '✏️ Updating image in HTML...';
         let updatedIndex = files.index;
         
+        // The image.data is already a base64 data URL (data:image/png;base64,...)
+        // We use it directly in the HTML - no need to re-encode
+        const imageUrl = image.data;
+        
         // Replace hero image URL in the HTML
         // Look for the hero image and replace its src
         if (section === 'hero') {
             // Find and replace hero image
             updatedIndex = updatedIndex.replace(
                 /(<img[^>]*id="hero-poodle"[^>]*src=")[^"]*(")[^>]*>/g,
-                `$1${image.data}$2>`
+                `$1${imageUrl}$2>`
             );
             
             // Also try to replace by class if id doesn't work
             updatedIndex = updatedIndex.replace(
                 /(<img[^>]*class="[^"]*hero[^"]*"[^>]*src=")[^"]*(")[^>]*>/g,
-                `$1${image.data}$2>`
+                `$1${imageUrl}$2>`
             );
         }
         
