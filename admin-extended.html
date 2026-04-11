@@ -779,7 +779,7 @@
                     
                     <div style="display: flex; gap: 10px;">
                         <button class="save-btn" onclick="saveAllContent()" style="flex: 1;">💾 Save Locally</button>
-                        <button class="save-btn" onclick="updateContentOnWebsite()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
+                        <button class="save-btn" onclick="updateContentOnWebsiteViaGitHub()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
                     </div>
                 </div>
             </div>
@@ -804,17 +804,38 @@
                     <div class="success-message" id="pricingSuccessMessage"></div>
                     <div style="display: flex; gap: 10px;">
                         <button class="save-btn" onclick="savePricing()" style="flex: 1;">💾 Save Locally</button>
-                        <button class="save-btn" onclick="updatePricingOnWebsite()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
+                        <button class="save-btn" onclick="updatePricingOnWebsiteViaGitHub()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- GitHub Integration Scripts -->
+    <script src="github-api.js"></script>
+    <script src="html-generator.js"></script>
+    <script src="file-manager.js"></script>
+    
     <!-- Firebase (compat version for plain HTML) -->
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
     <script src="admin.js"></script>
     <script src="admin-extended.js"></script>
+    
+    <!-- Initialize GitHub setup check on page load -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check GitHub setup when dashboard is shown
+            const loginScreen = document.getElementById('loginScreen');
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class' && !loginScreen.classList.contains('hidden')) {
+                        checkGitHubSetup();
+                    }
+                });
+            });
+            observer.observe(loginScreen, { attributes: true });
+        });
+    </script>
 </body>
 </html>

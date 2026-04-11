@@ -65,7 +65,7 @@ function loadSectionImages() {
                 <br><small>${img.uploadedAt}</small>
             </div>
             <div style="padding: 10px; display: flex; gap: 5px; flex-direction: column;">
-                <button onclick="updateImageOnWebsite('${section}', ${img.id})" style="width: 100%; padding: 8px; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">🌐 Update Website</button>
+                <button onclick="updateImageOnWebsiteViaGitHub('${section}', ${img.id})" style="width: 100%; padding: 8px; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">🌐 Update Website</button>
                 <div style="display: flex; gap: 5px;">
                     <button onclick="deleteImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Delete</button>
                     <button onclick="useImage('${section}', ${img.id})" style="flex: 1; padding: 6px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600;">Use</button>
@@ -106,32 +106,8 @@ function updateImageOnWebsite(section, id) {
         return;
     }
     
-    // Show loading state
-    showImageSuccess('Updating website...');
-    
-    // Send to backend
-    fetch('https://3000-i0v8orymvnq4y2o36cd0p-1b3891fa.us2.manus.computer/api/update-image', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            page: 'studio', // or 'index' depending on which page
-            elementId: `${section}-image-${id}`,
-            imageUrl: image.data
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showImageSuccess(`✅ Website updated! Image "${image.name}" is now live.`);
-        } else {
-            showImageError(`Error: ${data.error}`);
-        }
-    })
-    .catch(error => {
-        showImageError(`Failed to update: ${error.message}`);
-    });
+    // This function is deprecated - use updateImageOnWebsiteViaGitHub instead
+    showImageError('Please use the GitHub integration to update images.');
 }
 
 function showImageSuccess(message) {
@@ -148,236 +124,252 @@ function showImageError(message) {
     setTimeout(() => msg.classList.remove('show'), 3000);
 }
 
-// ==================== CONTENT EDITOR ====================
-function loadContentEditor() {
-    const contentData = {
-        'Home Page': {
-            'Hero Title': 'Where Every Pet Gets Their Glow-Up',
-            'Hero Subtitle': 'Premium grooming, daycare & boarding for dogs and cats',
-            'CTA Button': 'Book an Appointment'
-        },
-        'Services': {
-            'Section Title': 'Services Tailored for Your Furry Family',
-            'Bath & Brush': 'A restorative wash-and-brush session',
-            'Full Grooming': 'Organic bath, blow dry, hand-finished cut',
-            'Daycare': 'Calm, supervised home-away-from-home'
-        },
-        'About': {
-            'About Title': 'Family-Owned, Pet-Obsessed, Community-Proud',
-            'About Description': 'Shiny Paws is a family- and minority-owned grooming salon',
-            'Experience': '15+ Years Experience'
-        }
-    };
-    const container = document.getElementById('contentSections');
-    container.innerHTML = '';
-    for (const [section, fields] of Object.entries(contentData)) {
-        let sectionHTML = `<div class="content-section"><h3>${section}</h3>`;
-        for (const [fieldName, fieldValue] of Object.entries(fields)) {
-            const fieldId = `content_${section.replace(/\s+/g, '_')}_${fieldName.replace(/\s+/g, '_')}`;
-            sectionHTML += `
-                <div class="content-field">
-                    <label>${fieldName}</label>
-                    <textarea id="${fieldId}">${fieldValue}</textarea>
-                </div>
-            `;
-        }
-        sectionHTML += '</div>';
-        container.innerHTML += sectionHTML;
-    }
-}
+/**
+ * SECURE GitHub Integration Functions
+ * Token is prompted each time and never stored
+ */
 
-function saveAllContent() {
-    const contentData = {};
-    const fields = document.querySelectorAll('.content-field textarea');
-    fields.forEach(field => {
-        const id = field.id;
-        const value = field.value;
-        contentData[id] = value;
-    });
-    localStorage.setItem('websiteContent', JSON.stringify(contentData));
-    const msg = document.createElement('div');
-    msg.className = 'success-message show';
-    msg.textContent = 'All content saved successfully!';
-    document.querySelector('#content .card').appendChild(msg);
-    setTimeout(() => msg.remove(), 3000);
-}
-
-function updateContentOnWebsite() {
-    const contentData = {};
-    const fields = document.querySelectorAll('.content-field textarea');
-    fields.forEach(field => {
-        const id = field.id;
-        const value = field.value;
-        contentData[id] = value;
-    });
-    
-    // Show loading state
-    const msg = document.createElement('div');
-    msg.className = 'success-message show';
-    msg.textContent = '📝 Updating website...';
-    document.querySelector('#content .card').appendChild(msg);
-    
-    // Send each content update to backend
-    const updates = Object.entries(contentData).map(([elementId, text]) => {
-        return fetch('/api/update-text', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                page: 'studio',
-                elementId: elementId,
-                newText: text
-            })
-        });
-    });
-    
-    Promise.all(updates)
-        .then(responses => Promise.all(responses.map(r => r.json())))
-        .then(results => {
-            if (results.every(r => r.success)) {
-                msg.textContent = '✅ Website updated! All content is now live.';
-            } else {
-                msg.textContent = '⚠️ Some updates failed. Check console for details.';
-            }
+/**
+ * Update content on website via GitHub (SECURE - prompts for token)
+ */
+async function updateContentOnWebsiteViaGitHub() {
+    try {
+        // Show loading state
+        const msg = document.createElement('div');
+        msg.className = 'success-message show';
+        msg.textContent = '🔐 Enter your GitHub token to continue...';
+        document.querySelector('#content .card').appendChild(msg);
+        
+        // Prompt for token (secure - not stored)
+        let token;
+        try {
+            token = promptForGitHubToken();
+        } catch (error) {
+            msg.className = 'error-message show';
+            msg.textContent = `❌ ${error.message}`;
             setTimeout(() => msg.remove(), 4000);
-        })
-        .catch(error => {
-            msg.textContent = `❌ Error: ${error.message}`;
-            setTimeout(() => msg.remove(), 4000);
+            return;
+        }
+        
+        // Get current content from form
+        const contentData = {};
+        const fields = document.querySelectorAll('.content-field textarea');
+        fields.forEach(field => {
+            contentData[field.id] = field.value;
         });
-}
-
-// ==================== PRICING EDITOR ====================
-function loadPricingEditor() {
-    const pricingData = [
-        { service: 'Bath & Brush', duration: '45 min', price: '60' },
-        { service: 'Bath & Trim', duration: '60 min', price: '85' },
-        { service: 'Full Grooming', duration: '90 min', price: '100' },
-        { service: 'Daycare', duration: 'Full Day', price: '45' }
-    ];
-    const tbody = document.getElementById('pricingTable');
-    tbody.innerHTML = pricingData.map((item, index) => `
-        <tr>
-            <td><input type="text" id="service_${index}" value="${item.service}" /></td>
-            <td><input type="text" id="duration_${index}" value="${item.duration}" /></td>
-            <td><input type="number" id="price_${index}" value="${item.price}" step="0.01" /></td>
-        </tr>
-    `).join('');
-}
-
-function savePricing() {
-    const pricingData = [];
-    const rows = document.querySelectorAll('#pricingTable tr');
-    rows.forEach((row, index) => {
-        const service = document.getElementById(`service_${index}`).value;
-        const duration = document.getElementById(`duration_${index}`).value;
-        const price = document.getElementById(`price_${index}`).value;
-        if (service && price) {
-            pricingData.push({ service, duration, price });
+        
+        // Load website files
+        msg.textContent = '📥 Fetching website files from GitHub...';
+        const files = await loadWebsiteFiles(token);
+        
+        // Update HTML with new content
+        msg.textContent = '✏️ Updating HTML content...';
+        let updatedStudio = files.studio;
+        
+        // Replace content in the HTML
+        for (const [fieldId, value] of Object.entries(contentData)) {
+            // Find and replace content by looking for common patterns
+            updatedStudio = updatedStudio.replace(
+                new RegExp(`(<[^>]*id="${fieldId}"[^>]*>)([^<]*)(<)`, 'g'),
+                `$1${value}$3`
+            );
         }
-    });
-    localStorage.setItem('pricingData', JSON.stringify(pricingData));
-    const msg = document.getElementById('pricingSuccessMessage');
-    msg.textContent = 'Pricing updated successfully!';
-    msg.classList.add('show');
-    setTimeout(() => msg.classList.remove('show'), 3000);
-}
-
-function updatePricingOnWebsite() {
-    const pricingData = [];
-    const rows = document.querySelectorAll('#pricingTable tr');
-    rows.forEach((row, index) => {
-        const service = document.getElementById(`service_${index}`).value;
-        const duration = document.getElementById(`duration_${index}`).value;
-        const price = document.getElementById(`price_${index}`).value;
-        if (service && price) {
-            pricingData.push({ service, duration, price });
-        }
-    });
-    
-    // Show loading state
-    const msg = document.getElementById('pricingSuccessMessage');
-    msg.textContent = '💰 Updating website pricing...';
-    msg.classList.add('show');
-    
-    // Send pricing update to backend
-    fetch('https://3000-i0v8orymvnq4y2o36cd0p-1b3891fa.us2.manus.computer/api/update-text', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            page: 'index',
-            elementId: 'pricing_table',
-            newText: JSON.stringify(pricingData)
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            msg.textContent = '✅ Pricing updated! Changes are now live on your website.';
-        } else {
-            msg.textContent = `❌ Error: ${data.error}`;
-        }
-        setTimeout(() => msg.classList.remove('show'), 4000);
-    })
-    .catch(error => {
+        
+        // Upload to GitHub
+        msg.textContent = '📤 Uploading to GitHub...';
+        
+        const result = await uploadFileToGitHub(
+            'studio.html',
+            updatedStudio,
+            generateCommitMessage('Update content'),
+            token
+        );
+        
+        // Clear token from memory
+        clearSensitiveData(token);
+        token = null;
+        
+        msg.className = 'success-message show';
+        msg.textContent = '✅ Website updated! Changes will appear in 1-2 minutes.';
+        setTimeout(() => msg.remove(), 5000);
+        
+    } catch (error) {
+        console.error('Update error:', error);
+        const msg = document.createElement('div');
+        msg.className = 'error-message show';
         msg.textContent = `❌ Error: ${error.message}`;
-        setTimeout(() => msg.classList.remove('show'), 4000);
-    });
-}
-
-// ==================== DRAG AND DROP REORDERING ====================
-let draggedItem = null;
-
-function dragStart(event) {
-    draggedItem = event.currentTarget;
-    event.currentTarget.style.opacity = '0.5';
-    event.dataTransfer.effectAllowed = 'move';
-}
-
-function dragOver(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-    const afterElement = getDragAfterElement(event.clientY);
-    const grid = document.getElementById('imageGrid');
-    if (afterElement == null) {
-        grid.appendChild(draggedItem);
-    } else {
-        grid.insertBefore(draggedItem, afterElement);
+        document.querySelector('#content .card').appendChild(msg);
+        setTimeout(() => msg.remove(), 5000);
     }
 }
 
-function getDragAfterElement(y) {
-    const draggableElements = [...document.querySelectorAll('.image-item')];
-    return draggableElements.reduce((closest, child) => {
-        if (child === draggedItem) return closest;
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
+/**
+ * Update pricing on website via GitHub (SECURE - prompts for token)
+ */
+async function updatePricingOnWebsiteViaGitHub() {
+    try {
+        // Show loading state
+        const msg = document.getElementById('pricingSuccessMessage');
+        msg.className = 'success-message show';
+        msg.textContent = '🔐 Enter your GitHub token to continue...';
+        
+        // Prompt for token (secure - not stored)
+        let token;
+        try {
+            token = promptForGitHubToken();
+        } catch (error) {
+            msg.className = 'error-message show';
+            msg.textContent = `❌ ${error.message}`;
+            setTimeout(() => msg.classList.remove('show'), 4000);
+            return;
         }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+        
+        // Get pricing data from form
+        const pricingData = [];
+        const rows = document.querySelectorAll('#pricingTable tr');
+        rows.forEach((row, index) => {
+            const service = document.getElementById(`service_${index}`).value;
+            const duration = document.getElementById(`duration_${index}`).value;
+            const price = document.getElementById(`price_${index}`).value;
+            if (service && price) {
+                pricingData.push({ service, duration, price });
+            }
+        });
+        
+        // Load website files
+        msg.textContent = '📥 Fetching website files from GitHub...';
+        const files = await loadWebsiteFiles(token);
+        
+        // Update HTML with new pricing
+        msg.textContent = '✏️ Updating pricing...';
+        let updatedIndex = files.index;
+        
+        // Replace pricing in the HTML
+        pricingData.forEach(item => {
+            // Find and replace price for each service
+            updatedIndex = updatedIndex.replace(
+                new RegExp(`(${item.service}[^<]*<[^>]*>\\s*\\$)[\\d.]+`, 'g'),
+                `$1${item.price}`
+            );
+        });
+        
+        // Upload to GitHub
+        msg.textContent = '📤 Uploading to GitHub...';
+        
+        const result = await uploadFileToGitHub(
+            'index.html',
+            updatedIndex,
+            generateCommitMessage('Update pricing'),
+            token
+        );
+        
+        // Clear token from memory
+        clearSensitiveData(token);
+        token = null;
+        
+        msg.className = 'success-message show';
+        msg.textContent = '✅ Pricing updated! Changes will appear in 1-2 minutes.';
+        setTimeout(() => msg.classList.remove('show'), 5000);
+        
+    } catch (error) {
+        console.error('Update error:', error);
+        const msg = document.getElementById('pricingSuccessMessage');
+        msg.className = 'error-message show';
+        msg.textContent = `❌ Error: ${error.message}`;
+        setTimeout(() => msg.classList.remove('show'), 5000);
+    }
 }
 
-function dropImage(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    const section = draggedItem.getAttribute('data-section');
-    const grid = document.getElementById('imageGrid');
-    const imageItems = [...grid.querySelectorAll('.image-item')];
-    const newOrder = imageItems.map(item => item.getAttribute('data-image-id'));
-    const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
-    const reorderedImages = newOrder.map(id => images.find(img => img.id === parseInt(id)));
-    localStorage.setItem(`images_${section}`, JSON.stringify(reorderedImages));
-    showImageSuccess('Images reordered successfully!');
-    loadSectionImages();
+/**
+ * Update images on website via GitHub (SECURE - prompts for token)
+ */
+async function updateImageOnWebsiteViaGitHub(section, imageId) {
+    try {
+        // Show loading state
+        const msg = document.createElement('div');
+        msg.className = 'success-message show';
+        msg.textContent = '🔐 Enter your GitHub token to continue...';
+        document.querySelector('#images .card').appendChild(msg);
+        
+        // Prompt for token (secure - not stored)
+        let token;
+        try {
+            token = promptForGitHubToken();
+        } catch (error) {
+            msg.className = 'error-message show';
+            msg.textContent = `❌ ${error.message}`;
+            setTimeout(() => msg.remove(), 4000);
+            return;
+        }
+        
+        // Get the image data
+        const images = JSON.parse(localStorage.getItem(`images_${section}`) || '[]');
+        const image = images.find(img => img.id === imageId);
+        
+        if (!image) {
+            throw new Error('Image not found');
+        }
+        
+        // Load website files
+        msg.textContent = '📥 Fetching website files...';
+        const files = await loadWebsiteFiles(token);
+        
+        // Clear token from memory
+        clearSensitiveData(token);
+        token = null;
+        
+        // For now, we'll just show a message that the image is ready
+        msg.className = 'success-message show';
+        msg.textContent = `✅ Image "${image.name}" is ready to use. You can now update the website content to use this image.`;
+        setTimeout(() => msg.remove(), 5000);
+        
+    } catch (error) {
+        console.error('Update error:', error);
+        const msg = document.createElement('div');
+        msg.className = 'error-message show';
+        msg.textContent = `❌ Error: ${error.message}`;
+        document.querySelector('#images .card').appendChild(msg);
+        setTimeout(() => msg.remove(), 5000);
+    }
 }
 
-function dragEnd(event) {
-    event.currentTarget.style.opacity = '1';
-    draggedItem = null;
+/**
+ * Log update action (for security audit trail)
+ */
+function logUpdateAction(action, details) {
+    const log = {
+        timestamp: new Date().toISOString(),
+        action: action,
+        details: details,
+        userAgent: navigator.userAgent
+    };
+    
+    // Store in localStorage for audit trail
+    const logs = JSON.parse(localStorage.getItem('update_logs') || '[]');
+    logs.push(log);
+    
+    // Keep only last 100 logs
+    if (logs.length > 100) {
+        logs.shift();
+    }
+    
+    localStorage.setItem('update_logs', JSON.stringify(logs));
+    console.log('Update logged:', log);
+}
+
+/**
+ * View update logs (for debugging)
+ */
+function viewUpdateLogs() {
+    const logs = JSON.parse(localStorage.getItem('update_logs') || '[]');
+    console.table(logs);
+    return logs;
+}
+
+/**
+ * Clear all update logs
+ */
+function clearUpdateLogs() {
+    localStorage.removeItem('update_logs');
+    console.log('Update logs cleared');
 }
