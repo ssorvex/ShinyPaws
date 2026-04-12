@@ -127,7 +127,7 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .tb-hint{position:absolute;right:16px;font-size:clamp(9px,1.8vw,11px);color:var(--purp-m);opacity:.75;font-weight:700;letter-spacing:.12em;text-transform:uppercase;transition:opacity .4s;font-style:italic;}
 .room-wrap{position:absolute;width:100%;height:100%;top:0;left:0;right:0;bottom:0;
-  margin:0;padding:0;z-index:1;overflow:hidden;flex-shrink:0;border:none;display:flex;align-items:center;justify-content:center;}
+  margin:0;padding:0;z-index:1;overflow:visible;flex-shrink:0;border:none;display:flex;align-items:center;justify-content:center;}
 
 #room-img{width:100%;height:100%;object-fit:contain;display:block;background:transparent;opacity:1;}
 #m-room{position:absolute;left:42%;top:62%;transform:translateX(-50%) translateY(-100%);height:19.2%;width:auto;aspect-ratio:1;z-index:50;
@@ -322,18 +322,23 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
 
 
 
-/* Zone positions */
+/* Zone positions - positioned within room-wrap */
 #z-contact  {left:8%;top:65%;width:12%;height:12%;border-radius:50%;}
 #z-daycare  {left:70%;top:58%;width:12%;height:12%;border-radius:50%;}
 #z-grooming  {left:16%;top:10%;width:12%;height:12%;border-radius:50%;}
 #z-booking  {left:30%;top:38%;width:12%;height:12%;border-radius:50%;}
 #z-about  {left:73%;top:12%;width:12%;height:12%;border-radius:50%;}
+
+/* Desktop: zones repositioned for wider screens */
+@media(min-width:1024px){
+  #z-contact  {left:5%;top:68%;width:10%;height:10%;}
+  #z-daycare  {left:80%;top:60%;width:10%;height:10%;}
+  #z-grooming  {left:10%;top:6%;width:10%;height:10%;}
+  #z-booking  {left:48%;top:40%;width:10%;height:10%;}
+  #z-about  {left:80%;top:8%;width:10%;height:10%;}
+}
 @media(max-width:768px){
-  #z-contact  {left:6%;top:68%;width:14%;height:14%;}
-  #z-daycare  {left:68%;top:60%;width:14%;height:14%;}
-  #z-grooming  {left:14%;top:8%;width:14%;height:14%;}
-  #z-booking  {left:28%;top:40%;width:14%;height:14%;}
-  #z-about  {left:71%;top:10%;width:14%;height:14%;}
+
 }
 /* OVERLAYS */
 .overlay{position:fixed;inset:0;background:rgba(61,32,96,.42);backdrop-filter:blur(12px);
