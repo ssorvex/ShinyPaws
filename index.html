@@ -331,6 +331,7 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
 .overlay.on{display:flex;}
 .card{background:linear-gradient(150deg,rgba(255,252,255,.97),rgba(240,228,255,.97));
   border:1px solid rgba(255,255,255,.65);border-radius:26px;padding:clamp(18px,4vw,34px);
+  padding-bottom:clamp(28px,6vw,48px);
   max-width:490px;width:100%;max-height:88vh;overflow-y:auto;
   box-shadow:0 24px 64px rgba(61,32,96,.25),0 0 0 1px rgba(255,255,255,.8);
   position:relative;animation:cardIn .38s cubic-bezier(.34,1.2,.64,1);}
@@ -471,10 +472,10 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
     <h2>Dog Day Care</h2>
     <p>A safe, fun and loving environment for your pup to play, socialize, and relax while you&rsquo;re away.</p>
     <div class="svc-grid">
-      <div class="svc"><div class="ic">⏰</div><div class="nm">1 Hour</div><div class="pr">Ask us!</div></div>
-      <div class="svc"><div class="ic">🌤️</div><div class="nm">Half Day</div><div class="pr">Ask us!</div></div>
-      <div class="svc"><div class="ic">☀️</div><div class="nm">Full Day</div><div class="pr">Ask us!</div></div>
-      <div class="svc"><div class="ic">🌙</div><div class="nm">Overnight</div><div class="pr">Ask us!</div></div>
+      <div class="svc"><div class="ic">⏰</div><div class="nm">1 Hour</div><div class="pr">$15</div></div>
+      <div class="svc"><div class="ic">🌤️</div><div class="nm">Half Day</div><div class="pr">$30</div></div>
+      <div class="svc"><div class="ic">☀️</div><div class="nm">Full Day</div><div class="pr">$50</div></div>
+      <div class="svc"><div class="ic">🌙</div><div class="nm">Overnight</div><div class="pr">$80</div></div>
     </div>
     <button class="cta" onclick="closeOverlay('daycare');openZone('booking');">Book a Spot</button>
   </div>
@@ -527,10 +528,9 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
 </div>
 <script>
 var SRC = {
-  runRight: "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/shinny_running_right_new_4f733ee5.png",
-  runLeft:  "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/shinny_running_left_new_2f4b93c6.png",
-  wave:     "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/shinny_waving_fixed_5393ea10.png",
-  sit:      "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/shinny_sitting_fixed_06878c33.png"
+  runRight: "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/LeapinglavenderPomeranianpuppywithcharm_f8a2ff60.png",
+  wave:     "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/LilacPomeranianwavingwithcharm_1adfe548.png",
+  sit:      "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/ChatGPTImageApr11,2026,04_04_00AM_d9b3c335.png"
 };
 var HOME_X = "42%";
 var HOME_Y = "62%";
@@ -630,7 +630,7 @@ function moveShinny(mr, targetX, targetY, slowMode) {
   var curL = parseFloat(mr.style.left) || parseFloat(HOME_X);
   var tarL = parseFloat(targetX);
   var dist = Math.abs(tarL - curL);
-  mr.src = (tarL >= curL) ? SRC.runRight : SRC.runLeft;
+  mr.src = SRC.runRight;
   var minDur = slowMode ? 0.9  : 0.6;
   var maxDur = slowMode ? 1.6  : 1.1;
   var speed  = slowMode ? 38   : 50;

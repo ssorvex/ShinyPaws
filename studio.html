@@ -42,10 +42,15 @@ nav{
   font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;
   color:var(--purple);letter-spacing:0.01em;flex-shrink:0;
 }
+@keyframes pawShine {
+  0%, 100% { box-shadow: 0 0 8px rgba(201,168,76,0.4), inset 0 0 8px rgba(255,255,255,0.1); }
+  50% { box-shadow: 0 0 20px rgba(201,168,76,0.8), inset 0 0 12px rgba(255,255,255,0.3), 0 0 30px rgba(201,168,76,0.6); }
+}
 .logo-paw{
   width:38px;height:38px;border-radius:12px;
   background:var(--purple);display:flex;align-items:center;justify-content:center;
   font-size:1.1rem;flex-shrink:0;
+  animation: pawShine 2s ease-in-out infinite;
 }
 .nav-links{display:flex;gap:1.8rem;list-style:none}
 .nav-links a{
@@ -465,7 +470,7 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
   </div>
   <div class="hero-visual">
     <div class="hero-orb">
-      <img class="orb-img" src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/hero-groomed-poodle-QVVFsnPcJU4wmZrRkdhEYS.webp" alt="Beautifully groomed white poodle">
+      <img class="orb-img" src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/16cc1eec-a957-4873-8ec2-d31300cd784c_cd50c5cc.webp" alt="Owner with beloved dogs">
     </div>
     <div class="float-pill fp1"><div class="fp-dot fp-p">✅</div>Certified Groomers</div>
     <div class="float-pill fp2"><div class="fp-dot fp-l">⚡</div>Same-Day Booking</div>
