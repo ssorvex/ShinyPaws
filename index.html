@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  if (window.innerWidth > 768) {
+    window.location.replace('https://shinypawsla.com/studio');
+  }
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Shiny Paws — Pet Grooming &amp; Daycare | Gardena, CA</title>
@@ -623,7 +628,7 @@ function letsGo() {
 
 function showPixelWorld() {
   document.getElementById('pixel').classList.add('show');
-  setTimeout(showWelcomeMessage, 400);
+  setTimeout(startTour, 600);
 }
 
 function moveShinny(mr, targetX, targetY, slowMode) {
