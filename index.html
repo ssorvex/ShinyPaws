@@ -758,13 +758,8 @@ function showPixelWorld() {
   if (typeof showWelcomeMessage === 'function') setTimeout(showWelcomeMessage, 400);
   // First-visit guided tour, otherwise just regular chatter
   setTimeout(function() {
-    var seen = false;
-    try { seen = localStorage.getItem('shinnyTourSeen') === '1'; } catch(e){}
-    if (seen) {
-      startShinnyChatter();
-    } else {
-      startShinnyTour();
-    }
+    // Tour disabled - always start with chatter
+    startShinnyChatter();
   }, 900);
 }
 
