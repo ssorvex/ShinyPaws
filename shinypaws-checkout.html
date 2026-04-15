@@ -273,6 +273,23 @@
     </div>
 
     <div id="checkout-body">
+
+      <!-- ── RETURNING CUSTOMER BANNER ── -->
+      <div style="padding:0.85rem 1.5rem 0">
+        <button id="rc-toggle" onclick="toggleReturning()" style="width:100%;padding:11px 16px;background:var(--pink-light);border:1px solid var(--lilac);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--purple-mid);font-weight:500;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.15s;" onmouseover="this.style.background='#ede8ff'" onmouseout="this.style.background=document.getElementById('rc-panel').style.display==='block'?'#ede8ff':'var(--pink-light)'">
+          <span style="font-size:15px">↩</span> Returning customer? Auto-fill my details
+        </button>
+        <div id="rc-panel" style="display:none;background:#f7f4ff;border:1px solid var(--lilac);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:13px 14px;">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--purple-soft);font-weight:500;margin-bottom:8px">Enter your phone number</div>
+          <div style="display:flex;gap:7px">
+            <input type="tel" id="rc-phone" placeholder="(310) 555-0100" style="flex:1;padding:9px 12px;border:0.5px solid var(--border-mid);border-radius:var(--radius-sm);font-size:13px;background:#fff;color:var(--purple);font-family:'DM Sans',sans-serif;outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupCustomer()}" />
+            <button onclick="lookupCustomer()" id="rc-btn" style="padding:9px 16px;background:var(--purple);color:var(--pink-light);border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;white-space:nowrap;transition:opacity 0.15s">Find →</button>
+          </div>
+          <div id="rc-status" style="margin-top:7px;font-size:12px;min-height:16px"></div>
+          <div id="rc-pets" style="display:none;margin-top:10px"></div>
+        </div>
+      </div>
+
       <div class="container">
 
         <!-- LEFT -->
@@ -321,10 +338,10 @@
               <div class="field"><label>Time</label><select id="appt-time-select"><option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option><option>11:00 AM</option><option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option><option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option><option>3:00 PM</option><option>3:30 PM</option><option>4:00 PM</option><option>4:30 PM</option><option>5:00 PM</option><option>5:30 PM</option><option>6:00 PM</option></select></div>
             </div>
             <div class="row2">
-              <div class="field"><label>Pet name</label><input type="text" placeholder="Buddy" /></div>
-              <div class="field"><label>Breed</label><input type="text" placeholder="Poodle" /></div>
+              <div class="field"><label>Pet name</label><input type="text" id="pet-name" placeholder="Buddy" /></div>
+              <div class="field"><label>Breed</label><input type="text" id="pet-breed" placeholder="Poodle" /></div>
             </div>
-            <div class="field"><label>Special notes</label><input type="text" placeholder="Sensitive skin, nervous around dryers..." /></div>
+            <div class="field"><label>Special notes</label><input type="text" id="pet-notes" placeholder="Sensitive skin, nervous around dryers..." /></div>
           </div>
         </div>
 
@@ -344,10 +361,10 @@
             </div>
             <div class="field"><label>Email</label><input type="email" id="email" placeholder="jane@email.com" /></div>
             <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(310) 555-0100" /></div>
-            <div class="field"><label>Address</label><input type="text" placeholder="1234 Main St" /></div>
+            <div class="field"><label>Address</label><input type="text" id="address" placeholder="1234 Main St" /></div>
             <div class="row2">
-              <div class="field"><label>City</label><input type="text" placeholder="Gardena" /></div>
-              <div class="field"><label>ZIP</label><input type="text" placeholder="90247" maxlength="5" /></div>
+              <div class="field"><label>City</label><input type="text" id="city" placeholder="Gardena" /></div>
+              <div class="field"><label>ZIP</label><input type="text" id="zip" placeholder="90247" maxlength="5" /></div>
             </div>
 
             <div class="divider"></div>
@@ -413,12 +430,28 @@
       <h2>Booking confirmed!</h2>
       <p>A confirmation email has been sent.<br>We look forward to seeing your pup at Shiny Paws in Gardena!</p>
       <div id="booking-ref"></div>
+      <a id="manage-link" href="#" style="display:inline-block;margin-top:1rem;font-size:13px;color:var(--purple-mid);text-decoration:underline">Manage or cancel this booking →</a>
       <button class="close-success-btn" onclick="goBack()">← Back to home</button>
     </div>
 
   </div>
 </div>
 
+
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+<script>
+// Firebase Configuration
+const firebaseConfig = {
+    databaseURL: "https://shiny-paws-default-rtdb.firebaseio.com"
+};
+
+// Initialize Firebase
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    window.db = firebase.database();
+}
+</script>
 
 <script>
 /* ═══════════════════════════════════════════════════════════
@@ -696,6 +729,7 @@ async function pay() {
 
 function showSuccess() {
   // Save the booked date+time to localStorage so it stays greyed out
+  // Use the date value directly from the input (YYYY-MM-DD format)
   const date = document.getElementById('appt-date').value;
   const timeEl = document.querySelector('#appt-time-select');
   const time = timeEl ? timeEl.value : '';
@@ -708,13 +742,17 @@ function showSuccess() {
 
   // Collect booking details
   const ref = '#SP-' + Math.floor(100000 + Math.random() * 900000);
-  const fname    = document.getElementById('fname')  ? document.getElementById('fname').value  : '';
-  const lname    = document.getElementById('lname')  ? document.getElementById('lname').value  : '';
-  const email    = document.getElementById('email')  ? document.getElementById('email').value  : '';
-  const phone    = document.getElementById('phone')  ? document.getElementById('phone').value  : '';
-  const petName  = document.querySelector('input[placeholder="Buddy"]')   ? document.querySelector('input[placeholder="Buddy"]').value   : '';
-  const breed    = document.querySelector('input[placeholder="Poodle"]')  ? document.querySelector('input[placeholder="Poodle"]').value  : '';
-  const notes    = document.querySelector('input[placeholder="Sensitive skin, nervous around dryers..."]') ? document.querySelector('input[placeholder="Sensitive skin, nervous around dryers..."]').value : '';
+  const bookingToken = Array.from(crypto.getRandomValues(new Uint8Array(18))).map(b => b.toString(16).padStart(2,'0')).join('');
+  const fname    = document.getElementById('fname')     ? document.getElementById('fname').value     : '';
+  const lname    = document.getElementById('lname')     ? document.getElementById('lname').value     : '';
+  const email    = document.getElementById('email')     ? document.getElementById('email').value     : '';
+  const phone    = document.getElementById('phone')     ? document.getElementById('phone').value     : '';
+  const address  = document.getElementById('address')   ? document.getElementById('address').value   : '';
+  const city     = document.getElementById('city')      ? document.getElementById('city').value      : '';
+  const zip      = document.getElementById('zip')       ? document.getElementById('zip').value       : '';
+  const petName  = document.getElementById('pet-name')  ? document.getElementById('pet-name').value  : '';
+  const breed    = document.getElementById('pet-breed') ? document.getElementById('pet-breed').value : '';
+  const notes    = document.getElementById('pet-notes') ? document.getElementById('pet-notes').value : '';
   const addonList = Object.keys(addons).join(', ') || 'None';
   const bookingData = {
     reference:    ref,
@@ -732,12 +770,74 @@ function showSuccess() {
     submitted_at: new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})
   };
 
-  // ── FORMSPREE — sends you an email notification ──────────────────
+  // ── SEND CONFIRMATION EMAIL TO CUSTOMER ──────────────────
+  const customerConfirmationEmail = {
+    email: email,
+    name: fname + ' ' + lname,
+    _subject: '✅ Your Shiny Paws Appointment is Confirmed!',
+    _template: 'table',
+    reference: ref,
+    petName: petName,
+    petBreed: breed,
+    service: selName,
+    date: date,
+    time: time,
+    total: document.getElementById('total-val').textContent,
+    notes: notes,
+    businessPhone: '(310) 290-4970',
+    businessEmail: 'info@shinypawsla.com',
+    cancellationPolicy: 'Free cancellation up to 24 hours before your appointment. Cancellations within 24 hours may be subject to a fee.',
+    manageLink: 'https://shinypawsla.com/manage-booking.html?token=' + bookingToken
+  };
+  
+  fetch('https://formspree.io/f/mgopplba', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify(customerConfirmationEmail)
+  }).then(() => {
+    console.log('✅ Confirmation email sent to customer');
+  }).catch(err => console.log('Email error:', err));
+  
+  // ── FORMSPREE — sends you (admin) an email notification ──────────────────
   fetch('https://formspree.io/f/mgopplba', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify(bookingData)
   }).catch(err => console.log('Formspree error:', err));
+
+  // ── FIREBASE — saves booking to admin dashboard database ───────
+  if (window.db) {
+    const firebaseBooking = {
+      customerName: fname + ' ' + lname,
+      customerFirstName: fname,
+      customerLastName: lname,
+      customerEmail: email,
+      customerPhone: phone,
+      customerAddress: address,
+      customerCity: city,
+      customerZip: zip,
+      petName: petName,
+      petBreed: breed,
+      service: selName,
+      date: date,
+      time: time,
+      notes: notes,
+      status: 'pending',
+      bookingRef: ref,
+      bookingToken: bookingToken,
+      createdAt: new Date().toISOString()
+    };
+    window.db.ref('appointments').push(firebaseBooking)
+      .then(() => {
+        console.log('✅ Booking saved to Firebase successfully');
+      })
+      .catch(err => {
+        console.error('❌ Firebase error:', err);
+        console.error('Booking data:', firebaseBooking);
+      });
+  } else {
+    console.warn('⚠️ Firebase not initialized - booking may not be saved to admin dashboard');
+  }
 
   // ── GOOGLE SHEETS — logs every booking to your spreadsheet ───────
   // Step 1: Create a Google Sheet
@@ -769,6 +869,8 @@ function showSuccess() {
   document.getElementById('checkout-body').style.display = 'none';
   document.getElementById('success-screen').style.display = 'block';
   document.getElementById('booking-ref').textContent = 'Booking reference: ' + ref;
+  const ml = document.getElementById('manage-link');
+  if (ml) ml.href = 'manage-booking.html?token=' + bookingToken;
 }
 
 function refreshBookedSlots() {
@@ -793,6 +895,137 @@ function refreshBookedSlots() {
       if (!select.options[i].disabled) { select.selectedIndex = i; break; }
     }
   }
+}
+
+// ── RETURNING CUSTOMER ────────────────────────────────────────────────
+function toggleReturning() {
+  const panel = document.getElementById('rc-panel');
+  const btn   = document.getElementById('rc-toggle');
+  const open  = panel.style.display === 'none' || panel.style.display === '';
+  panel.style.display = open ? 'block' : 'none';
+  btn.style.background = open ? '#ede9ff' : '';
+  if (open) document.getElementById('rc-phone').focus();
+}
+
+function showRcStatus(msg, type) {
+  const el = document.getElementById('rc-status');
+  el.textContent = msg;
+  el.style.color = type === 'error' ? '#c0392b' : type === 'success' ? '#27ae60' : 'var(--purple-soft)';
+}
+
+async function lookupCustomer() {
+  const raw = document.getElementById('rc-phone').value.trim();
+  if (!raw) { showRcStatus('Please enter your phone number', 'error'); return; }
+
+  // Normalize: keep digits only for comparison
+  const normalize = s => s.replace(/\D/g,'');
+  const search = normalize(raw);
+  if (search.length < 7) { showRcStatus('Enter a valid phone number', 'error'); return; }
+
+  const btn = document.getElementById('rc-btn');
+  btn.textContent = '...'; btn.disabled = true;
+  showRcStatus('Looking up your info…', 'info');
+
+  try {
+    if (!window.db) throw new Error('Database unavailable');
+
+    const snap = await window.db.ref('appointments').once('value');
+    const all  = snap.val() || {};
+
+    // Collect all appointments matching this phone
+    const matches = Object.values(all).filter(apt =>
+      apt.customerPhone && normalize(apt.customerPhone).includes(search)
+    );
+
+    if (matches.length === 0) {
+      showRcStatus('No bookings found for that number. Please fill in your details.', 'error');
+      btn.textContent = 'Find →'; btn.disabled = false;
+      return;
+    }
+
+    // Use the most recent booking for customer info
+    matches.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    const latest = matches[0];
+
+    // Fill customer fields
+    if (latest.customerFirstName) {
+      const f = document.getElementById('fname'); if (f) f.value = latest.customerFirstName;
+    } else if (latest.customerName) {
+      const parts = latest.customerName.split(' ');
+      const f = document.getElementById('fname'); if (f) f.value = parts[0] || '';
+      const l = document.getElementById('lname'); if (l) l.value = parts.slice(1).join(' ') || '';
+    }
+    if (latest.customerLastName) {
+      const l = document.getElementById('lname'); if (l) l.value = latest.customerLastName;
+    }
+    if (latest.customerEmail) {
+      const e = document.getElementById('email'); if (e) e.value = latest.customerEmail;
+    }
+    if (latest.customerPhone) {
+      const p = document.getElementById('phone'); if (p) p.value = latest.customerPhone;
+    }
+    if (latest.customerAddress) {
+      const a = document.getElementById('address'); if (a) a.value = latest.customerAddress;
+    }
+    if (latest.customerCity) {
+      const c = document.getElementById('city'); if (c) c.value = latest.customerCity;
+    }
+    if (latest.customerZip) {
+      const z = document.getElementById('zip'); if (z) z.value = latest.customerZip;
+    }
+
+    // Collect unique pets from all their bookings
+    const petMap = {};
+    matches.forEach(apt => {
+      if (apt.petName) {
+        const key = apt.petName.toLowerCase();
+        if (!petMap[key]) petMap[key] = { name: apt.petName, breed: apt.petBreed || '' };
+      }
+    });
+    const pets = Object.values(petMap);
+
+    showRcStatus('✓ Details filled in!', 'success');
+    if (pets.length > 0) showPetSelection(pets);
+    else {
+      document.getElementById('rc-pets').style.display = 'none';
+      updateSum();
+    }
+  } catch (err) {
+    console.error('Lookup error:', err);
+    showRcStatus('Could not look up your info. Please fill in manually.', 'error');
+  }
+
+  btn.textContent = 'Find →'; btn.disabled = false;
+}
+
+function showPetSelection(pets) {
+  const container = document.getElementById('rc-pets');
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--purple-soft);font-weight:500;margin-bottom:7px">Which pet are you booking for?</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      ${pets.map(p => `
+        <button onclick="selectPet('${p.name.replace(/'/g,"\\'")}','${p.breed.replace(/'/g,"\\'")}');event.preventDefault()"
+          style="padding:6px 13px;border:1px solid var(--lilac);border-radius:20px;background:#fff;color:var(--purple);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s"
+          onmouseover="this.style.background='var(--purple)';this.style.color='var(--pink-light)'"
+          onmouseout="this.style.background='#fff';this.style.color='var(--purple)'">
+          ${p.name}${p.breed ? ' · ' + p.breed : ''}
+        </button>
+      `).join('')}
+      <button onclick="document.getElementById('rc-pets').style.display='none';event.preventDefault()"
+        style="padding:6px 13px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--purple-soft);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">
+        + New pet
+      </button>
+    </div>
+  `;
+}
+
+function selectPet(name, breed) {
+  const n = document.getElementById('pet-name');  if (n) n.value = name;
+  const b = document.getElementById('pet-breed'); if (b) b.value = breed;
+  document.getElementById('rc-pets').style.display = 'none';
+  showRcStatus('✓ Pet selected: ' + name, 'success');
+  updateSum();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────

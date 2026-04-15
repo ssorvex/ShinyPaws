@@ -42,10 +42,15 @@ nav{
   font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;
   color:var(--purple);letter-spacing:0.01em;flex-shrink:0;
 }
+@keyframes pawShine {
+  0%, 100% { box-shadow: 0 0 8px rgba(201,168,76,0.4), inset 0 0 8px rgba(255,255,255,0.1); }
+  50% { box-shadow: 0 0 20px rgba(201,168,76,0.8), inset 0 0 12px rgba(255,255,255,0.3), 0 0 30px rgba(201,168,76,0.6); }
+}
 .logo-paw{
   width:38px;height:38px;border-radius:12px;
   background:var(--purple);display:flex;align-items:center;justify-content:center;
   font-size:1.1rem;flex-shrink:0;
+  animation: pawShine 2s ease-in-out infinite;
 }
 .nav-links{display:flex;gap:1.8rem;list-style:none}
 .nav-links a{
@@ -110,6 +115,7 @@ nav{
   display:grid;grid-template-columns:1fr 1fr;align-items:center;
   padding:5rem 5%;position:relative;overflow:hidden;
   background:linear-gradient(135deg,var(--pink-light) 55%,var(--pink) 100%);
+  gap:2rem;
 }
 .blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:0.4;pointer-events:none;z-index:0}
 .b1{width:500px;height:500px;background:var(--lilac);top:-120px;right:-100px}
@@ -136,16 +142,16 @@ nav{
 .hero-stats{display:flex;gap:2.5rem;margin-top:3rem;flex-wrap:wrap}
 .hstat-n{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:600;color:var(--purple);line-height:1}
 .hstat-l{font-size:0.74rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-.hero-visual{position:relative;z-index:2;display:flex;align-items:center;justify-content:center}
+.hero-visual{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;max-width:600px;margin:0 auto;overflow:visible}
 .hero-orb{
-  width:min(440px,90%);aspect-ratio:1;border-radius:50%;
-  background:radial-gradient(circle at 35% 35%,var(--lilac) 0%,var(--lilac-dust) 45%,var(--pink-warm) 100%);
+  width:auto;aspect-ratio:auto;border-radius:0;
+  background:transparent;
   display:flex;align-items:center;justify-content:center;position:relative;
-  box-shadow:0 30px 80px rgba(201,184,255,0.4);
+  box-shadow:none;
   animation:floatY 5s ease-in-out infinite;
 }
-.hero-orb::before{content:'';position:absolute;inset:-12px;border-radius:50%;border:2px dashed rgba(61,32,96,0.15)}
-.orb-img{width:75%;height:75%;object-fit:cover;border-radius:50%}
+.hero-orb::before{content:'';display:none}
+.orb-img{width:100%;height:auto;max-width:100%;object-fit:contain;border-radius:0;transform:scale(1.18)}
 .orb-emoji{font-size:9rem;filter:drop-shadow(0 8px 24px rgba(61,32,96,0.2))}
 .float-pill{
   position:absolute;background:var(--white);border-radius:100px;padding:10px 18px;
@@ -229,8 +235,8 @@ section{padding:6rem 5%;position:relative}
 .gi{border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer}
 .gi:first-child{grid-column:span 2;grid-row:span 2;border-radius:var(--radius-lg)}
 .gi:nth-child(4){grid-column:span 2}
-.gi-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;transition:transform 0.4s ease;position:relative}
-.gi img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;position:absolute;inset:0}
+.gi-inner{width:100%;height:100%;display:none;align-items:center;justify-content:center;font-size:4rem;transition:transform 0.4s ease;position:relative}
+.gi img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s ease;position:relative;z-index:2}
 .gi:hover .gi-inner,.gi:hover img{transform:scale(1.06)}
 .gi-label{position:absolute;bottom:0;left:0;right:0;padding:0.8rem 1rem;background:linear-gradient(to top,rgba(61,32,96,0.75),transparent);color:var(--pink-light);font-size:0.8rem;font-weight:700;letter-spacing:0.05em;opacity:0;transition:opacity 0.3s}
 .gi:hover .gi-label{opacity:1}
@@ -248,7 +254,7 @@ section{padding:6rem 5%;position:relative}
 .ig-tile{
   aspect-ratio:1;border-radius:var(--radius);overflow:hidden;
   position:relative;cursor:pointer;background:var(--pink-warm);
-  display:flex;align-items:center;justify-content:center;font-size:3rem;
+  display:flex;align-items:center;justify-content:center;font-size:3rem;display:block;
 }
 .ig-tile img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform 0.4s}
 .ig-tile:hover img{transform:scale(1.07)}
@@ -408,6 +414,11 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
   .gi:first-child{grid-column:span 1;height:240px}
   .gi:nth-child(4){grid-column:span 1}
   .about-headline{font-size:clamp(1.45rem,6vw,1.75rem)}
+  .hero{grid-template-columns:1fr;min-height:auto;padding:3rem 5%}
+  .hero-visual{max-width:100%;margin:0}
+  .orb-img{width:100%;max-width:100%;transform:scale(1.0)}
+  .float-pill{font-size:0.7rem;padding:6px 12px;position:static;margin-top:0.5rem}
+  .fp1,.fp2{position:static}
 }
 </style>
 </head>
@@ -465,8 +476,7 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
   </div>
   <div class="hero-visual">
     <div class="hero-orb">
-      <!-- REPLACE: swap emoji for <img class="orb-img" src="YOUR_HERO_DOG_PHOTO.jpg" alt="Groomed dog"> -->
-      <div class="orb-emoji">🐩</div>
+      <img class="orb-img" src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663540497088/ImjTeNHuJTTVWjcV.png" alt="Shinny the Pomeranian">
     </div>
     <div class="float-pill fp1"><div class="fp-dot fp-p">✅</div>Certified Groomers</div>
     <div class="float-pill fp2"><div class="fp-dot fp-l">⚡</div>Same-Day Booking</div>
@@ -539,8 +549,7 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
   <div class="blob ab3"></div>
   <div class="about-img-wrap">
     <div class="about-card-big">
-      <!-- REPLACE: <img src="YOUR_TEAM_OR_PET_PHOTO.jpg" alt="Shiny Paws Studio"> -->
-      <div class="ab-emoji">🐶</div>
+      <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/family-dogs-WNFntdSQ9mMwcNKP5y6a6u.webp" alt="Shiny Paws Family of Dogs">
     </div>
     <div class="ab-badge">
       <div class="ab-n">15+</div>
@@ -570,12 +579,12 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
   <p class="ssub">A peek at some of our most recent groom transformations — every pet that leaves our studio is a little masterpiece.</p>
   <div class="gallery-grid">
     <!-- REPLACE each .gi-inner emoji with: <img src="photo.jpg" alt="description"> inside the .gi div -->
-    <div class="gi ga"><div class="gi-inner">🐩</div><div class="gi-label">Poodle — Full Groom</div></div>
-    <div class="gi gb"><div class="gi-inner">🐱</div><div class="gi-label">Persian — Bath & Brush</div></div>
-    <div class="gi gc"><div class="gi-inner">🐕</div><div class="gi-label">Goldendoodle — Scissor Cut</div></div>
-    <div class="gi gd"><div class="gi-inner">🦮</div><div class="gi-label">Retriever — Daycare Day</div></div>
-    <div class="gi ge"><div class="gi-inner">🐶</div><div class="gi-label">Maltese — Full Package</div></div>
-    <div class="gi gf"><div class="gi-inner">🐈</div><div class="gi-label">Domestic — Nail Trim</div></div>
+    <div class="gi ga"><img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/poodle-groom-fixed-8H7KTdzfdmH67CiZonzHth.webp" alt="Poodle — Full Groom"><div class="gi-label">Poodle — Full Groom</div></div>
+    <div class="gi gb"><img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/groomed-goldendoodle-a82RkKMPC2FcUR3qdLtQGW.webp" alt="Goldendoodle — Bath & Brush"><div class="gi-label">Goldendoodle — Bath & Brush</div></div>
+    <div class="gi gc"><img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/groomed-pomeranian-MCb5AszFMFp66xrGSnLmUP.webp" alt="Pomeranian — Scissor Cut"><div class="gi-label">Pomeranian — Scissor Cut</div></div>
+    <div class="gi gd"><img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/maltese-daycare-fixed-GpGnWNjmBeP67WAJsqevAj.webp" alt="Maltese — Daycare Day"><div class="gi-label">Maltese — Daycare Day</div></div>
+    <div class="gi ge"><img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/groomed-shih-tzu-3mJdtoxUHXLVZwQs4RHwVV.webp" alt="Shih Tzu — Full Package"><div class="gi-label">Shih Tzu — Full Package</div></div>
+    <div class="gi gf"><img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/groomed-cockapoo-XtCdsPfR8zyg89LHoeeS79.webp" alt="Cockapoo — Nail Trim"><div class="gi-label">Cockapoo — Nail Trim</div></div>
   </div>
   <p class="gallery-note">📸 Photos will be updated as soon as your real pet photos are ready to upload.</p>
 </section>
@@ -587,19 +596,13 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
     <h2 class="stitle">We're on Instagram</h2>
     <p class="ssub">Follow <strong>@shinypaws</strong> for daily transformations, pet tips, and an exclusive <strong>10% discount</strong> on your next service when you show us your follow at check-in.</p>
   </div>
-  <div class="ig-grid">
-    <!-- REPLACE: swap .ig-tile emoji content with <img src="ig-photo.jpg"> inside each tile -->
-    <!-- When you connect a real Instagram feed, replace this entire grid with the embed code -->
-    <div class="ig-tile ga"><span>🐩</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
-    <div class="ig-tile gb"><span>🐶</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
-    <div class="ig-tile gc"><span>🐱</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
-    <div class="ig-tile gd"><span>🦮</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
-    <div class="ig-tile ge"><span>🐕</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
-    <div class="ig-tile gf"><span>🐈</span><div class="ig-overlay"><span class="ig-heart">🤍</span><span>View Post</span></div></div>
+  <div style="text-align:center;margin:2rem 0;">
+    <p style="color:var(--muted);margin-bottom:1.5rem;font-size:1.1rem;line-height:1.6;">Follow us on Instagram for daily transformations, grooming tips, and behind-the-scenes moments from our studio!</p>
+    <a href="https://instagram.com/shiny_pawsla" target="_blank" class="ig-follow-btn" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#5B2FA0,#7B4FBA);color:white;border-radius:50px;text-decoration:none;font-weight:bold;box-shadow:0 4px 15px rgba(91,47,160,0.3);transition:all 0.3s;">📸 Follow @shiny_pawsla</a>
   </div>
-  <div class="ig-cta-row">
-    <a href="https://instagram.com/YOUR_HANDLE" target="_blank" class="ig-follow-btn">📷 Follow @shinypaws</a>
-    <span class="ig-discount">Show us your follow in-studio for 10% off!</span>
+  <div class="ig-cta-row" style="display:flex;flex-direction:column;align-items:center;gap:1rem;margin-top:2rem;">
+    <a href="https://instagram.com/shiny_pawsla" target="_blank" class="ig-follow-btn" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#5B2FA0,#7B4FBA);color:white;border-radius:50px;text-decoration:none;font-weight:bold;box-shadow:0 4px 15px rgba(91,47,160,0.3);">📸 Follow @shiny_pawsla</a>
+    <span class="ig-discount" style="font-size:0.95rem;color:var(--muted);">✨ Show us your follow in-studio for 10% off your next service!</span>
   </div>
 </section>
 
@@ -770,9 +773,9 @@ footer{background:#28104A;color:rgba(255,255,255,0.58);padding:3rem 5% 1.5rem}
       <div class="ft-brand">🐾 Shiny Paws</div>
       <p class="ft-sub">Family-owned pet grooming studio in Gardena, CA. Premium grooming, daycare, boarding & groomer training — with love and expertise in every session.</p>
       <div class="soc-row">
-        <a href="https://instagram.com/YOUR_HANDLE" target="_blank" class="soc">📷</a>
-        <a href="https://tiktok.com/@YOUR_HANDLE" target="_blank" class="soc">🎵</a>
-        <a href="https://facebook.com/YOUR_PAGE" target="_blank" class="soc">💬</a>
+        <a href="https://instagram.com/shiny_pawsla" target="_blank" class="soc" title="Instagram">📸</a>
+        <a href="https://facebook.com/shinypawsla" target="_blank" class="soc" title="Facebook">👍</a>
+        <a href="https://tiktok.com/@shinypawsla" target="_blank" class="soc" title="TikTok">🎬</a>
       </div>
     </div>
     <div class="ft-col">

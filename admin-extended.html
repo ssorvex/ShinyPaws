@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiny Paws - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #C8B2FF 0%, #E8D5FF 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* LOGIN SCREEN */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #C8B2FF 0%, #E8D5FF 100%);
+            z-index: 1000;
+        }
+
+        #loginScreen.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(61, 32, 96, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            color: #3D2060;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-box p {
+            color: #7B5EA7;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            border: 2px solid #E8D5FF;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: 'Nunito', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: #C9A84C;
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3D2060, #5B3090);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .login-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(61, 32, 96, 0.3);
+        }
+
+        .login-error {
+            color: #d32f2f;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* DASHBOARD */
+        #dashboard {
+            display: none;
+        }
+
+        #dashboard.active {
+            display: block;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(61, 32, 96, 0.1);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #3D2060;
+            font-size: 24px;
+        }
+
+        .logout-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
+
+        /* TAB NAVIGATION */
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #E8D5FF;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(61, 32, 96, 0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #7B5EA7;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .tab-btn:hover {
+            color: #3D2060;
+        }
+
+        .tab-btn.active {
+            color: #3D2060;
+            border-bottom-color: #C9A84C;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(61, 32, 96, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #3D2060;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .date-picker {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .date-picker input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #E8D5FF;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .date-picker button {
+            padding: 10px 20px;
+            background: #C9A84C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .date-picker button:hover {
+            background: #B89A3F;
+        }
+
+        .appointments-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .appointment-item {
+            background: #F5F5F5;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #C9A84C;
+        }
+
+        .appointment-item.completed {
+            opacity: 0.6;
+            border-left-color: #4CAF50;
+        }
+
+        .appointment-item.cancelled {
+            opacity: 0.5;
+            border-left-color: #d32f2f;
+            text-decoration: line-through;
+        }
+
+        .appointment-time {
+            font-weight: 700;
+            color: #3D2060;
+            font-size: 16px;
+        }
+
+        .appointment-details {
+            font-size: 14px;
+            color: #7B5EA7;
+            margin-top: 5px;
+        }
+
+        .appointment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .appointment-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-complete {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-complete:hover {
+            background: #45a049;
+        }
+
+        .btn-cancel {
+            background: #d32f2f;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #b71c1c;
+        }
+
+        .btn-delete {
+            background: #FF9800;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #E68900;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #3D2060;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #E8D5FF;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #C9A84C;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3D2060, #5B3090);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(61, 32, 96, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7B5EA7;
+            padding: 40px 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #D1ECF1;
+            color: #0C5460;
+        }
+
+        .status-cancelled {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .success-message {
+            background: #D4EDDA;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .error-message {
+            background: #F8D7DA;
+            color: #721C24;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* IMAGE MANAGER */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .image-item {
+            background: #F5F5F5;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #E8D5FF;
+            transition: all 0.3s;
+        }
+
+        .image-item:hover {
+            border-color: #C9A84C;
+            box-shadow: 0 4px 12px rgba(61, 32, 96, 0.15);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background: #E8D5FF;
+        }
+
+        .image-info {
+            padding: 10px;
+            font-size: 12px;
+            color: #7B5EA7;
+            word-break: break-all;
+        }
+
+        /* CONTENT EDITOR */
+        .content-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .content-section {
+            background: #F5F5F5;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #E8D5FF;
+        }
+
+        .content-section h3 {
+            color: #3D2060;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .content-field {
+            margin-bottom: 12px;
+        }
+
+        .content-field label {
+            display: block;
+            color: #3D2060;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .content-field input,
+        .content-field textarea {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #E8D5FF;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .content-field textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .content-field input:focus,
+        .content-field textarea:focus {
+            outline: none;
+            border-color: #C9A84C;
+            background: #FFF9E6;
+        }
+
+        .save-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .save-btn:hover {
+            background: #45a049;
+        }
+
+        /* PRICING EDITOR */
+        .pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .pricing-table th,
+        .pricing-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #E8D5FF;
+        }
+
+        .pricing-table th {
+            background: #F5F5F5;
+            color: #3D2060;
+            font-weight: 700;
+        }
+
+        .pricing-table input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #E8D5FF;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .pricing-table input:focus {
+            outline: none;
+            border-color: #C9A84C;
+        }
+
+        .time-slot {
+            padding: 8px;
+            border: 2px solid #E8D5FF;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .time-slot:hover {
+            border-color: #C9A84C;
+            background: #FFF9E6;
+        }
+
+        .time-slot.selected {
+            background: #3D2060;
+            color: white;
+            border-color: #3D2060;
+        }
+
+        .time-slot.booked {
+            background: #E0E0E0;
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* DRAG AND DROP STYLES */
+        .image-item[draggable="true"] {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .image-item[draggable="true"]:active {
+            cursor: grabbing;
+        }
+
+        .image-item[draggable="true"]:hover {
+            box-shadow: 0 8px 20px rgba(61, 32, 96, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .availability-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1>🐾 Shiny Paws</h1>
+            <p>Admin Dashboard</p>
+            <input type="password" id="passwordInput" placeholder="Enter admin password" />
+            <button type="button" onclick="login()">Login</button>
+            <div class="login-error" id="loginError">Invalid password</div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+        <div class="container">
+            <div class="header">
+                <h1>🐾 Shiny Paws Admin</h1>
+                <div class="header-buttons">
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+
+            <!-- TAB NAVIGATION -->
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('bookings')">📅 Bookings</button>
+                <button class="tab-btn" onclick="switchTab('images')">🖼️ Images</button>
+                <button class="tab-btn" onclick="switchTab('content')">✏️ Content</button>
+                <button class="tab-btn" onclick="switchTab('pricing')">💰 Pricing</button>
+            </div>
+
+            <!-- BOOKINGS TAB -->
+            <div id="bookings" class="tab-content active">
+                <div class="dashboard-grid">
+                    <!-- APPOINTMENTS LIST -->
+                    <div class="card">
+                        <h2>Appointments</h2>
+                        <div class="date-picker">
+                            <input type="date" id="dateFilter" />
+                            <button onclick="filterByDate()">Filter</button>
+                        </div>
+                        <div class="success-message" id="successMessage"></div>
+                        <div class="error-message" id="errorMessage"></div>
+                        <div class="appointments-list" id="appointmentsList">
+                            <div class="empty-state">
+                                <p>No appointments yet</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ADD BOOKING FORM -->
+                    <div class="card">
+                        <h2>Add Phone Booking</h2>
+                        <form id="bookingForm" onsubmit="addBooking(event)">
+                            <div class="form-group">
+                                <label>Customer Name *</label>
+                                <input type="text" id="customerName" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phone *</label>
+                                <input type="tel" id="customerPhone" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="customerEmail" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Pet Name *</label>
+                                <input type="text" id="petName" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Breed</label>
+                                <input type="text" id="petBreed" />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Service *</label>
+                                <select id="service" required>
+                                    <option value="">Select service</option>
+                                    <option value="Bath & Brush">Bath & Brush - 45 min ($60)</option>
+                                    <option value="Bath & Trim">Bath & Trim - 60 min ($85)</option>
+                                    <option value="Full Grooming">Full Grooming - 90 min ($100)</option>
+                                    <option value="Daycare">Daycare - Full Day ($45)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Date *</label>
+                                <input type="date" id="appointmentDate" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Time *</label>
+                                <div class="availability-slots" id="timeSlots"></div>
+                                <input type="hidden" id="selectedTime" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label>Notes</label>
+                                <textarea id="notes"></textarea>
+                            </div>
+
+                            <button type="submit" class="submit-btn">Create Booking</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IMAGES TAB -->
+            <div id="images" class="tab-content">
+                <div class="card">
+                    <h2>🖼️ Image Manager</h2>
+                    <p style="color: #7B5EA7; margin-bottom: 15px;">Upload and manage website images</p>
+                    
+                    <div class="form-group">
+                        <label>Select Image Section</label>
+                        <select id="imageSection" onchange="loadSectionImages()">
+                            <option value="gallery">Gallery Images</option>
+                            <option value="hero">Hero Images</option>
+                            <option value="about">About Section</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload New Image</label>
+                        <input type="file" id="imageUpload" accept="image/*" />
+                    </div>
+
+                    <button class="submit-btn" onclick="uploadImage()">Upload Image</button>
+                    <div class="success-message" id="imageSuccessMessage"></div>
+                    <div class="error-message" id="imageErrorMessage"></div>
+
+                    <div class="image-grid" id="imageGrid"></div>
+                </div>
+            </div>
+
+            <!-- CONTENT TAB -->
+            <div id="content" class="tab-content">
+                <div class="card">
+                    <h2>✏️ Edit Content</h2>
+                    <p style="color: #7B5EA7; margin-bottom: 15px;">Edit page text and descriptions</p>
+                    
+                    <div class="content-sections" id="contentSections"></div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="save-btn" onclick="saveAllContent()" style="flex: 1;">💾 Save Locally</button>
+                        <button class="save-btn" onclick="updateContentOnWebsiteViaGitHub()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRICING TAB -->
+            <div id="pricing" class="tab-content">
+                <div class="card">
+                    <h2>💰 Pricing Management</h2>
+                    <p style="color: #7B5EA7; margin-bottom: 15px;">Update service prices</p>
+                    
+                    <table class="pricing-table">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th>Duration</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pricingTable"></tbody>
+                    </table>
+                    
+                    <div class="success-message" id="pricingSuccessMessage"></div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="save-btn" onclick="savePricing()" style="flex: 1;">💾 Save Locally</button>
+                        <button class="save-btn" onclick="updatePricingOnWebsiteViaGitHub()" style="flex: 1; background: #2196F3;">🌐 Update Website</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GitHub Integration Scripts -->
+    <script src="github-api.js"></script>
+    <script src="html-generator.js"></script>
+    <script src="file-manager.js"></script>
+    
+    <!-- Firebase (compat version for plain HTML) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script src="admin.js"></script>
+    <script src="admin-extended.js"></script>
+    
+    <!-- Initialize GitHub setup check on page load -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check GitHub setup when dashboard is shown
+            const loginScreen = document.getElementById('loginScreen');
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class' && !loginScreen.classList.contains('hidden')) {
+                        checkGitHubSetup();
+                    }
+                });
+            });
+            observer.observe(loginScreen, { attributes: true });
+        });
+    </script>
+</body>
+</html>
