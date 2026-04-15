@@ -149,7 +149,7 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
   opacity:0;pointer-events:none;transform:translateX(-50%) scale(.88);
   transition:opacity .3s,transform .3s cubic-bezier(.34,1.56,.64,1);}
 #tour-bubble.show{opacity:1;transform:translateX(-50%) scale(1);}
-#tour-bubble::before{content:'🐾';font-size:1.1em;flex-shrink:0;}
+#tour-bubble::before{content:'';display:none;}
 #tour-bubble::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
   width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:10px solid #EDE0FF;}
 #tour-lock{position:fixed;inset:0;z-index:55;background:transparent;pointer-events:none;display:none;}
@@ -272,10 +272,26 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
 
 /* Subtle ripple on zone area */
 .zone::before{
-  content:'';position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle,rgba(201,184,255,.18) 0%,transparent 70%);
-  animation:zoneRipple 2.5s ease-in-out infinite;
+  content:'';position:absolute;inset:-12%;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,184,255,.42) 0%,rgba(201,184,255,.18) 40%,transparent 72%);
+  animation:zoneHalo 2.2s ease-in-out infinite;
   pointer-events:none;
+  z-index:-1;
+}
+.zone::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:2.5px solid rgba(201,184,255,.85);
+  box-shadow:0 0 18px rgba(201,184,255,.55),inset 0 0 12px rgba(201,184,255,.4);
+  animation:zoneRing 2.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes zoneHalo{
+  0%,100%{transform:scale(1);opacity:.55;}
+  50%{transform:scale(1.18);opacity:.95;}
+}
+@keyframes zoneRing{
+  0%,100%{transform:scale(1);opacity:.55;box-shadow:0 0 12px rgba(201,184,255,.4),inset 0 0 8px rgba(201,184,255,.3);}
+  50%{transform:scale(1.08);opacity:1;box-shadow:0 0 26px rgba(201,184,255,.85),0 0 50px rgba(201,184,255,.4),inset 0 0 16px rgba(201,184,255,.5);}
 }
 #z-contact::before  {animation-delay:0s;}
 #z-daycare::before  {animation-delay:.65s;}
@@ -389,24 +405,102 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
   border-radius:13px;margin:0 2px;}
 .bnav:hover{background:rgba(201,184,255,.2);}.bnav:active{transform:scale(.9);}
 .bnav-icon{font-size:clamp(1.4rem,4vw,1.65rem);line-height:1;}
-.bnav-label{font-size:clamp(.62rem,1.8vw,.75rem);font-weight:800;color:var(--purple);letter-spacing:.04em;text-transform:uppercase;}
+.bnav-label{font-size:clamp(.72rem,2vw,.88rem);font-weight:800;color:var(--purple);letter-spacing:.06em;text-transform:uppercase;}
 .bnav-div{width:1.5px;background:linear-gradient(to bottom,transparent,rgba(201,184,255,.5),transparent);align-self:stretch;margin:8px 0;flex-shrink:0;}
 @media(max-width:480px){
-  #pixel{top:0!important;padding-top:44px!important;justify-content:center!important;}
-  .room-wrap{
-    width:92vw!important;
-    height:auto!important;
-    max-width:92vw!important;
-    margin-left:0!important;
-    display:block!important;
-    position:relative!important;
-    overflow:hidden!important;
-  }
-  #m-room{height:16.8%!important;}#shinny{height:clamp(230px,50vw,320px);top:54%!important;}
+  /* Cards, intro tour bubble — keep these, they're useful */
   .card{padding:16px 14px;}.svc-grid{gap:7px;}
-  #tour-bubble{font-size:.68rem;padding:8px 14px 8px 11px;}}
+  #tour-bubble{font-size:.68rem;padding:8px 14px 8px 11px;}
+  /* Intro Shinny smaller on phones */
+  #shinny{height:clamp(230px,50vw,320px);top:54%!important;}
+}
 
 @supports(-webkit-touch-callout:none){#intro,#pixel{-webkit-transform:translateZ(0);transform:translateZ(0);}}
+
+/* ═══════════════════════════════════════
+   MOBILE OPTIMIZATION
+═══════════════════════════════════════ */
+html,body{
+  /* Use small viewport units (svh) where supported — these don't change when iOS URL bar shows/hides */
+  height:100vh;height:100svh;
+  overscroll-behavior:none;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+/* Top bar respects notch */
+#topbar{
+  height:calc(44px + env(safe-area-inset-top,0px));
+  padding-top:env(safe-area-inset-top,0px);
+}
+/* Bottom nav respects home indicator */
+#bottom-nav{
+  padding-bottom:max(14px,env(safe-area-inset-bottom,0px));
+}
+/* Pixel world fills the space between top bar and bottom nav, using svh so it doesn't jump on iOS */
+#pixel{
+  top:calc(44px + env(safe-area-inset-top,0px));
+  bottom:calc(64px + env(safe-area-inset-bottom,0px));
+  height:auto;
+  width:100vw;
+}
+/* Room image — portrait map (1024:1536 ≈ 2:3) fills mobile screen properly.
+   .room-wrap is constrained to the map's aspect ratio so zones positioned
+   in % of the wrap always align with the visible image. */
+.room-wrap{
+  position:relative !important;
+  inset:auto !important;
+  aspect-ratio:1024/1536;
+  /* Take whichever dimension is smaller relative to map ratio */
+  height:min(100%, calc(100vw * 1536 / 1024)) !important;
+  width:auto !important;
+  max-width:100% !important;
+  max-height:100% !important;
+  margin:0 auto !important;
+  display:block !important;
+}
+/* Center the room inside #pixel ONLY when pixel is shown */
+#pixel.show{
+  align-items:center !important;
+  justify-content:center !important;
+}
+#room-img{
+  width:100%;height:100%;
+  object-fit:fill;
+  display:block;
+}
+/* Shinny sprite size — proportional to room (not viewport) so she scales with the map */
+#m-room{
+  height:18%;
+  width:auto;
+  aspect-ratio:1;
+}
+
+@media(max-width:768px){
+  /* Speech bubble narrower on mobile */
+  #shinny-bubble{max-width:min(82vw,260px) !important;font-size:.78rem !important;padding:8px 14px !important;}
+  /* Bottom nav buttons get more space */
+  .bnav{padding:6px 4px 4px;}
+  .bnav-icon{font-size:1.5rem;}
+  .bnav-label{font-size:.66rem;}
+  .bnav-div{margin:10px 0;}
+  /* Skip tour button positioned safely */
+  #shinny-tour-skip{top:calc(48px + env(safe-area-inset-top,0px)) !important;}
+}
+@media(max-width:480px){
+  /* On very small screens hide the divider lines for more button space */
+  .bnav-div{width:1px;opacity:.4;}
+  .bnav{margin:0 1px;}
+}
+/* Landscape mobile — keep things accessible */
+@media(max-width:900px) and (orientation:landscape){
+  #pixel{
+    bottom:calc(56px + env(safe-area-inset-bottom,0px));
+  }
+  #bottom-nav{min-height:54px;}
+  .bnav{padding:4px;}
+  .bnav-icon{font-size:1.2rem;}
+  .bnav-label{font-size:.6rem;}
+}
 </style>
   <!-- DISABLED: 3D model-viewer script - using 2D assets only
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js" defer></script>
@@ -423,15 +517,15 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
   <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
 </div>
 <div id="bottom-nav">
-  <button class="bnav" onclick="dialPhone()"><span class="bnav-icon">📞</span><span class="bnav-label">Call</span></button>
+  <button class="bnav" onclick="goToZone('contact')"><span class="bnav-icon">📞</span><span class="bnav-label">Call</span></button>
   <div class="bnav-div"></div>
-  <button class="bnav" onclick="openZone('daycare')"><span class="bnav-icon">🐕</span><span class="bnav-label">Daycare</span></button>
+  <button class="bnav" onclick="goToZone('daycare')"><span class="bnav-icon">🐕</span><span class="bnav-label">Daycare</span></button>
   <div class="bnav-div"></div>
-  <button class="bnav" onclick="openZone('grooming')"><span class="bnav-icon">✂️</span><span class="bnav-label">Grooming</span></button>
+  <button class="bnav" onclick="goToZone('grooming')"><span class="bnav-icon">✂️</span><span class="bnav-label">Grooming</span></button>
   <div class="bnav-div"></div>
-  <button class="bnav" onclick="window.location.href='shinypaws-checkout.html'"><span class="bnav-icon">📅</span><span class="bnav-label">Book</span></button>
+  <button class="bnav" onclick="goToZone('booking')"><span class="bnav-icon">📅</span><span class="bnav-label">Book</span></button>
   <div class="bnav-div"></div>
-  <button class="bnav" onclick="window.location.href='/studio'"><span class="bnav-icon">🐾</span><span class="bnav-label">About Us</span></button>
+  <button class="bnav" onclick="goToZone('about')"><span class="bnav-icon">🐾</span><span class="bnav-label">About Us</span></button>
 </div>
 <div id="intro">
   <div class="headline">
@@ -469,7 +563,7 @@ html,body{overflow:hidden;width:100vw;height:100vh;height:-webkit-fill-available
 <div id="tour-bubble"></div>
 <div id="tour-lock"></div>
 <div id="skip-wrap" style="position:fixed;top:44px;right:10px;z-index:62;display:none;align-items:center;justify-content:center;">
-  <button id="skip-btn" onclick="skipTour()">SKIP TOUR ✕</button>
+  <button id="skip-btn" onclick="skipTour()">SKIP TOUR</button>
 </div>
 <!-- OVERLAYS -->
 <div class="overlay" id="ov-contact">
@@ -547,8 +641,18 @@ var SRC = {
   wave:     "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/LilacPomeranianwavingwithcharm_1adfe548.png",
   sit:      "https://d2xsxph8kpxj0f.cloudfront.net/310519663540497088/oGnmMXocsZqm75fQNMS9yu/ChatGPTImageApr11,2026,04_04_00AM_d9b3c335.png"
 };
-var HOME_X = "42%";
-var HOME_Y = "62%";
+
+// Preload all Shinny sprites into browser cache so src swaps don't cause layout glitches
+var _shinnyPreload = {};
+(function preloadShinnySprites() {
+  ['runRight','runLeft','sit','wave'].forEach(function(k){
+    var im = new Image();
+    im.src = SRC[k];
+    _shinnyPreload[k] = im;
+  });
+})();
+var HOME_X = "50%";
+var HOME_Y = "92%";
 
 window.addEventListener('load', function() {
   setTimeout(function() {
@@ -565,13 +669,15 @@ function startSparkles(el) {
   sparkleInt = setInterval(function() {
     var rect = el.getBoundingClientRect();
     if (!rect.width) return;
-    var x = rect.right - rect.width * 0.1 + (Math.random() * 16 - 8);
-    var y = rect.top + rect.height * 0.32 + (Math.random() * 26 - 13);
+    // Spawn BEHIND Shinny — on her trailing/left side, not in front
+    var x = rect.left + rect.width * 0.15 + (Math.random() * 22 - 11);
+    var y = rect.top + rect.height * 0.45 + (Math.random() * 36 - 18);
     var span = document.createElement('span');
     span.className = 'intro-sparkle';
     span.style.left = x + 'px';
     span.style.top  = y + 'px';
-    var rx = (Math.random() * 44 - 22) + 'px';
+    span.style.zIndex = '11'; // below #shinny which is z-index 12
+    var rx = (Math.random() * 50 - 25) + 'px';
     var ry = -(Math.random() * 32 + 6) + 'px';
     span.style.setProperty('--rx', rx);
     span.style.setProperty('--ry', ry);
@@ -587,53 +693,76 @@ function stopSparkles() { clearInterval(sparkleInt); sparkleInt = null; }
 function positionBubble() {
   var shinny = document.getElementById('shinny');
   var bubble = document.getElementById('bubble');
+  if (!shinny || !bubble) return;
   var rect   = shinny.getBoundingClientRect();
   if (!rect.width) return;
-  bubble.style.top  = Math.max(60, rect.top - 60) + 'px';
+  // Position the bubble well above Shinny's head with breathing room
+  var br = bubble.getBoundingClientRect();
+  var bubbleH = br.height || 44;
+  // Place the bubble's BOTTOM ~36px above Shinny's top, so the tail clearly clears her head
+  var top = rect.top - bubbleH - 36;
+  bubble.style.top  = Math.max(20, top) + 'px';
   bubble.style.left = (rect.left + rect.width / 2) + 'px';
+}
+
+// JS-driven horizontal animator — bypasses CSS transition glitches
+function animateLeft(el, fromVW, toVW, durationMs, onDone) {
+  el.style.transition = 'none';
+  el.style.left = fromVW + 'vw';
+  void el.offsetWidth;
+  var startTime = null;
+  function tick(t) {
+    if (startTime === null) startTime = t;
+    var p = Math.min(1, (t - startTime) / durationMs);
+    // Linear — constant speed run, no slow-down at the end
+    el.style.left = (fromVW + (toVW - fromVW) * p) + 'vw';
+    if (p < 1) {
+      requestAnimationFrame(tick);
+    } else if (onDone) {
+      onDone();
+    }
+  }
+  requestAnimationFrame(tick);
 }
 
 function startIntro() {
   var intro  = document.getElementById('intro');
   var shinny = document.getElementById('shinny');
   var nav    = document.getElementById('bottom-nav');
-  intro.classList.add('show');
-  nav.classList.add('show');
+  document.body.classList.add('intro-showing');
+  if (intro) intro.classList.add('show');
+  if (nav) nav.classList.add('show');
+  if (!shinny) { return; }
   shinny.src = SRC.runRight;
-  shinny.style.transition = 'none';
-  shinny.style.left = '-20vw';
-  requestAnimationFrame(function() {
-    requestAnimationFrame(function() {
-      shinny.style.transition = 'left 0.9s cubic-bezier(0.22,1,0.36,1)';
-      shinny.style.left = '50%';
-      startSparkles(shinny);
-      setTimeout(function() {
-        stopSparkles();
-        shinny.src = SRC.sit;
-        shinny.style.transition = 'none';
-        setTimeout(function() {
-          shinny.src = SRC.wave;
-          positionBubble();
-          setTimeout(function() { document.getElementById('bubble').classList.add('show'); }, 200);
-          setTimeout(function() { document.getElementById('go-btn').classList.add('show'); }, 750);
-        }, 520);
-      }, 940);
-    });
+  // Animate from off-screen left (-20vw) to center (50vw) — fast and snappy
+  animateLeft(shinny, -20, 50, 700, function() {
+    shinny.src = SRC.sit;
+    setTimeout(function() {
+      shinny.src = SRC.wave;
+      positionBubble();
+      setTimeout(function() { var b=document.getElementById('bubble'); if(b) b.classList.add('show'); }, 200);
+      setTimeout(function() { var g=document.getElementById('go-btn'); if(g) g.classList.add('show'); }, 750);
+    }, 520);
   });
+  startSparkles(shinny);
+  setTimeout(stopSparkles, 740);
 }
 
 function letsGo() {
   var shinny = document.getElementById('shinny');
-  document.getElementById('go-btn').classList.remove('show');
-  document.getElementById('bubble').classList.remove('show');
+  var go = document.getElementById('go-btn'); if (go) go.classList.remove('show');
+  var bub = document.getElementById('bubble'); if (bub) bub.classList.remove('show');
   var intro = document.getElementById('intro');
-  shinny.src = SRC.runRight;
-  shinny.style.transition = 'left 0.55s cubic-bezier(0.76,0,0.24,1)';
-  shinny.style.left = '130vw';
-  setTimeout(function() {
-    intro.style.opacity = '0'; intro.style.pointerEvents = 'none';
-    setTimeout(function() { intro.style.display = 'none'; showPixelWorld(); }, 350);
-  }, 580);
+  if (shinny) {
+    shinny.src = SRC.runRight;
+    animateLeft(shinny, 50, 130, 800, function() {
+      if (intro) { intro.style.opacity = '0'; intro.style.pointerEvents = 'none'; }
+      setTimeout(function() { if (intro) intro.style.display = 'none'; showPixelWorld(); }, 350);
+    });
+  } else {
+    if (intro) { intro.style.opacity = '0'; intro.style.pointerEvents = 'none'; }
+    setTimeout(function() { if (intro) intro.style.display = 'none'; showPixelWorld(); }, 350);
+  }
 }
 
 function showPixelWorld() {
@@ -642,7 +771,7 @@ function showPixelWorld() {
   // setTimeout(startTour, 600);
 }
 
-function moveShinny(mr, targetX, targetY, slowMode) {
+function moveShinny(mr, targetX, targetY, slowMode, forcedSprite) {
   var curL = parseFloat(mr.style.left) || parseFloat(HOME_X);
   var tarL = parseFloat(targetX);
   var dist = Math.abs(tarL - curL);
@@ -654,14 +783,17 @@ function moveShinny(mr, targetX, targetY, slowMode) {
   mr.style.transition = 'left ' + dur + 's cubic-bezier(.4,0,.2,1), top ' + dur + 's cubic-bezier(.4,0,.2,1)';
   mr.style.left = targetX;
   mr.style.top  = targetY;
+  // Switch to sitting pose when arrival animation completes
+  if (mr._sitTimer) clearTimeout(mr._sitTimer);
+  mr._sitTimer = setTimeout(function(){ mr.src = SRC.sit; }, dur * 1000 + 20);
   return dur;
 }
 
 var TOUR = [
-  { zone:'contact',  mx:'11%', mt:'70%', msg:'👋 Tap the DOOR to contact us!',             wait:2800 },
-  { zone:'daycare',  mx:'58%', mt:'62%', msg:'🐕 Tap the KENNELS for Day Care info!',       wait:2800 },
-  { zone:'grooming', mx:'35%', mt:'74%', msg:'✂️ Tap the HYDRANT for Grooming!',             wait:2800 },
-  { zone:'booking',  mx:'66%', mt:'77%', msg:'📅 Tap the DESK to Book!',                    wait:2800 }
+  { zone:'contact',  mx:'22%', mt:'80%', msg:'Tap the DOOR to contact us!',             wait:2800 },
+  { zone:'daycare',  mx:'72%', mt:'80%', msg:'Tap the KENNELS for Day Care info!',       wait:2800 },
+  { zone:'grooming', mx:'22%', mt:'34%', msg:'Tap the HYDRANT for Grooming!',             wait:2800 },
+  { zone:'booking',  mx:'50%', mt:'60%', msg:'Tap the DESK to Book!',                    wait:2800 }
 ];
 var tourActive = false, tourTimers = [];
 
@@ -670,7 +802,7 @@ function startTour() {
   document.getElementById('tour-lock').classList.add('active');
   var sw=document.getElementById('skip-wrap'); if(sw) sw.style.display='flex'; document.getElementById('skip-btn').classList.add('show');
   document.getElementById('tb-hint').textContent = 'TOUR IN PROGRESS...';
-  showTourBubble("Follow me! I'll show you around 🐾");
+  showTourBubble("Follow me! I'll show you around");
   tourTimers.push(setTimeout(function() { runTourStep(0); }, 2000));
 }
 function runTourStep(i) {
@@ -695,7 +827,7 @@ function endTour() {
   var mr = document.getElementById('m-room');
   moveShinny(mr, '51%', '52%', false);
   setTimeout(function() { mr.src = SRC.wave; mr.style.transition = 'none'; }, 700);
-  showTourBubble("Now it's YOUR turn! Tap any glowing area! 👆");
+  showTourBubble("Now it's YOUR turn! Tap any glowing area!");
   setTimeout(function() {
     hideTourBubble();
     document.getElementById('tour-lock').classList.remove('active');
@@ -733,6 +865,245 @@ function showTourBubble(text) {
   }, 80);
 }
 function hideTourBubble() { document.getElementById('tour-bubble').classList.remove('show'); }
+
+/* ───────────────────────────────────────────
+   SHINNY GAME-WORLD SPEECH BUBBLE
+   Floats above Shinny in the pixel world,
+   follows her as she moves, cycles reminder messages.
+─────────────────────────────────────────── */
+var SHINNY_MESSAGES = [
+  "Wuff wuff! :)",
+  "Psst… tap a glowing circle!",
+  "Don't be shy — pick a circle!"
+];
+var _shinnyBubbleEl = null;
+var _shinnyBubbleInt = null;
+var _shinnyBubbleFollowRAF = null;
+var _shinnyBubbleMsgIdx = 0;
+
+function ensureShinnyBubble() {
+  if (_shinnyBubbleEl) return _shinnyBubbleEl;
+  var b = document.createElement('div');
+  b.id = 'shinny-bubble';
+  b.style.cssText =
+    'position:fixed;z-index:70;pointer-events:none;' +
+    'background:linear-gradient(135deg,#FFFAFE,#F2E8FF,#EDE0FF);' +
+    'color:#3D2060;border-radius:22px;' +
+    'padding:9px 16px;font-family:Nunito,sans-serif;font-weight:800;' +
+    'font-size:clamp(.72rem,1.6vw,.92rem);' +
+    'border:1.5px solid rgba(201,184,255,.85);' +
+    'box-shadow:0 6px 22px rgba(61,32,96,.22),inset 0 1px 0 rgba(255,255,255,.95);' +
+    'max-width:min(70vw,260px);text-align:center;white-space:normal;' +
+    'opacity:0;transform:translate(-50%,-100%) scale(.85);' +
+    'transition:opacity .35s ease,transform .35s cubic-bezier(.34,1.56,.64,1);' +
+    'top:0;left:0;';
+  // little tail
+  var tail = document.createElement('div');
+  tail.style.cssText =
+    'position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);' +
+    'width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;' +
+    'border-top:10px solid #EDE0FF;';
+  b.appendChild(tail);
+  document.body.appendChild(b);
+  _shinnyBubbleEl = b;
+  return b;
+}
+
+function positionShinnyBubble() {
+  var b = _shinnyBubbleEl;
+  var mr = document.getElementById('m-room');
+  if (!b || !mr) return;
+  var rect = mr.getBoundingClientRect();
+  if (!rect.width) return;
+  var cx = rect.left + rect.width / 2;
+  // More breathing room between bubble and Shinny's head
+  var top = Math.max(50, rect.top - 32);
+  b.style.left = cx + 'px';
+  b.style.top  = top + 'px';
+}
+
+function followShinnyBubble() {
+  positionShinnyBubble();
+  _shinnyBubbleFollowRAF = requestAnimationFrame(followShinnyBubble);
+}
+
+function showShinnyBubble(msg) {
+  var b = ensureShinnyBubble();
+  // Update text (preserve the tail child)
+  b.childNodes.forEach(function(n){ if (n.nodeType === 3) n.remove(); });
+  b.insertBefore(document.createTextNode(msg), b.firstChild);
+  positionShinnyBubble();
+  requestAnimationFrame(function() {
+    b.style.opacity = '1';
+    b.style.transform = 'translate(-50%,-100%) scale(1)';
+  });
+}
+
+function hideShinnyBubble() {
+  var b = _shinnyBubbleEl;
+  if (!b) return;
+  b.style.opacity = '0';
+  b.style.transform = 'translate(-50%,-100%) scale(.85)';
+}
+
+function startShinnyChatter() {
+  ensureShinnyBubble();
+  if (_shinnyBubbleFollowRAF) cancelAnimationFrame(_shinnyBubbleFollowRAF);
+  followShinnyBubble();
+  _shinnyBubbleMsgIdx = 0;
+  if (_shinnyBubbleInt) clearInterval(_shinnyBubbleInt);
+  // Pattern: show first message after a small beat, hide after ~4s,
+  // then wait ~6s of silence, then show next message, repeat.
+  var SPEAK_MS = 4000;   // how long the bubble stays visible
+  var SILENCE_MS = 6000; // gap between messages
+  function speakNext() {
+    if (!_shinnyBubbleEl) return;
+    showShinnyBubble(SHINNY_MESSAGES[_shinnyBubbleMsgIdx]);
+    _shinnyBubbleInt = setTimeout(function() {
+      hideShinnyBubble();
+      _shinnyBubbleMsgIdx = (_shinnyBubbleMsgIdx + 1) % SHINNY_MESSAGES.length;
+      _shinnyBubbleInt = setTimeout(speakNext, SILENCE_MS);
+    }, SPEAK_MS);
+  }
+  // Initial delay before first message so it doesn't appear instantly
+  _shinnyBubbleInt = setTimeout(speakNext, 800);
+}
+
+function stopShinnyChatter() {
+  if (_shinnyBubbleInt) { clearTimeout(_shinnyBubbleInt); clearInterval(_shinnyBubbleInt); _shinnyBubbleInt = null; }
+  if (_shinnyBubbleFollowRAF) { cancelAnimationFrame(_shinnyBubbleFollowRAF); _shinnyBubbleFollowRAF = null; }
+  hideShinnyBubble();
+}
+
+/* ───────────────────────────────────────────
+   FIRST-VISIT GUIDED TOUR
+   Shinny walks to each station and explains it.
+─────────────────────────────────────────── */
+var SHINNY_TOUR = [
+  { zone:'grooming', msg:"This is Grooming — where the magic floof happens!" },
+  { zone:'about',    msg:"About Us! Read all about my humans (they're cool)." },
+  { zone:'daycare',  msg:"Daycare HQ. Translation: nonstop zoomies." },
+  { zone:'contact',  msg:"Need a human? Tap here, they'll pick up. Promise." },
+  { zone:'booking',  msg:"Ready for the spa day of dreams? Tap Book Now!" }
+];
+var _tourActive = false;
+var _tourTimers = [];
+var _tourSkipBtn = null;
+
+function ensureSkipButton() {
+  if (_tourSkipBtn) return _tourSkipBtn;
+  var btn = document.createElement('button');
+  btn.id = 'shinny-tour-skip';
+  btn.textContent = 'Skip Tour';
+  btn.style.cssText =
+    'position:fixed;top:54px;right:14px;z-index:80;' +
+    'background:linear-gradient(135deg,#FFFAFE,#EDE0FF);' +
+    'color:#3D2060;border:1.5px solid rgba(201,184,255,.85);' +
+    'border-radius:30px;padding:8px 18px;' +
+    'font-family:Nunito,sans-serif;font-weight:800;font-size:.72rem;' +
+    'letter-spacing:.08em;text-transform:uppercase;cursor:pointer;' +
+    'box-shadow:0 6px 22px rgba(61,32,96,.22);' +
+    'opacity:0;transform:translateY(-10px);' +
+    'transition:opacity .3s,transform .3s;';
+  btn.onclick = stopShinnyTour;
+  document.body.appendChild(btn);
+  _tourSkipBtn = btn;
+  return btn;
+}
+
+function tourAnimateMove(zone, onDone) {
+  var z = ZONES[zone];
+  var mr = document.getElementById('m-room');
+  if (!z || !mr) { if (onDone) onDone(); return; }
+  hideShinnyBubble();
+  mr.src = (z.side === 'right') ? SRC.runRight : SRC.runLeft;
+  animateRoomShinny(z.mx, z.my, 1100, function() {
+    mr.src = SRC.sit;
+    if (onDone) onDone();
+  });
+}
+
+function runTourStep(i) {
+  if (!_tourActive) return;
+  if (i >= SHINNY_TOUR.length) { finishShinnyTour(); return; }
+  var step = SHINNY_TOUR[i];
+  tourAnimateMove(step.zone, function() {
+    if (!_tourActive) return;
+    showShinnyBubble(step.msg);
+    _tourTimers.push(setTimeout(function() {
+      runTourStep(i + 1);
+    }, 2800));
+  });
+}
+
+function startShinnyTour() {
+  if (_tourActive) return;
+  _tourActive = true;
+  // Disable zone clicks during tour
+  document.querySelectorAll('.zone').forEach(function(z){ z.style.pointerEvents = 'none'; });
+  // Show skip button
+  var btn = ensureSkipButton();
+  requestAnimationFrame(function() {
+    btn.style.opacity = '1';
+    btn.style.transform = 'translateY(0)';
+  });
+  // Start chatter follow loop so the bubble tracks her during the tour
+  if (!_shinnyBubbleFollowRAF) followShinnyBubble();
+  // Intro line
+  showShinnyBubble("Buckle up! Tour time, follow me!");
+  _tourTimers.push(setTimeout(function() {
+    runTourStep(0);
+  }, 2000));
+}
+
+function stopShinnyTour() {
+  _tourTimers.forEach(function(t){ clearTimeout(t); });
+  _tourTimers = [];
+  _tourActive = false;
+  // Re-enable zones
+  document.querySelectorAll('.zone').forEach(function(z){ z.style.pointerEvents = ''; });
+  // Hide skip button
+  if (_tourSkipBtn) {
+    _tourSkipBtn.style.opacity = '0';
+    _tourSkipBtn.style.transform = 'translateY(-10px)';
+  }
+  // Send Shinny home and start regular chatter
+  var mr = document.getElementById('m-room');
+  if (mr) {
+    mr.src = (parseFloat(mr.style.left) > parseFloat(HOME_X)) ? SRC.runLeft : SRC.runRight;
+    animateRoomShinny(HOME_X, HOME_Y, 900, function() {
+      mr.src = SRC.sit;
+      startShinnyChatter();
+    });
+  } else {
+    startShinnyChatter();
+  }
+  try { localStorage.setItem('shinnyTourSeen', '1'); } catch(e){}
+}
+
+function finishShinnyTour() {
+  // Same cleanup as skip but with a final friendly message
+  _tourTimers.forEach(function(t){ clearTimeout(t); });
+  _tourTimers = [];
+  _tourActive = false;
+  document.querySelectorAll('.zone').forEach(function(z){ z.style.pointerEvents = ''; });
+  if (_tourSkipBtn) {
+    _tourSkipBtn.style.opacity = '0';
+    _tourSkipBtn.style.transform = 'translateY(-10px)';
+  }
+  var mr = document.getElementById('m-room');
+  if (mr) {
+    mr.src = (parseFloat(mr.style.left) > parseFloat(HOME_X)) ? SRC.runLeft : SRC.runRight;
+    animateRoomShinny(HOME_X, HOME_Y, 1000, function() {
+      mr.src = SRC.sit;
+      showShinnyBubble("Your turn! Go on, tap something!");
+      setTimeout(startShinnyChatter, 3000);
+    });
+  } else {
+    startShinnyChatter();
+  }
+  try { localStorage.setItem('shinnyTourSeen', '1'); } catch(e){}
+}
 
 var zoneMoving = false;
 var ZONES = {
@@ -1027,45 +1398,53 @@ function updateGrmSummary() {
 }
 
 function bookGrooming() {
-  var info = GRM.type + ' — ' + GRM.size + ' (' + GRM.sizePrice + ')';
-  if (GRM.addons.length) info += '\nAdd-ons: ' + GRM.addons.join(', ');
-  // Build exact dropdown value: "Full Grooming - Small" or "Bath Only - Large"
-  var svcVal = (GRM.type === 'Full Grooming' ? 'Full Grooming - ' : 'Bath Only - ') + GRM.size;
-  closeOverlay('grooming');
-  openBookingWith('Grooming', info, svcVal);
+  window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
 }
 
 /* Reset grooming state when overlay opens */
 function openZone(name) { /* original */
-  if (name === 'grooming') {
-    GRM.type='Full Grooming'; GRM.size=null; GRM.sizePrice=null; GRM.addons=[];
-    setTimeout(function(){
-      grmTab('full');
-      document.querySelectorAll('.grm-addon').forEach(function(b){b.classList.remove('active');});
-      var sum=document.getElementById('grm-summary');
-      if(sum) sum.style.display='none';
-      var btn=document.getElementById('grm-book-btn');
-      if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
-    }, 50);
+  // Booking always redirects to live checkout
+  if (name === 'booking') {
+    window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
+    return;
   }
-  if (name === 'daycare') {
-    DAY.duration=null; DAY.dogs=1;
-    setTimeout(function(){
-      document.querySelectorAll('.day-opt').forEach(function(b){b.classList.remove('active');});
-      var dc=document.getElementById('dog-count-val'); if(dc) dc.textContent='1';
-      var sum=document.getElementById('day-summary'); if(sum) sum.style.display='none';
-      var btn=document.getElementById('day-book-btn'); if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
-    }, 50);
-  }
+  try {
+    if (name === 'grooming') {
+      if (typeof GRM !== 'undefined') { GRM.type='Full Grooming'; GRM.size=null; GRM.sizePrice=null; GRM.addons=[]; }
+      setTimeout(function(){
+        try { if (typeof grmTab === 'function') grmTab('full'); } catch(e){}
+        document.querySelectorAll('.grm-addon').forEach(function(b){b.classList.remove('active');});
+        var sum=document.getElementById('grm-summary');
+        if(sum) sum.style.display='none';
+        var btn=document.getElementById('grm-book-btn');
+        if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
+      }, 50);
+    }
+    if (name === 'daycare') {
+      if (typeof DAY !== 'undefined') { DAY.duration=null; DAY.dogs=1; }
+      setTimeout(function(){
+        document.querySelectorAll('.day-opt').forEach(function(b){b.classList.remove('active');});
+        var dc=document.getElementById('dog-count-val'); if(dc) dc.textContent='1';
+        var sum=document.getElementById('day-summary'); if(sum) sum.style.display='none';
+        var btn=document.getElementById('day-book-btn'); if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
+      }, 50);
+    }
+  } catch(e){}
   if (tourActive || zoneMoving) return;
   var z = ZONES[name];
   if (!z) return;
   zoneMoving = true;
   var mr = document.getElementById('m-room');
-  var dur = moveShinny(mr, z.mx, z.my, false);
+  if (!mr) { zoneMoving = false; return; }
+  // Use the same right/left forced sprite logic as moveShiny()
+  var forcedSprite = null;
+  if (name === 'daycare' || name === 'about') forcedSprite = SRC.runRight;
+  else if (name === 'contact' || name === 'call' || name === 'grooming') forcedSprite = SRC.runLeft;
+  var dur = moveShinny(mr, z.mx, z.my, false, forcedSprite);
   setTimeout(function() {
     mr.src = SRC.wave; mr.style.transition = 'none';
-    document.getElementById(z.ov).classList.add('on');
+    var ov = z.ov ? document.getElementById(z.ov) : null;
+    if (ov) ov.classList.add('on');
     zoneMoving = false;
   }, dur * 1000 + 90);
 }
@@ -1102,42 +1481,13 @@ function updateDaySummary() {
 }
 
 function bookDaycare() {
-  var info = DAY.duration + ' · ' + DAY.dogs + ' dog' + (DAY.dogs>1?'s':'');
-  var svcMap = {'1 Hour':'Day Care - 1 Hour','Half Day':'Day Care - Half Day',
-                'Full Day':'Day Care - Full Day','Overnight':'Overnight Stay'};
-  var svcVal = svcMap[DAY.duration] || '';
-  closeOverlay('daycare');
-  openBookingWith('Day Care', info, svcVal);
+  window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
 }
 
 /* ── BOOKING WITH PRE-FILLED INFO ── */
 function openBookingWith(service, details, serviceValue) {
-  var ov = document.getElementById('ov-booking');
-  if (!ov) return;
-  // Reset then pre-select
-  var sel = document.getElementById('booking-service-sel');
-  if (sel) {
-    sel.selectedIndex = 0; // reset to "Select a Service (optional)"
-    if (serviceValue) {
-      for (var i=0; i<sel.options.length; i++) {
-        if (sel.options[i].value === serviceValue) { sel.selectedIndex = i; break; }
-      }
-    }
-  }
-  // Show/update pre-fill note with dismiss button
-  var note = document.getElementById('booking-prefill');
-  if (!note) {
-    note = document.createElement('div');
-    note.id = 'booking-prefill';
-    note.style.cssText = 'background:rgba(72,199,142,.1);border:1.5px solid rgba(72,199,142,.4);border-radius:12px;padding:10px 14px;margin-bottom:10px;font-size:.82rem;color:#1a7a52;font-weight:700;line-height:1.5;position:relative;';
-    var card = ov.querySelector('.card');
-    var firstInp = card.querySelector('.inp');
-    card.insertBefore(note, firstInp);
-  }
-  note.innerHTML = '&#9989; <span style="font-weight:800;">Selected:</span> ' + details.replace(/\n/g,'<br>')
-    + '<button onclick="clearBookingPrefill()" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#1a7a52;font-size:1rem;cursor:pointer;font-weight:800;line-height:1;" title="Remove selection">&#10005;</button>';
-  note.style.display = 'block';
-  ov.classList.add('on');
+  // Always redirect to the live checkout page
+  window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
 }
 
 function clearBookingPrefill() {
