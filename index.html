@@ -869,10 +869,10 @@ function moveShinny(mr, targetX, targetY, slowMode, forcedSprite) {
 }
 
 var TOUR = [
-  { zone:'contact',  mx:'22%', mt:'80%', msg:'Tap the DOOR to contact us!',             wait:2800 },
+  { zone:'contact',  mx:'50%', mt:'60%', msg:'Tap the middle to give us a call!',       wait:2800 },
   { zone:'daycare',  mx:'72%', mt:'80%', msg:'Tap the KENNELS for Day Care info!',       wait:2800 },
   { zone:'grooming', mx:'22%', mt:'34%', msg:'Tap the HYDRANT for Grooming!',             wait:2800 },
-  { zone:'booking',  mx:'50%', mt:'60%', msg:'Tap the DESK to Book!',                    wait:2800 }
+  { zone:'booking',  mx:'22%', mt:'80%', msg:'Tap the DESK to Book!',                    wait:2800 }
 ];
 var tourActive = false, tourTimers = [];
 
@@ -1235,10 +1235,10 @@ function finishShinnyTour() {
 
 var zoneMoving = false;
 var ZONES = {
-  contact:  { ov:'ov-contact',  mx:'22%', my:'80%', side:'left',  url:'tel:3102904970' },
+  contact:  { ov:'ov-contact',  mx:'50%', my:'60%', side:'right', url:'tel:3102904970' },
   daycare:  { ov:'ov-daycare',  mx:'72%', my:'80%', side:'right', url:null },
   grooming: { ov:'ov-grooming', mx:'22%', my:'34%', side:'left',  url:null },
-  booking:  { ov:'ov-booking',  mx:'50%', my:'60%', side:'right', url:'https://shinypawsla.com/shinypaws-checkout' },
+  booking:  { ov:'ov-booking',  mx:'22%', my:'80%', side:'left',  url:'https://shinypawsla.com/shinypaws-checkout' },
   about:    { ov:'ov-about',    mx:'70%', my:'28%', side:'right', url:'studio.html' }
 };
 
