@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes">
 <title>Shiny Paws — Pet Grooming &amp; Daycare | Gardena, CA</title>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -284,7 +284,11 @@ body.intro-showing #topbar{display:none !important;}
 #z-contact::before  {animation-delay:0s;}
 #z-daycare::before  {animation-delay:.65s;}
 #z-grooming::before {animation-delay:1.3s;}
-#z-booking::before  {animation-delay:1.95s;}
+#z-booking::before  {animation-delay:1.95s;animation:bookPulse 2s ease-in-out infinite;}
+@keyframes bookPulse{
+  0%,100%{transform:scale(1);opacity:.7;box-shadow:0 0 16px rgba(201,168,76,.55),inset 0 0 10px rgba(232,201,106,.45);}
+  50%{transform:scale(1.14);opacity:1;box-shadow:0 0 34px rgba(232,201,106,.95),0 0 60px rgba(232,201,106,.5),inset 0 0 20px rgba(232,201,106,.65);}
+}
 
 @keyframes tagFloat{
   0%,100%{transform:translateX(-50%) translateY(0);}
@@ -390,6 +394,13 @@ body.intro-showing #topbar{display:none !important;}
 .bnav-icon{font-size:clamp(1.4rem,4vw,1.65rem);line-height:1;}
 .bnav-label{font-size:clamp(.72rem,2vw,.88rem);font-weight:800;color:var(--purple);letter-spacing:.06em;text-transform:uppercase;}
 .bnav-div{width:1.5px;background:linear-gradient(to bottom,transparent,rgba(201,184,255,.5),transparent);align-self:stretch;margin:8px 0;flex-shrink:0;}
+.bnav.bnav-book{background:linear-gradient(135deg,rgba(232,201,106,.22),rgba(201,168,76,.18));box-shadow:0 0 0 1.5px rgba(201,168,76,.55),0 4px 14px rgba(201,168,76,.28);animation:bnavBookPulse 2.2s ease-in-out infinite;}
+.bnav.bnav-book .bnav-label{color:#8a6d1f;}
+.bnav.bnav-book:hover{background:linear-gradient(135deg,rgba(232,201,106,.35),rgba(201,168,76,.28));}
+@keyframes bnavBookPulse{
+  0%,100%{box-shadow:0 0 0 1.5px rgba(201,168,76,.55),0 4px 14px rgba(201,168,76,.28);}
+  50%{box-shadow:0 0 0 1.5px rgba(232,201,106,.85),0 6px 22px rgba(232,201,106,.55);}
+}
 @media(max-width:480px){
   /* Cards, intro tour bubble — keep these, they're useful */
   .card{padding:16px 14px;}.svc-grid{gap:7px;}
@@ -506,7 +517,7 @@ html,body{
   <div class="bnav-div"></div>
   <button class="bnav" onclick="goToZone('grooming')"><span class="bnav-icon">✂️</span><span class="bnav-label">Grooming</span></button>
   <div class="bnav-div"></div>
-  <button class="bnav" onclick="goToZone('booking')"><span class="bnav-icon">📅</span><span class="bnav-label">Book</span></button>
+  <button class="bnav bnav-book" onclick="goToZone('booking')"><span class="bnav-icon">📅</span><span class="bnav-label">Book</span></button>
   <div class="bnav-div"></div>
   <button class="bnav" onclick="goToZone('about')"><span class="bnav-icon">🐾</span><span class="bnav-label">About Us</span></button>
 </div>
@@ -765,6 +776,7 @@ function showPixelWorld() {
     } else {
       startShinnyTour();
     }
+    showTourStartButton();
   }, 900);
 }
 
@@ -990,15 +1002,54 @@ function stopShinnyChatter() {
    Shinny walks to each station and explains it.
 ─────────────────────────────────────────── */
 var SHINNY_TOUR = [
-  { zone:'grooming', msg:"This is Grooming — where the magic floof happens!" },
-  { zone:'about',    msg:"About Us! Read all about my humans (they're cool)." },
-  { zone:'daycare',  msg:"Daycare HQ. Translation: nonstop zoomies." },
-  { zone:'contact',  msg:"Need a human? Tap here, they'll pick up. Promise." },
-  { zone:'booking',  msg:"Ready for the spa day of dreams? Tap Book Now!" }
+  { zone:'grooming', msg:"Spa zone — fluff magic! ✨" },
+  { zone:'about',    msg:"Meet my humans! 💜" },
+  { zone:'daycare',  msg:"Zoomie HQ — endless playtime!" },
+  { zone:'contact',  msg:"Wanna chat? Tap! 📞" },
+  { zone:'booking',  msg:"Spa day awaits — tap Book! 🐾" }
 ];
 var _tourActive = false;
 var _tourTimers = [];
 var _tourSkipBtn = null;
+var _tourStartBtn = null;
+
+function ensureTourStartButton() {
+  if (_tourStartBtn) return _tourStartBtn;
+  var btn = document.createElement('button');
+  btn.id = 'shinny-tour-start';
+  btn.innerHTML = 'Take the tour 🐾';
+  btn.style.cssText =
+    'position:fixed;top:54px;left:14px;z-index:80;' +
+    'background:linear-gradient(135deg,#FFFAFE,#EDE0FF);' +
+    'color:#3D2060;border:1.5px solid rgba(201,184,255,.85);' +
+    'border-radius:30px;padding:9px 18px;' +
+    'font-family:Nunito,sans-serif;font-weight:800;font-size:.72rem;' +
+    'letter-spacing:.08em;text-transform:uppercase;cursor:pointer;' +
+    'box-shadow:0 6px 22px rgba(61,32,96,.22);' +
+    'opacity:0;transform:translateY(-10px);' +
+    'transition:opacity .3s,transform .3s;';
+  btn.onclick = function() {
+    if (_tourActive) return;
+    startShinnyTour();
+  };
+  document.body.appendChild(btn);
+  _tourStartBtn = btn;
+  return btn;
+}
+
+function showTourStartButton() {
+  var btn = ensureTourStartButton();
+  requestAnimationFrame(function() {
+    btn.style.opacity = '1';
+    btn.style.transform = 'translateY(0)';
+  });
+}
+
+function hideTourStartButton() {
+  if (!_tourStartBtn) return;
+  _tourStartBtn.style.opacity = '0';
+  _tourStartBtn.style.transform = 'translateY(-10px)';
+}
 
 function ensureSkipButton() {
   if (_tourSkipBtn) return _tourSkipBtn;
@@ -1049,6 +1100,8 @@ function runTourStep(i) {
 function startShinnyTour() {
   if (_tourActive) return;
   _tourActive = true;
+  // Hide the "Take the tour" button while tour runs
+  hideTourStartButton();
   // Disable zone clicks during tour
   document.querySelectorAll('.zone').forEach(function(z){ z.style.pointerEvents = 'none'; });
   // Show skip button
@@ -1060,7 +1113,7 @@ function startShinnyTour() {
   // Start chatter follow loop so the bubble tracks her during the tour
   if (!_shinnyBubbleFollowRAF) followShinnyBubble();
   // Intro line
-  showShinnyBubble("Buckle up! Tour time, follow me!");
+  showShinnyBubble("Quick tour — follow me! 🐾");
   _tourTimers.push(setTimeout(function() {
     runTourStep(0);
   }, 2000));
@@ -1089,6 +1142,7 @@ function stopShinnyTour() {
     startShinnyChatter();
   }
   try { localStorage.setItem('shinnyTourSeen', '1'); } catch(e){}
+  showTourStartButton();
 }
 
 function finishShinnyTour() {
@@ -1113,6 +1167,7 @@ function finishShinnyTour() {
     startShinnyChatter();
   }
   try { localStorage.setItem('shinnyTourSeen', '1'); } catch(e){}
+  showTourStartButton();
 }
 
 var zoneMoving = false;
