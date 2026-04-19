@@ -331,16 +331,16 @@ body.intro-showing #topbar{display:none !important;}
 
 
 /* Zone positions */
-#z-contact  {left:11.575%;top:63.05%;width:15.3%;height:11.9%;border-radius:50%;}
+#z-contact  {left:38.9675%;top:48.7525%;width:16.065%;height:12.495%;border-radius:50%;}
 #z-daycare  {left:66.455%;top:61.05%;width:18.7%;height:11.9%;border-radius:50%;}
 #z-grooming  {left:9.65%;top:14.2%;width:18.7%;height:13.6%;border-radius:50%;}
-#z-booking  {left:38.9675%;top:48.7525%;width:16.065%;height:12.495%;border-radius:50%;}
+#z-booking  {left:11.575%;top:63.05%;width:15.3%;height:11.9%;border-radius:50%;}
 #z-about  {left:65.37%;top:9.54%;width:19.38%;height:12.92%;border-radius:50%;}
 @media(max-width:768px){
-  #z-contact  {left:13.5%;top:63.05%;width:17%;height:11.9%;}
+  #z-contact  {left:37.5%;top:49.05%;width:17%;height:11.9%;}
   #z-daycare  {left:61.8%;top:61.05%;width:20.4%;height:11.9%;}
   #z-grooming  {left:7.8%;top:13.2%;width:20.4%;height:13.6%;}
-  #z-booking  {left:37.5%;top:49.05%;width:17%;height:11.9%;}
+  #z-booking  {left:13.5%;top:63.05%;width:17%;height:11.9%;}
   #z-about  {left:59.95%;top:9.2%;width:22.1%;height:13.6%;}
 }
 /* OVERLAYS */
@@ -550,13 +550,13 @@ html,body{
   <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
 </div>
 <div id="bottom-nav">
-  <button class="bnav" onclick="goToZone('contact')"><span class="bnav-icon">📞</span><span class="bnav-label">Call</span></button>
+  <button class="bnav bnav-book" onclick="goToZone('booking')"><span class="bnav-icon">📅</span><span class="bnav-label">Book</span></button>
   <div class="bnav-div"></div>
   <button class="bnav" onclick="goToZone('daycare')"><span class="bnav-icon">🐕</span><span class="bnav-label">Daycare</span></button>
   <div class="bnav-div"></div>
   <button class="bnav" onclick="goToZone('grooming')"><span class="bnav-icon">✂️</span><span class="bnav-label">Grooming</span></button>
   <div class="bnav-div"></div>
-  <button class="bnav bnav-book" onclick="goToZone('booking')"><span class="bnav-icon">📅</span><span class="bnav-label">Book</span></button>
+  <button class="bnav" onclick="goToZone('contact')"><span class="bnav-icon">📞</span><span class="bnav-label">Call</span></button>
   <div class="bnav-div"></div>
   <button class="bnav" onclick="goToZone('about')"><span class="bnav-icon">🐾</span><span class="bnav-label">About Us</span></button>
 </div>
@@ -613,13 +613,17 @@ html,body{
   <div class="card"><button class="c-close" onclick="closeOverlay('daycare')">✕</button>
     <h2>Dog Day Care</h2>
     <p>A safe, fun and loving environment for your furry friend to play, socialize, and relax while you&rsquo;re away.</p>
-    <div class="svc-grid">
-      <div class="svc"><div class="ic">⏰</div><div class="nm">1 Hour</div><div class="pr">$15</div></div>
-      <div class="svc"><div class="ic">🌤️</div><div class="nm">Half Day</div><div class="pr">$30</div></div>
-      <div class="svc"><div class="ic">☀️</div><div class="nm">Full Day</div><div class="pr">$50</div></div>
-      <div class="svc"><div class="ic">🌙</div><div class="nm">Overnight</div><div class="pr">$80</div></div>
+    <p class="grm-section-label">Pick a stay</p>
+    <div class="grm-sizes" id="dc-options"></div>
+    <p class="grm-section-label">Add-ons <span style="font-weight:500;font-size:.74rem;color:var(--purp-m);">(optional, tap to select)</span></p>
+    <div class="grm-addons-grid" id="dc-addons">
+      <button type="button" class="grm-addon" data-addon-name="Extra treats" onclick="toggleDcAddon(this,'Extra treats',5)">🦴 Extra treats<span>$5</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Extra walk" onclick="toggleDcAddon(this,'Extra walk',10)">🚶 Extra walk<span>$10</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Quick rinse" onclick="toggleDcAddon(this,'Quick rinse',15)">🛁 Quick rinse<span>$15</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Nail trim" onclick="toggleDcAddon(this,'Nail trim',18)">💅 Nail trim<span>$18</span></button>
     </div>
-    <button class="cta" onclick="closeOverlay('daycare');openZone('booking');">Book a Spot</button>
+    <div id="dc-summary" style="display:none;margin-top:10px;padding:10px;background:#F5EFFF;border-radius:10px;font-size:.82rem;color:var(--purple);"><span id="dc-summary-text"></span></div>
+    <button class="cta" id="dc-book-btn" style="opacity:.5;pointer-events:none;margin-top:10px;" onclick="bookDaycare()">Book Now</button>
   </div>
 </div>
 <div class="overlay" id="ov-grooming">
@@ -1643,6 +1647,89 @@ function bookGrooming() {
   window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
 }
 
+/* ── DAYCARE INTERACTIVE ── */
+var DC = { option:null, addons:[] };
+var DC_OPTIONS = [
+  {label:'1 Hour',             price:15, value:'Day Care - 1 Hour',     icon:'⏰'},
+  {label:'Half Day',           price:28, value:'Day Care - Half Day',   icon:'🌤️'},
+  {label:'Full Day',           price:45, value:'Day Care - Full Day',   icon:'☀️'},
+  {label:'Overnight Boarding', price:75, value:'Overnight Boarding',    icon:'🌙'}
+];
+
+function renderDcOptions() {
+  var grid = document.getElementById('dc-options');
+  if (!grid) return;
+  grid.innerHTML = '';
+  DC_OPTIONS.forEach(function(opt, idx) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'grm-size';
+    btn.innerHTML =
+      '<div class="snm">' + opt.icon + ' ' + opt.label + '</div>' +
+      '<div class="spr">$' + opt.price + '</div>';
+    btn.onclick = function() {
+      document.querySelectorAll('#dc-options .grm-size').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      DC.option = opt;
+      updateDcSummary();
+    };
+    grid.appendChild(btn);
+  });
+}
+
+function toggleDcAddon(el, name, price) {
+  el.classList.toggle('active');
+  var idx = -1;
+  for (var i=0;i<DC.addons.length;i++) { if (DC.addons[i].name===name){idx=i;break;} }
+  if (idx>=0) DC.addons.splice(idx,1);
+  else DC.addons.push({name:name, price:price});
+  updateDcSummary();
+}
+
+function updateDcSummary() {
+  var sum = document.getElementById('dc-summary');
+  var txt = document.getElementById('dc-summary-text');
+  var btn = document.getElementById('dc-book-btn');
+  if (!sum || !txt || !btn) return;
+  var hasOpt = !!DC.option;
+  var hasAdd = DC.addons.length > 0;
+  if (!hasOpt && !hasAdd) {
+    sum.style.display='none';
+    btn.style.opacity='.5'; btn.style.pointerEvents='none';
+    return;
+  }
+  var total = 0, lines = [];
+  if (hasOpt) { lines.push('<strong>'+DC.option.label+'</strong> &middot; $'+DC.option.price); total += DC.option.price; }
+  else lines.push('<strong>Add-ons only</strong>');
+  if (hasAdd) {
+    var names = DC.addons.map(function(a){return a.name+' ($'+a.price+')';});
+    lines.push('Add-ons: '+names.join(', '));
+    DC.addons.forEach(function(a){total+=a.price;});
+  }
+  lines.push('<span class="grm-total">Total: $'+total+'</span>');
+  txt.innerHTML = lines.join('<br>');
+  sum.style.display='block';
+  btn.style.opacity='1'; btn.style.pointerEvents='all';
+}
+
+function bookDaycare() {
+  try {
+    var payload = {
+      category: 'daycare',
+      value:    DC.option ? DC.option.value : null,
+      label:    DC.option ? DC.option.label : null,
+      price:    DC.option ? DC.option.price : null,
+      addons:   DC.addons.slice(),
+      ts:       Date.now()
+    };
+    sessionStorage.setItem('shinypaws_prefill', JSON.stringify(payload));
+  } catch(e){}
+  window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
+}
+
+document.addEventListener('DOMContentLoaded', renderDcOptions);
+if (document.readyState !== 'loading') renderDcOptions();
+
 /* Reset grooming state when overlay opens */
 function openZone(name) { /* original */
   // Booking always redirects to live checkout
@@ -1666,12 +1753,12 @@ function openZone(name) { /* original */
       }, 50);
     }
     if (name === 'daycare') {
-      if (typeof DAY !== 'undefined') { DAY.duration=null; DAY.dogs=1; }
+      if (typeof DC !== 'undefined') { DC.option=null; DC.addons=[]; }
       setTimeout(function(){
-        document.querySelectorAll('.day-opt').forEach(function(b){b.classList.remove('active');});
-        var dc=document.getElementById('dog-count-val'); if(dc) dc.textContent='1';
-        var sum=document.getElementById('day-summary'); if(sum) sum.style.display='none';
-        var btn=document.getElementById('day-book-btn'); if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
+        document.querySelectorAll('#dc-options .grm-size').forEach(function(b){b.classList.remove('active');});
+        document.querySelectorAll('#dc-addons .grm-addon').forEach(function(b){b.classList.remove('active');});
+        var sum=document.getElementById('dc-summary'); if(sum) sum.style.display='none';
+        var btn=document.getElementById('dc-book-btn'); if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
       }, 50);
     }
   } catch(e){}

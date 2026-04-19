@@ -616,6 +616,21 @@ function applyShinypawsPrefill() {
   const TYPE_LABEL = {bath:'Bath Only', machine:'Machine Cut', scissor:'Scissor Cut'};
   const tabs = document.querySelectorAll('.cat-tab');
 
+  // Daycare flow (from game-world daycare overlay)
+  if (data.category === 'daycare') {
+    if (tabs[CAT_TAB_INDEX.daycare]) filterCat('daycare', tabs[CAT_TAB_INDEX.daycare]);
+    if (data.value) {
+      const card = document.querySelector('.service-card[data-value="' + data.value + '"]');
+      if (card) {
+        card.click();
+        document.getElementById('prefill-label').textContent = data.label || data.value;
+        document.getElementById('prefill-banner').classList.add('visible');
+      }
+    }
+    if (data.addons && data.addons.length) applyPrefillAddons(data.addons);
+    return;
+  }
+
   // Add-ons-only flow (no service tier picked)
   if (!data.type || !data.size) {
     if (data.addons && data.addons.length) {
