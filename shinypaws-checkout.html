@@ -298,26 +298,33 @@
             <h2>Select your service</h2>
             <div class="slabel">Category</div>
             <div class="cat-tabs">
-              <button class="cat-tab active" onclick="filterCat('grooming',this)">Full grooming</button>
+              <button class="cat-tab active" onclick="filterCat('scissor',this)">Scissor cut</button>
+              <button class="cat-tab" onclick="filterCat('machine',this)">Machine cut</button>
               <button class="cat-tab" onclick="filterCat('bath',this)">Bath only</button>
               <button class="cat-tab" onclick="filterCat('daycare',this)">Day care</button>
               <button class="cat-tab" onclick="filterCat('addons',this)">Add-ons only</button>
             </div>
             <div class="addon-only-note" id="addon-only-note">No base service needed — choose any add-ons below and we'll take care of the rest.</div>
             <div id="service-list">
-              <div class="service-card visible selected" onclick="pick(this,'Full Grooming — Small',100)" data-cat="grooming" data-value="Full Grooming - Small"><div class="srow"><div><div class="sname">Full grooming — small</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$100+</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Full Grooming — Medium',120)" data-cat="grooming" data-value="Full Grooming - Medium"><div class="srow"><div><div class="sname">Full grooming — medium</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$120+</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Full Grooming — Large',150)" data-cat="grooming" data-value="Full Grooming - Large"><div class="srow"><div><div class="sname">Full grooming — large</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$150+</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Full Grooming — Extra Large',170)" data-cat="grooming" data-value="Full Grooming - Extra Large"><div class="srow"><div><div class="sname">Full grooming — extra large</div><div class="sdesc">Bath · cut · nails · ear · eye cleaning · anal gland</div></div><div class="sprice">$170+</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Small',60)" data-cat="bath" data-value="Bath Only - Small"><div class="srow"><div><div class="sname">Bath only — small</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$60+</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Medium',75)" data-cat="bath" data-value="Bath Only - Medium"><div class="srow"><div><div class="sname">Bath only — medium</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$75+</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Large',85)" data-cat="bath" data-value="Bath Only - Large"><div class="srow"><div><div class="sname">Bath only — large</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$85+</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Extra Large',100)" data-cat="bath" data-value="Bath Only - Extra Large"><div class="srow"><div><div class="sname">Bath only — extra large</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$100+</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — XXL',120)" data-cat="bath" data-value="Bath Only - XXL"><div class="srow"><div><div class="sname">Bath only — extra extra large</div><div class="sdesc">Shampoo · blow-dry · brush out</div></div><div class="sprice">$120+</div></div></div>
+              <div class="service-card visible selected" onclick="pick(this,'Scissor Cut — Small',80)" data-cat="scissor" data-value="Scissor Cut - Small"><div class="srow"><div><div class="sname">Scissor cut — small</div><div class="sdesc">0–15 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$80</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Scissor Cut — Medium',95)" data-cat="scissor" data-value="Scissor Cut - Medium"><div class="srow"><div><div class="sname">Scissor cut — medium</div><div class="sdesc">16–30 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$95</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Scissor Cut — Large',120)" data-cat="scissor" data-value="Scissor Cut - Large"><div class="srow"><div><div class="sname">Scissor cut — large</div><div class="sdesc">31–60 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$120</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Scissor Cut — XL',150)" data-cat="scissor" data-value="Scissor Cut - XL"><div class="srow"><div><div class="sname">Scissor cut — XL</div><div class="sdesc">61–90 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$150</div></div></div>
+              <div class="service-card visible" onclick="pick(this,'Scissor Cut — XXL',185)" data-cat="scissor" data-value="Scissor Cut - XXL"><div class="srow"><div><div class="sname">Scissor cut — XXL</div><div class="sdesc">91+ lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$185</div></div></div>
+              <div class="service-card" onclick="pick(this,'Machine Cut — Small',65)" data-cat="machine" data-value="Machine Cut - Small"><div class="srow"><div><div class="sname">Machine cut — small</div><div class="sdesc">0–15 lbs · clipper cut, bath, brush</div></div><div class="sprice">$65</div></div></div>
+              <div class="service-card" onclick="pick(this,'Machine Cut — Medium',80)" data-cat="machine" data-value="Machine Cut - Medium"><div class="srow"><div><div class="sname">Machine cut — medium</div><div class="sdesc">16–30 lbs · clipper cut, bath, brush</div></div><div class="sprice">$80</div></div></div>
+              <div class="service-card" onclick="pick(this,'Machine Cut — Large',100)" data-cat="machine" data-value="Machine Cut - Large"><div class="srow"><div><div class="sname">Machine cut — large</div><div class="sdesc">31–60 lbs · clipper cut, bath, brush</div></div><div class="sprice">$100</div></div></div>
+              <div class="service-card" onclick="pick(this,'Machine Cut — XL',125)" data-cat="machine" data-value="Machine Cut - XL"><div class="srow"><div><div class="sname">Machine cut — XL</div><div class="sdesc">61–90 lbs · clipper cut, bath, brush</div></div><div class="sprice">$125</div></div></div>
+              <div class="service-card" onclick="pick(this,'Machine Cut — XXL',155)" data-cat="machine" data-value="Machine Cut - XXL"><div class="srow"><div><div class="sname">Machine cut — XXL</div><div class="sdesc">91+ lbs · clipper cut, bath, brush</div></div><div class="sprice">$155</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Small',40)" data-cat="bath" data-value="Bath Only - Small"><div class="srow"><div><div class="sname">Bath only — small</div><div class="sdesc">0–15 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$40</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Medium',50)" data-cat="bath" data-value="Bath Only - Medium"><div class="srow"><div><div class="sname">Bath only — medium</div><div class="sdesc">16–30 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$50</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — Large',65)" data-cat="bath" data-value="Bath Only - Large"><div class="srow"><div><div class="sname">Bath only — large</div><div class="sdesc">31–60 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$65</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — XL',80)" data-cat="bath" data-value="Bath Only - XL"><div class="srow"><div><div class="sname">Bath only — XL</div><div class="sdesc">61–90 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$80</div></div></div>
+              <div class="service-card" onclick="pick(this,'Bath Only — XXL',95)" data-cat="bath" data-value="Bath Only - XXL"><div class="srow"><div><div class="sname">Bath only — XXL</div><div class="sdesc">91+ lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$95</div></div></div>
               <div class="service-card" onclick="pick(this,'Day Care — 1 Hour',15)" data-cat="daycare" data-value="Day Care - 1 Hour"><div class="srow"><div><div class="sname">Day care — 1 hour</div><div class="sdesc">Supervised play &amp; socialization</div></div><div class="sprice">$15</div></div></div>
-              <div class="service-card" onclick="pick(this,'Day Care — Half Day',30)" data-cat="daycare" data-value="Day Care - Half Day"><div class="srow"><div><div class="sname">Day care — half day</div><div class="sdesc">Up to 5 hours supervised play</div></div><div class="sprice">$30</div></div></div>
-              <div class="service-card" onclick="pick(this,'Day Care — Full Day',50)" data-cat="daycare" data-value="Day Care - Full Day"><div class="srow"><div><div class="sname">Day care — full day</div><div class="sdesc">All-day supervised care</div></div><div class="sprice">$50</div></div></div>
-              <div class="service-card" onclick="pick(this,'Overnight Boarding',80)" data-cat="daycare" data-value="Overnight Boarding"><div class="srow"><div><div class="sname">Overnight boarding</div><div class="sdesc">Overnight stay with attentive care</div></div><div class="sprice">$80</div></div></div>
+              <div class="service-card" onclick="pick(this,'Day Care — Half Day',28)" data-cat="daycare" data-value="Day Care - Half Day"><div class="srow"><div><div class="sname">Day care — half day</div><div class="sdesc">Up to 5 hours supervised play</div></div><div class="sprice">$28</div></div></div>
+              <div class="service-card" onclick="pick(this,'Day Care — Full Day',45)" data-cat="daycare" data-value="Day Care - Full Day"><div class="srow"><div><div class="sname">Day care — full day</div><div class="sdesc">All-day supervised care</div></div><div class="sprice">$45</div></div></div>
+              <div class="service-card" onclick="pick(this,'Overnight Boarding',75)" data-cat="daycare" data-value="Overnight Boarding"><div class="srow"><div><div class="sname">Overnight boarding</div><div class="sdesc">Overnight stay with attentive care</div></div><div class="sprice">$75</div></div></div>
             </div>
             <div class="divider"></div>
             <div class="slabel">Add-ons <span style="text-transform:none;letter-spacing:0;font-weight:400;font-style:italic"> — optional, select any</span></div>
@@ -326,8 +333,6 @@
               <div class="addon-card" onclick="toggleAddon(this,'Ear cleaning',15)"><div><div class="addon-name">Ear cleaning</div><div class="addon-price">$15</div></div><span class="addon-check">✓</span></div>
               <div class="addon-card" onclick="toggleAddon(this,'Eye cleaning',12)"><div><div class="addon-name">Eye cleaning</div><div class="addon-price">$12</div></div><span class="addon-check">✓</span></div>
               <div class="addon-card" onclick="toggleAddon(this,'Anal gland expression',20)"><div><div class="addon-name">Anal gland expression</div><div class="addon-price">$20</div></div><span class="addon-check">✓</span></div>
-              <div class="addon-card" onclick="toggleAddon(this,'Teeth brushing',15)"><div><div class="addon-name">Teeth brushing</div><div class="addon-price">$15</div></div><span class="addon-check">✓</span></div>
-              <div class="addon-card" onclick="toggleAddon(this,'De-shedding treatment',25)"><div><div class="addon-name">De-shedding treatment</div><div class="addon-price">$25</div></div><span class="addon-check">✓</span></div>
             </div>
           </div>
 
@@ -428,7 +433,7 @@
     <div id="success-screen">
       <div class="check-circle">✓</div>
       <h2>Booking confirmed!</h2>
-      <p>A confirmation email has been sent.<br>We look forward to seeing your pup at Shiny Paws in Gardena!</p>
+      <p>A confirmation email has been sent.<br>We look forward to seeing your furry friend at Shiny Paws in Gardena!</p>
       <div id="booking-ref"></div>
       <a id="manage-link" href="#" style="display:inline-block;margin-top:1rem;font-size:13px;color:var(--purple-mid);text-decoration:underline">Manage or cancel this booking →</a>
       <button class="close-success-btn" onclick="goBack()">← Back to home</button>
@@ -558,7 +563,7 @@ function initStripe() {
 }
 
 // ── STATE ────────────────────────────────────────────────────────────
-let basePrice = 100, discount = 0, selName = 'Full Grooming — Small';
+let basePrice = 80, discount = 0, selName = 'Scissor Cut — Small';
 const addons = {}, TAX = 0.095;
 
 function getTotalCents() {
@@ -573,6 +578,9 @@ function openSPCheckout() {
   document.body.style.overflow = 'hidden';
 }
 
+// Cat-tab order: scissor=0, machine=1, bath=2, daycare=3, addons=4
+const CAT_TAB_INDEX = {scissor:0, machine:1, bath:2, daycare:3, addons:4};
+
 function openBookingWith(service, details, serviceValue) {
   openSPCheckout();
   document.getElementById('prefill-label').textContent = serviceValue || service;
@@ -582,16 +590,66 @@ function openBookingWith(service, details, serviceValue) {
   cards.forEach(card => {
     if (card.dataset.value && card.dataset.value.toLowerCase() === (serviceValue||'').toLowerCase()) {
       const cat = card.dataset.cat;
-      const tabMap = {grooming:0,bath:1,daycare:2,addons:3};
       const tabs = document.querySelectorAll('.cat-tab');
-      if (tabs[tabMap[cat]]) filterCat(cat, tabs[tabMap[cat]]);
+      if (tabs[CAT_TAB_INDEX[cat]]) filterCat(cat, tabs[CAT_TAB_INDEX[cat]]);
       card.click(); matched = true;
     }
   });
   if (!matched) {
     const tabs = document.querySelectorAll('.cat-tab');
-    filterCat(service==='Day Care'?'daycare':'grooming', tabs[service==='Day Care'?2:0]);
+    const fallback = (service==='Day Care') ? 'daycare' : 'scissor';
+    filterCat(fallback, tabs[CAT_TAB_INDEX[fallback]]);
   }
+}
+
+// Apply prefill saved by the game-world Grooming overlay (sessionStorage key 'shinypaws_prefill').
+// Payload shape: { type:'bath'|'machine'|'scissor', size:'Small'|..., sizePrice:number|null, addons:[{name,price}], weight:string }
+function applyShinypawsPrefill() {
+  let raw;
+  try { raw = sessionStorage.getItem('shinypaws_prefill'); } catch(e){ return; }
+  if (!raw) return;
+  let data;
+  try { data = JSON.parse(raw); } catch(e){ return; }
+  // One-shot: clear so a refresh doesn't re-apply stale state
+  try { sessionStorage.removeItem('shinypaws_prefill'); } catch(e){}
+
+  const TYPE_LABEL = {bath:'Bath Only', machine:'Machine Cut', scissor:'Scissor Cut'};
+  const tabs = document.querySelectorAll('.cat-tab');
+
+  // Add-ons-only flow (no service tier picked)
+  if (!data.type || !data.size) {
+    if (data.addons && data.addons.length) {
+      filterCat('addons', tabs[CAT_TAB_INDEX.addons]);
+      document.getElementById('prefill-label').textContent = 'Add-ons only';
+      document.getElementById('prefill-banner').classList.add('visible');
+      applyPrefillAddons(data.addons);
+    }
+    return;
+  }
+
+  // Service tier + size
+  const cat = data.type;
+  const value = TYPE_LABEL[data.type] + ' - ' + data.size;
+  if (tabs[CAT_TAB_INDEX[cat]]) filterCat(cat, tabs[CAT_TAB_INDEX[cat]]);
+  const card = document.querySelector('.service-card[data-value="' + value + '"]');
+  if (card) {
+    card.click();
+    document.getElementById('prefill-label').textContent = value + (data.weight ? ' · ' + data.weight : '');
+    document.getElementById('prefill-banner').classList.add('visible');
+  }
+  if (data.addons && data.addons.length) applyPrefillAddons(data.addons);
+}
+
+function applyPrefillAddons(list) {
+  const cards = document.querySelectorAll('.addon-card');
+  list.forEach(a => {
+    cards.forEach(c => {
+      const name = (c.querySelector('.addon-name')||{}).textContent;
+      if (name && name.toLowerCase() === a.name.toLowerCase() && !c.classList.contains('picked')) {
+        c.click();
+      }
+    });
+  });
 }
 
 function openZone(zone) { if (zone==='booking') openSPCheckout(); }
@@ -1034,6 +1092,7 @@ document.getElementById('appt-date').min=today;
 document.getElementById('appt-date').value=today;
 updateSum();
 refreshBookedSlots();
+applyShinypawsPrefill();
 
 // Refresh booked slots whenever date changes
 document.getElementById('appt-date').addEventListener('change', refreshBookedSlots);

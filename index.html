@@ -364,6 +364,45 @@ body.intro-showing #topbar{display:none !important;}
 .svc:hover{border-color:#C0A0E0;box-shadow:0 4px 16px rgba(192,160,224,.4);}
 .svc .ic{font-size:24px;}.svc .nm{font-weight:700;color:var(--purple);font-size:.86rem;margin-top:5px;}
 .svc .pr{color:var(--gold);font-weight:800;font-size:.93rem;margin-top:2px;}
+/* ── Grooming overlay (interactive) ── */
+.grm-tiers{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0 6px;}
+.grm-tier{background:white;border:1.5px solid rgba(192,160,224,.4);border-radius:16px;padding:14px 6px 12px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:center;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.grm-tier:hover{border-color:#C0A0E0;transform:translateY(-2px);box-shadow:0 6px 18px rgba(192,160,224,.35);}
+.grm-tier.active{border:2px solid var(--purple);background:linear-gradient(135deg,#FFFAFE,#F2E8FF);box-shadow:0 4px 16px rgba(61,32,96,.2);}
+.grm-tier-icon{font-size:1.6rem;line-height:1;}
+.grm-tier-name{font-weight:800;color:var(--purple);font-size:.74rem;line-height:1.2;}
+.grm-tier-from{color:var(--gold);font-weight:800;font-size:.78rem;}
+.grm-tier-featured{background:linear-gradient(135deg,rgba(232,201,106,.18),rgba(201,168,76,.14));border:1.5px solid rgba(201,168,76,.6);box-shadow:0 0 0 1px rgba(232,201,106,.5),0 4px 18px rgba(201,168,76,.32);animation:grmTierPulse 2.4s ease-in-out infinite;position:relative;}
+.grm-tier-featured::after{content:'POPULAR';position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#C9A84C,#E8C96A);color:white;font-size:.55rem;font-weight:800;letter-spacing:.1em;padding:2px 8px;border-radius:10px;white-space:nowrap;box-shadow:0 2px 6px rgba(201,168,76,.4);}
+.grm-tier-featured.active{background:linear-gradient(135deg,#FFF8E6,#FFEFC4);border:2px solid var(--gold);}
+@keyframes grmTierPulse{
+  0%,100%{box-shadow:0 0 0 1px rgba(232,201,106,.5),0 4px 18px rgba(201,168,76,.32);}
+  50%{box-shadow:0 0 0 1.5px rgba(232,201,106,.85),0 6px 26px rgba(232,201,106,.55);}
+}
+.grm-section-label{font-weight:800;color:var(--purple);margin:14px 0 6px;font-size:.84rem;}
+.grm-sizes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:7px;}
+.grm-size{background:white;border:1.5px solid rgba(192,160,224,.4);border-radius:14px;padding:10px 6px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:center;transition:all .15s;}
+.grm-size:hover{border-color:#C0A0E0;transform:translateY(-1px);}
+.grm-size.active{border:2px solid var(--purple);background:#F5EFFF;box-shadow:0 4px 12px rgba(61,32,96,.18);}
+.grm-size .snm{font-weight:800;color:var(--purple);font-size:.84rem;}
+.grm-size .swt{color:var(--purp-m);font-size:.66rem;font-weight:600;margin-top:2px;}
+.grm-size .spr{color:var(--gold);font-weight:800;font-size:.82rem;margin-top:3px;}
+.grm-addons-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.grm-addon{background:white;border:1.5px solid rgba(192,160,224,.4);border-radius:12px;padding:9px 10px;cursor:pointer;font-family:'Nunito',sans-serif;text-align:left;font-weight:700;color:var(--purple);font-size:.78rem;display:flex;justify-content:space-between;align-items:center;gap:6px;transition:all .15s;}
+.grm-addon:hover{border-color:#C0A0E0;}
+.grm-addon.active{border:2px solid var(--purple);background:#F5EFFF;}
+.grm-addon span{color:var(--gold);font-weight:800;font-size:.76rem;}
+.grm-addon.included{border:2px solid #5BC07A;background:linear-gradient(135deg,#E8F8EE,#F5EFFF);color:#2E7D49;cursor:default;}
+.grm-addon.included span{color:#2E7D49;font-size:.7rem;}
+#grm-summary{background:linear-gradient(135deg,#F5EFFF,#FFFAFE);border:1.5px solid rgba(192,160,224,.5);border-radius:14px;padding:11px 14px;margin-top:12px;font-size:.85rem;color:var(--purple);line-height:1.55;}
+#grm-summary strong{color:var(--purple);}
+#grm-summary .grm-total{display:block;margin-top:6px;font-weight:800;color:var(--gold);font-size:.95rem;}
+@media(max-width:480px){
+  .grm-tier-name{font-size:.66rem;}
+  .grm-tier-from{font-size:.72rem;}
+  .grm-tier-icon{font-size:1.35rem;}
+  .grm-tier{padding:14px 4px 10px;}
+}
 .cta{background:linear-gradient(135deg,var(--purple),#6B3FA0);color:white;border:none;
   border-radius:50px;padding:14px 28px;font-family:'Great Vibes',cursive;font-size:1.3rem;
   cursor:pointer;width:100%;margin-top:12px;box-shadow:0 4px 20px rgba(61,32,96,.28);
@@ -573,7 +612,7 @@ html,body{
 <div class="overlay" id="ov-daycare">
   <div class="card"><button class="c-close" onclick="closeOverlay('daycare')">✕</button>
     <h2>Dog Day Care</h2>
-    <p>A safe, fun and loving environment for your pup to play, socialize, and relax while you&rsquo;re away.</p>
+    <p>A safe, fun and loving environment for your furry friend to play, socialize, and relax while you&rsquo;re away.</p>
     <div class="svc-grid">
       <div class="svc"><div class="ic">⏰</div><div class="nm">1 Hour</div><div class="pr">$15</div></div>
       <div class="svc"><div class="ic">🌤️</div><div class="nm">Half Day</div><div class="pr">$30</div></div>
@@ -586,38 +625,52 @@ html,body{
 <div class="overlay" id="ov-grooming">
   <div class="card"><button class="c-close" onclick="closeOverlay('grooming')">✕</button>
     <h2>Grooming</h2>
-    <p>Professional grooming services to keep your pup looking and feeling their best!</p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">🛁 Bathing</span>
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">🪮 Brushing</span>
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">👂 Ear Cleaning</span>
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">💅 Nail Trimming</span>
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">👁️ Eye Cleaning</span>
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">✂️ Full Grooming</span>
-      <span style="background:rgba(72,199,142,.12);border:1px solid rgba(72,199,142,.4);border-radius:20px;padding:4px 12px;font-size:.78rem;font-weight:700;color:#1a7a52;">✂️ Full Body Haircut</span>
+    <p>Pampering for your pet so they look &amp; feel their best 💜</p>
+
+    <p class="grm-section-label" style="margin-top:6px;">Pick a service</p>
+    <div class="grm-tiers">
+      <button type="button" class="grm-tier" id="grm-tier-bath" onclick="selectGrmType('bath')">
+        <div class="grm-tier-icon">🛁</div>
+        <div class="grm-tier-name">Bath Only</div>
+        <div class="grm-tier-from">From $40</div>
+      </button>
+      <button type="button" class="grm-tier grm-tier-featured" id="grm-tier-scissor" onclick="selectGrmType('scissor')">
+        <div class="grm-tier-icon">✂️</div>
+        <div class="grm-tier-name">Scissor Cut Full Groom</div>
+        <div class="grm-tier-from">From $80</div>
+      </button>
+      <button type="button" class="grm-tier" id="grm-tier-machine" onclick="selectGrmType('machine')">
+        <div class="grm-tier-icon">⚡</div>
+        <div class="grm-tier-name">Machine Cut Full Groom</div>
+        <div class="grm-tier-from">From $65</div>
+      </button>
     </div>
-    <p style="font-weight:800;color:var(--purple);margin-bottom:6px;font-size:.9rem;">Full Service Grooming:</p>
-    <div class="svc-grid">
-      <div class="svc"><div class="ic">🐩</div><div class="nm">Small</div><div class="pr">From $100</div></div>
-      <div class="svc"><div class="ic">🐕</div><div class="nm">Medium</div><div class="pr">From $120</div></div>
-      <div class="svc"><div class="ic">🦮</div><div class="nm">Large</div><div class="pr">From $150</div></div>
-      <div class="svc"><div class="ic">🐾</div><div class="nm">Extra Large</div><div class="pr">From $170</div></div>
+
+    <div id="grm-sizes-section" style="display:none;">
+      <p class="grm-section-label">Select your pet's size</p>
+      <div class="grm-sizes-grid" id="grm-sizes"></div>
     </div>
-    <p style="font-weight:800;color:var(--purple);margin:8px 0 6px;font-size:.9rem;">Bath Only:</p>
-    <div class="svc-grid">
-      <div class="svc"><div class="ic">🛁</div><div class="nm">Small</div><div class="pr">From $60</div></div>
-      <div class="svc"><div class="ic">🛁</div><div class="nm">Medium</div><div class="pr">From $75</div></div>
-      <div class="svc"><div class="ic">🛁</div><div class="nm">Large</div><div class="pr">From $85</div></div>
-      <div class="svc"><div class="ic">🛁</div><div class="nm">XL</div><div class="pr">From $100</div></div>
-      <div class="svc"><div class="ic">🛁</div><div class="nm">XXL</div><div class="pr">From $120</div></div>
+
+    <p class="grm-section-label" id="grm-addons-label">Add-ons <span style="font-weight:500;font-size:.74rem;color:var(--purp-m);">(optional, tap to select)</span></p>
+    <div class="grm-addons-grid" id="grm-addons">
+      <button type="button" class="grm-addon" data-addon-name="Nail trim" onclick="toggleGrmAddon(this,'Nail trim',18)">💅 Nail trim<span>$18</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Ear cleaning" onclick="toggleGrmAddon(this,'Ear cleaning',15)">👂 Ear cleaning<span>$15</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Eye cleaning" onclick="toggleGrmAddon(this,'Eye cleaning',12)">👁️ Eye cleaning<span>$12</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Teeth brushing" onclick="toggleGrmAddon(this,'Teeth brushing',15)">🦷 Teeth brushing<span>$15</span></button>
+      <button type="button" class="grm-addon" data-addon-name="Anal gland expression" onclick="toggleGrmAddon(this,'Anal gland expression',20)">✨ Anal gland<span>$20</span></button>
     </div>
-    <button class="cta" onclick="closeOverlay('grooming');openZone('booking');">Book Grooming</button>
+
+    <div id="grm-summary" style="display:none;">
+      <div id="grm-summary-text"></div>
+    </div>
+
+    <button class="cta" id="grm-book-btn" onclick="bookGrooming()" style="opacity:.5;pointer-events:none;">Continue to Checkout</button>
   </div>
 </div>
 <div class="overlay" id="ov-booking">
   <div class="card"><button class="c-close" onclick="closeOverlay('booking')">✕</button>
     <h2>Book an Appointment</h2>
-    <p>Ready to pamper your pup? Fill out below or give us a call!</p>
+    <p>Ready to pamper your furry friend? Fill out below or give us a call!</p>
     <input class="inp" type="text" placeholder="Your Name">
     <input class="inp" type="text" placeholder="Dog Name &amp; Breed">
     <select class="inp" id="booking-service-sel">
@@ -894,9 +947,9 @@ function hideTourBubble() { document.getElementById('tour-bubble').classList.rem
    follows her as she moves, cycles reminder messages.
 ─────────────────────────────────────────── */
 var SHINNY_MESSAGES = [
-  "Wuff wuff! :)",
-  "Psst… tap a glowing circle!",
-  "Don't be shy — pick a circle!"
+  "Hi sweet friend! So happy you're here 💜",
+  "Tap any glowing spot, I'll show you around ✨",
+  "Come explore with me! 🐾"
 ];
 var _shinnyBubbleEl = null;
 var _shinnyBubbleInt = null;
@@ -977,7 +1030,7 @@ function startShinnyChatter() {
   // Pattern: show first message after a small beat, hide after ~4s,
   // then wait ~6s of silence, then show next message, repeat.
   var SPEAK_MS = 4000;   // how long the bubble stays visible
-  var SILENCE_MS = 6000; // gap between messages
+  var SILENCE_MS = 9000; // gap between messages
   function speakNext() {
     if (!_shinnyBubbleEl) return;
     showShinnyBubble(SHINNY_MESSAGES[_shinnyBubbleMsgIdx]);
@@ -1002,11 +1055,11 @@ function stopShinnyChatter() {
    Shinny walks to each station and explains it.
 ─────────────────────────────────────────── */
 var SHINNY_TOUR = [
-  { zone:'grooming', msg:"Spa zone — fluff magic! ✨" },
-  { zone:'about',    msg:"Meet my humans! 💜" },
-  { zone:'daycare',  msg:"Zoomie HQ — endless playtime!" },
-  { zone:'contact',  msg:"Wanna chat? Tap! 📞" },
-  { zone:'booking',  msg:"Spa day awaits — tap Book! 🐾" }
+  { zone:'grooming', msg:"Here's our cozy spa ✨" },
+  { zone:'about',    msg:"Peek inside our pretty studio 💜" },
+  { zone:'daycare',  msg:"Welcome to our playtime home! 🐾" },
+  { zone:'contact',  msg:"Tap to say hi! 📞💜" },
+  { zone:'booking',  msg:"Ready for your spa day? Tap Book Now! 🐾" }
 ];
 var _tourActive = false;
 var _tourTimers = [];
@@ -1019,20 +1072,23 @@ function ensureTourStartButton() {
   btn.id = 'shinny-tour-start';
   btn.innerHTML = 'Take the tour 🐾';
   btn.style.cssText =
-    'position:fixed;top:54px;right:14px;z-index:80;' +
+    'position:absolute;top:50%;right:12px;transform:translateY(-50%) translateX(8px);' +
+    'z-index:55;' +
     'background:linear-gradient(135deg,#FFFAFE,#EDE0FF);' +
     'color:#3D2060;border:1.5px solid rgba(201,184,255,.85);' +
-    'border-radius:30px;padding:9px 18px;' +
-    'font-family:Nunito,sans-serif;font-weight:800;font-size:.72rem;' +
-    'letter-spacing:.08em;text-transform:uppercase;cursor:pointer;' +
-    'box-shadow:0 6px 22px rgba(61,32,96,.22);' +
-    'opacity:0;transform:translateY(-10px);' +
+    'border-radius:30px;padding:5px 12px;' +
+    'font-family:Nunito,sans-serif;font-weight:800;' +
+    'font-size:clamp(.58rem,2.2vw,.72rem);' +
+    'letter-spacing:.06em;text-transform:uppercase;cursor:pointer;' +
+    'box-shadow:0 4px 14px rgba(61,32,96,.18);' +
+    'white-space:nowrap;opacity:0;' +
     'transition:opacity .3s,transform .3s;';
   btn.onclick = function() {
     if (_tourActive) return;
     startShinnyTour();
   };
-  document.body.appendChild(btn);
+  var host = document.getElementById('topbar') || document.body;
+  host.appendChild(btn);
   _tourStartBtn = btn;
   return btn;
 }
@@ -1041,14 +1097,14 @@ function showTourStartButton() {
   var btn = ensureTourStartButton();
   requestAnimationFrame(function() {
     btn.style.opacity = '1';
-    btn.style.transform = 'translateY(0)';
+    btn.style.transform = 'translateY(-50%) translateX(0)';
   });
 }
 
 function hideTourStartButton() {
   if (!_tourStartBtn) return;
   _tourStartBtn.style.opacity = '0';
-  _tourStartBtn.style.transform = 'translateY(-10px)';
+  _tourStartBtn.style.transform = 'translateY(-50%) translateX(8px)';
 }
 
 function ensureSkipButton() {
@@ -1100,6 +1156,8 @@ function runTourStep(i) {
 function startShinnyTour() {
   if (_tourActive) return;
   _tourActive = true;
+  // Stop regular chatter so it doesn't overlap with tour lines
+  stopShinnyChatter();
   // Hide the "Take the tour" button while tour runs
   hideTourStartButton();
   // Disable zone clicks during tour
@@ -1113,7 +1171,7 @@ function startShinnyTour() {
   // Start chatter follow loop so the bubble tracks her during the tour
   if (!_shinnyBubbleFollowRAF) followShinnyBubble();
   // Intro line
-  showShinnyBubble("Quick tour — follow me! 🐾");
+  showShinnyBubble("Yay! Follow me, friend 🐾");
   _tourTimers.push(setTimeout(function() {
     runTourStep(0);
   }, 2000));
@@ -1136,10 +1194,10 @@ function stopShinnyTour() {
     mr.src = (parseFloat(mr.style.left) > parseFloat(HOME_X)) ? SRC.runLeft : SRC.runRight;
     animateRoomShinny(HOME_X, HOME_Y, 900, function() {
       mr.src = SRC.sit;
-      startShinnyChatter();
+      setTimeout(startShinnyChatter, 5000);
     });
   } else {
-    startShinnyChatter();
+    setTimeout(startShinnyChatter, 5000);
   }
   try { localStorage.setItem('shinnyTourSeen', '1'); } catch(e){}
   showTourStartButton();
@@ -1160,11 +1218,12 @@ function finishShinnyTour() {
     mr.src = (parseFloat(mr.style.left) > parseFloat(HOME_X)) ? SRC.runLeft : SRC.runRight;
     animateRoomShinny(HOME_X, HOME_Y, 1000, function() {
       mr.src = SRC.sit;
-      showShinnyBubble("Your turn! Go on, tap something!");
-      setTimeout(startShinnyChatter, 3000);
+      showShinnyBubble("Your turn, sweet friend! Tap anywhere 💜");
+      setTimeout(hideShinnyBubble, 3000);
+      setTimeout(startShinnyChatter, 8000);
     });
   } else {
-    startShinnyChatter();
+    setTimeout(startShinnyChatter, 5000);
   }
   try { localStorage.setItem('shinnyTourSeen', '1'); } catch(e){}
   showTourStartButton();
@@ -1414,112 +1473,173 @@ document.querySelectorAll('.overlay').forEach(function(ov) {
 
 /* ── GROOMING INTERACTIVE ── */
 var GRM = {
-  type: 'Full Grooming',
-  size: null,
-  sizePrice: null,
-  addons: []
+  type: null,        // 'bath' | 'machine' | 'scissor' | null
+  typeLabel: null,   // display string
+  size: null,        // 'Small' | ...
+  sizePrice: null,   // numeric price (or null for Custom Quote)
+  addons: []         // [{name, price}]
 };
 
-var GRM_SIZES = {
-  full: [
-    {ic:'🐩', nm:'Small',      pr:'From $100'},
-    {ic:'🐕', nm:'Medium',     pr:'From $120'},
-    {ic:'🦮', nm:'Large',      pr:'From $150'},
-    {ic:'🐾', nm:'Extra Large',pr:'From $170'}
-  ],
-  bath: [
-    {ic:'🛁', nm:'Small',      pr:'From $60'},
-    {ic:'🛁', nm:'Medium',     pr:'From $75'},
-    {ic:'🛁', nm:'Large',      pr:'From $85'},
-    {ic:'🛁', nm:'XL',         pr:'From $100'},
-    {ic:'🛁', nm:'XXL',        pr:'From $120'}
-  ]
+var GRM_TYPE_LABELS = {
+  bath:    'Bath Only',
+  machine: 'Machine Cut Full Grooming',
+  scissor: 'Scissor Cut Full Grooming'
 };
 
-function grmTab(type) {
-  GRM.type = (type === 'full') ? 'Full Grooming' : 'Bath Only';
+// Prices per (type, size). null = Custom Quote
+var GRM_PRICES = {
+  bath:    { Small:40, Medium:50,  Large:65,  XL:80,  XXL:95  },
+  machine: { Small:65, Medium:80,  Large:100, XL:125, XXL:155 },
+  scissor: { Small:80, Medium:95,  Large:120, XL:150, XXL:185 }
+};
+
+// Add-ons that come free with each tier
+var GRM_INCLUDED = {
+  bath:    [],
+  machine: [],
+  scissor: ['Nail trim','Ear cleaning','Eye cleaning','Anal gland expression']
+};
+
+function applyGrmIncluded(type) {
+  var included = GRM_INCLUDED[type] || [];
+  GRM.addons = GRM.addons.filter(function(a){ return included.indexOf(a.name) < 0; });
+  document.querySelectorAll('.grm-addon').forEach(function(btn){
+    var name = btn.getAttribute('data-addon-name');
+    var span = btn.querySelector('span');
+    if (span && !btn.hasAttribute('data-orig-price')) {
+      btn.setAttribute('data-orig-price', span.textContent);
+    }
+    if (included.indexOf(name) >= 0) {
+      btn.classList.add('included');
+      btn.classList.remove('active');
+      if (span) span.textContent = '✓ Included';
+    } else {
+      btn.classList.remove('included');
+      if (span) span.textContent = btn.getAttribute('data-orig-price') || span.textContent;
+    }
+  });
+}
+
+var GRM_SIZE_ORDER = ['Small','Medium','Large','XL','XXL'];
+var GRM_SIZE_WEIGHTS = {
+  Small:  '0–15 lbs',
+  Medium: '16–30 lbs',
+  Large:  '31–60 lbs',
+  XL:     '61–90 lbs',
+  XXL:    '91+ lbs'
+};
+
+function selectGrmType(type) {
+  GRM.type = type;
+  GRM.typeLabel = GRM_TYPE_LABELS[type];
   GRM.size = null; GRM.sizePrice = null;
 
-  var full = document.getElementById('grm-tab-full');
-  var bath = document.getElementById('grm-tab-bath');
-  var tabBase = 'flex:1;padding:8px;border-radius:12px;font-family:\'Nunito\',sans-serif;font-weight:800;font-size:.82rem;cursor:pointer;';
-  full.style.cssText = tabBase + (type==='full'
-    ? 'background:var(--purple);color:white;border:2px solid var(--purple);'
-    : 'background:white;color:var(--purple);border:2px solid rgba(123,94,167,.35);');
-  bath.style.cssText = tabBase + (type==='bath'
-    ? 'background:var(--purple);color:white;border:2px solid var(--purple);'
-    : 'background:white;color:var(--purple);border:2px solid rgba(123,94,167,.35);');
+  ['bath','machine','scissor'].forEach(function(t){
+    var el = document.getElementById('grm-tier-' + t);
+    if (el) el.classList.toggle('active', t === type);
+  });
 
-  // Full Grooming = all services included — lock add-ons
-  var addonsSection = document.getElementById('grm-addons');
-  var addonsLabel   = document.getElementById('grm-addons-label');
-  if (type === 'full') {
-    GRM.addons = []; // clear any selected
-    if (addonsSection) {
-      addonsSection.style.opacity = '.45';
-      addonsSection.style.pointerEvents = 'none';
-      addonsSection.querySelectorAll('.grm-addon').forEach(function(b){b.classList.remove('active');});
-    }
-    if (addonsLabel) addonsLabel.innerHTML = 'Add-on Services <span style="font-weight:600;font-size:.78rem;color:#1a9e6e;">&#9989; All included with Full Grooming</span>';
-  } else {
-    if (addonsSection) {
-      addonsSection.style.opacity = '1';
-      addonsSection.style.pointerEvents = 'all';
-    }
-    if (addonsLabel) addonsLabel.innerHTML = 'Add-on Services <span style="font-weight:500;font-size:.78rem;color:var(--purp-m);">(optional, tap to select)</span>';
-  }
-
+  document.getElementById('grm-sizes-section').style.display = 'block';
   renderGrmSizes(type);
+  applyGrmIncluded(type);
   updateGrmSummary();
 }
 
 function renderGrmSizes(type) {
   var grid = document.getElementById('grm-sizes');
-  var sizes = GRM_SIZES[type];
+  var prices = GRM_PRICES[type];
   grid.innerHTML = '';
-  sizes.forEach(function(s) {
+  GRM_SIZE_ORDER.forEach(function(sz) {
+    var price = prices[sz];
+    var priceLabel = (price === null) ? 'Custom Quote' : '$' + price;
     var btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'grm-size';
-    btn.innerHTML = '<div class="sic">'+s.ic+'</div><div class="snm">'+s.nm+'</div><div class="spr">'+s.pr+'</div>';
+    btn.innerHTML =
+      '<div class="snm">' + sz + '</div>' +
+      '<div class="swt">' + GRM_SIZE_WEIGHTS[sz] + '</div>' +
+      '<div class="spr">' + priceLabel + '</div>';
     btn.onclick = function() {
       document.querySelectorAll('.grm-size').forEach(function(b){b.classList.remove('active');});
       btn.classList.add('active');
-      GRM.size = s.nm; GRM.sizePrice = s.pr;
+      GRM.size = sz; GRM.sizePrice = price;
       updateGrmSummary();
     };
     grid.appendChild(btn);
   });
 }
 
-function toggleAddon(el, name) {
+function toggleGrmAddon(el, name, price) {
+  if (el.classList.contains('included')) return;
   el.classList.toggle('active');
-  var idx = GRM.addons.indexOf(name);
+  var idx = -1;
+  for (var i = 0; i < GRM.addons.length; i++) {
+    if (GRM.addons[i].name === name) { idx = i; break; }
+  }
   if (idx >= 0) GRM.addons.splice(idx,1);
-  else GRM.addons.push(name);
+  else GRM.addons.push({name:name, price:price});
   updateGrmSummary();
 }
+// Backward-compat alias for any older inline calls
+function toggleAddon(el, name) { toggleGrmAddon(el, name, 0); }
 
 function updateGrmSummary() {
   var sum = document.getElementById('grm-summary');
   var txt = document.getElementById('grm-summary-text');
   var btn = document.getElementById('grm-book-btn');
-  if (!GRM.size) {
+  var hasService = !!(GRM.type && GRM.size);
+  var hasAddons  = GRM.addons.length > 0;
+
+  if (!hasService && !hasAddons) {
     sum.style.display = 'none';
     btn.style.opacity = '.5'; btn.style.pointerEvents = 'none';
     return;
   }
-  var lines = ['<strong>' + GRM.type + '</strong> — ' + GRM.size + ' (' + GRM.sizePrice + ')'];
-  if (GRM.type === 'Full Grooming') {
-    lines.push('&#9989; Includes: Bathing, Brushing, Ear Cleaning, Nail Trimming, Eye Cleaning, Haircut');
-  } else if (GRM.addons.length) {
-    lines.push('Add-ons: ' + GRM.addons.join(', '));
+
+  var lines = [];
+  var total = 0;
+  var hasCustom = false;
+
+  if (hasService) {
+    var priceLabel = (GRM.sizePrice === null) ? 'Custom Quote' : '$' + GRM.sizePrice;
+    lines.push('<strong>' + GRM.typeLabel + '</strong> &middot; ' + GRM.size + ' &middot; ' + priceLabel);
+    if (GRM.sizePrice === null) hasCustom = true;
+    else total += GRM.sizePrice;
+  } else {
+    lines.push('<strong>Add-ons only</strong>');
   }
+
+  if (hasAddons) {
+    var addonNames = GRM.addons.map(function(a){return a.name + ' ($' + a.price + ')';});
+    lines.push('Add-ons: ' + addonNames.join(', '));
+    GRM.addons.forEach(function(a){ total += a.price; });
+  }
+
+  if (hasCustom) {
+    lines.push('<span class="grm-total">Total: Custom Quote' + (total ? ' + $' + total + ' add-ons' : '') + '</span>');
+  } else {
+    lines.push('<span class="grm-total">Total: $' + total + '</span>');
+  }
+
   txt.innerHTML = lines.join('<br>');
   sum.style.display = 'block';
   btn.style.opacity = '1'; btn.style.pointerEvents = 'all';
 }
 
 function bookGrooming() {
+  // Persist selection so the checkout page can pre-fill it
+  try {
+    var payload = {
+      type: GRM.type,
+      typeLabel: GRM.typeLabel,
+      size: GRM.size,
+      sizePrice: GRM.sizePrice,
+      weight: GRM.size ? GRM_SIZE_WEIGHTS[GRM.size] : null,
+      addons: GRM.addons.slice(),
+      ts: Date.now()
+    };
+    sessionStorage.setItem('shinypaws_prefill', JSON.stringify(payload));
+  } catch(e) {}
   window.location.href = 'https://shinypawsla.com/shinypaws-checkout';
 }
 
@@ -1532,12 +1652,15 @@ function openZone(name) { /* original */
   }
   try {
     if (name === 'grooming') {
-      if (typeof GRM !== 'undefined') { GRM.type='Full Grooming'; GRM.size=null; GRM.sizePrice=null; GRM.addons=[]; }
+      if (typeof GRM !== 'undefined') { GRM.type=null; GRM.typeLabel=null; GRM.size=null; GRM.sizePrice=null; GRM.addons=[]; }
       setTimeout(function(){
-        try { if (typeof grmTab === 'function') grmTab('full'); } catch(e){}
+        ['bath','machine','scissor'].forEach(function(t){
+          var el=document.getElementById('grm-tier-'+t); if(el) el.classList.remove('active');
+        });
+        var ss=document.getElementById('grm-sizes-section'); if(ss) ss.style.display='none';
+        var sg=document.getElementById('grm-sizes'); if(sg) sg.innerHTML='';
         document.querySelectorAll('.grm-addon').forEach(function(b){b.classList.remove('active');});
-        var sum=document.getElementById('grm-summary');
-        if(sum) sum.style.display='none';
+        var sum=document.getElementById('grm-summary'); if(sum) sum.style.display='none';
         var btn=document.getElementById('grm-book-btn');
         if(btn){btn.style.opacity='.5';btn.style.pointerEvents='none';}
       }, 50);
