@@ -865,11 +865,14 @@ function handleStripeReturn() {
   discount = snap.discount || 0;
   updateSum();
 
-  // Use the same booking ref and token we created before redirect
-  showSuccess(snap.ref, snap.bookingToken);
+  // Use the same booking ref and token we created before redirect.
+  // Also pass the Stripe session_id so showSuccess() can fetch + store the payment_intent
+  // on the Firebase booking (needed for auto-refund on customer cancel).
+  const sessionId = params.get('session_id') || '';
+  showSuccess(snap.ref, snap.bookingToken, sessionId);
 }
 
-function showSuccess(presetRef, presetToken) {
+function showSuccess(presetRef, presetToken, stripeSessionId) {
   // Save the booked date+time to localStorage so it stays greyed out
   // Use the date value directly from the input (YYYY-MM-DD format)
   const date = document.getElementById('appt-date').value;
@@ -967,9 +970,12 @@ function showSuccess(presetRef, presetToken) {
       status: 'pending',
       bookingRef: ref,
       bookingToken: bookingToken,
+      stripeSessionId: stripeSessionId || null,
+      paymentStatus: stripeSessionId ? 'paid' : 'unpaid',
       createdAt: new Date().toISOString()
     };
-    window.db.ref('appointments').push(firebaseBooking)
+    const newRef = window.db.ref('appointments').push(firebaseBooking);
+    newRef
       .then(() => {
         console.log('✅ Booking saved to Firebase successfully');
       })
@@ -977,6 +983,26 @@ function showSuccess(presetRef, presetToken) {
         console.error('❌ Firebase error:', err);
         console.error('Booking data:', firebaseBooking);
       });
+
+    // Look up the Stripe payment_intent from the session id and patch the booking
+    // so manage-booking.html can refund automatically on cancel.
+    if (stripeSessionId) {
+      fetch('/.netlify/functions/get-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: stripeSessionId })
+      })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (!data || !data.paymentIntentId) return;
+          window.db.ref('appointments/' + newRef.key).update({
+            stripePaymentIntentId: data.paymentIntentId,
+            amountPaidCents: data.amountTotal || null,
+            paymentStatus: data.status || 'paid'
+          });
+        })
+        .catch(err => console.warn('Could not fetch Stripe session:', err));
+    }
   } else {
     console.warn('⚠️ Firebase not initialized - booking may not be saved to admin dashboard');
   }

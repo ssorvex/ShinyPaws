@@ -139,7 +139,7 @@
       <h2>Manage Booking</h2>
       <button class="btn btn-outline" id="btn-reschedule" onclick="showReschedule()">📅 Reschedule Appointment</button>
       <button class="btn btn-danger"  id="btn-cancel"     onclick="confirmCancel()">✕ Cancel Appointment</button>
-      <p class="policy">Free cancellation up to 24 hours before your appointment. Cancellations within 24 hours may be subject to a fee. Refunds are processed manually within 1–2 business days.</p>
+      <p class="policy">Free cancellation up to 24 hours before your appointment. Cancellations within 24 hours may be subject to a fee. Refunds are issued automatically to your original card and typically appear within 5–10 business days.</p>
       <div id="msg-area"></div>
     </div>
   </div>
@@ -369,17 +369,58 @@ async function confirmReschedule() {
 
 // ── CANCEL ────────────────────────────────────────────────────────────
 async function confirmCancel() {
-  if (!confirm('Are you sure you want to cancel this appointment? This cannot be undone.')) return;
+  const hasPayment = !!currentBooking.stripePaymentIntentId;
+  const promptMsg = hasPayment
+    ? 'Cancel this appointment and refund your payment to the original card? This cannot be undone.'
+    : 'Are you sure you want to cancel this appointment? This cannot be undone.';
+  if (!confirm(promptMsg)) return;
 
   const btn = document.getElementById('btn-cancel');
-  btn.disabled = true; btn.textContent = 'Cancelling…';
+  btn.disabled = true; btn.textContent = hasPayment ? 'Cancelling & refunding…' : 'Cancelling…';
   document.getElementById('msg-area').innerHTML = '';
 
+  // Refund first (if there was a payment). Only mark cancelled in Firebase if refund succeeds —
+  // that way a failed refund doesn't leave the customer cancelled but un-refunded.
+  let refundInfo = null;
+  if (hasPayment && currentBooking.status !== 'cancelled') {
+    try {
+      const r = await fetch('/.netlify/functions/refund-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentIntentId: currentBooking.stripePaymentIntentId,
+          bookingRef: currentBooking.bookingRef
+        })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || 'Refund failed');
+      refundInfo = data;
+    } catch (err) {
+      document.getElementById('msg-area').innerHTML =
+        '<span class="msg-error">Refund failed: ' + esc(err.message || 'unknown error') +
+        '. Your appointment was NOT cancelled. Please call (310) 290-4970.</span>';
+      btn.disabled = false; btn.textContent = '✕ Cancel Appointment';
+      return;
+    }
+  }
+
   try {
-    await db.ref('appointments/' + currentBookingId).update({
+    const update = {
       status: 'cancelled',
       cancelledAt: new Date().toISOString()
-    });
+    };
+    if (refundInfo) {
+      update.refunded          = true;
+      update.refundedAt        = new Date().toISOString();
+      update.stripeRefundId    = refundInfo.refundId || null;
+      update.refundStatus      = refundInfo.status   || null;
+      update.refundAmountCents = refundInfo.amount   || null;
+    }
+    await db.ref('appointments/' + currentBookingId).update(update);
+
+    const emailMsg = refundInfo
+      ? 'Your appointment has been cancelled and a full refund has been issued to your original card. It typically appears within 5–10 business days. If you\'d like to rebook, please visit shinypawsla.com.'
+      : 'Your appointment has been cancelled. If you\'d like to rebook, please visit shinypawsla.com.';
 
     await fetch(FORMSPREE, {
       method: 'POST',
@@ -387,22 +428,30 @@ async function confirmCancel() {
       body: JSON.stringify({
         email: currentBooking.customerEmail,
         name:  currentBooking.customerName,
-        _subject: '❌ Your Shiny Paws Appointment Has Been Cancelled',
+        _subject: refundInfo
+          ? '❌ Appointment Cancelled & Refund Issued — Shiny Paws'
+          : '❌ Your Shiny Paws Appointment Has Been Cancelled',
         _template: 'table',
         petName:  currentBooking.petName,
         service:  currentBooking.service,
         date:     currentBooking.date,
         time:     currentBooking.time,
+        refundIssued: refundInfo ? 'Yes — full refund to original card' : 'No payment on file',
+        refundId:     refundInfo ? refundInfo.refundId : '',
         businessPhone: '(310) 290-4970',
         businessEmail: 'info@shinypawsla.com',
-        message: 'Your appointment has been cancelled. If you\'d like to rebook, please visit shinypawsla.com. Refunds are processed manually within 1–2 business days.'
+        message: emailMsg
       })
     });
 
-    showDone('✕', 'Appointment Cancelled',
-      `Your appointment on ${formatDisplayDate(currentBooking.date)} at ${currentBooking.time} has been cancelled. A confirmation has been sent to ${currentBooking.customerEmail}. Refunds are processed within 1–2 business days.`);
+    const doneMsg = refundInfo
+      ? `Your appointment on ${formatDisplayDate(currentBooking.date)} at ${currentBooking.time} has been cancelled and a full refund has been issued to your original card. It typically appears within 5–10 business days. A confirmation has been sent to ${currentBooking.customerEmail}.`
+      : `Your appointment on ${formatDisplayDate(currentBooking.date)} at ${currentBooking.time} has been cancelled. A confirmation has been sent to ${currentBooking.customerEmail}.`;
+
+    showDone('✕', refundInfo ? 'Cancelled & Refunded' : 'Appointment Cancelled', doneMsg);
   } catch (err) {
-    document.getElementById('msg-area').innerHTML = '<span class="msg-error">Error cancelling. Please call (310) 290-4970.</span>';
+    document.getElementById('msg-area').innerHTML =
+      '<span class="msg-error">Refund was issued but we could not update your booking. Please call (310) 290-4970.</span>';
     btn.disabled = false; btn.textContent = '✕ Cancel Appointment';
   }
 }
