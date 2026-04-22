@@ -415,7 +415,7 @@
       <h2>Booking confirmed!</h2>
       <p>A confirmation email has been sent.<br>We look forward to seeing your furry friend at Shiny Paws in Gardena!</p>
       <div id="booking-ref"></div>
-      <a id="manage-link" href="#" style="display:inline-block;margin-top:1rem;font-size:13px;color:var(--purple-mid);text-decoration:underline">Manage or cancel this booking →</a>
+      <p style="margin-top:1rem;font-size:13px;color:var(--purple-mid)">To cancel or reschedule, please call us at <a href="tel:+13102904970" style="color:var(--purple-mid);text-decoration:underline">(310) 290-4970</a>.</p>
       <button class="close-success-btn" onclick="goBack()">← Back to home</button>
     </div>
 
@@ -931,8 +931,7 @@ function showSuccess(presetRef, presetToken, stripeSessionId) {
     notes: notes,
     businessPhone: '(310) 290-4970',
     businessEmail: 'info@shinypawsla.com',
-    cancellationPolicy: 'Free cancellation up to 24 hours before your appointment. Cancellations within 24 hours may be subject to a fee.',
-    manageLink: 'https://shinypawsla.com/manage-booking.html?token=' + bookingToken
+    cancellationPolicy: 'To cancel or reschedule, please call us at (310) 290-4970. Free cancellation up to 24 hours before your appointment; cancellations within 24 hours may be subject to a fee.'
   };
   
   fetch('https://formspree.io/f/mgopplba', {
@@ -1037,8 +1036,6 @@ function showSuccess(presetRef, presetToken, stripeSessionId) {
   document.getElementById('checkout-body').style.display = 'none';
   document.getElementById('success-screen').style.display = 'block';
   document.getElementById('booking-ref').textContent = 'Booking reference: ' + ref;
-  const ml = document.getElementById('manage-link');
-  if (ml) ml.href = 'manage-booking.html?token=' + bookingToken;
 }
 
 function refreshBookedSlots() {
