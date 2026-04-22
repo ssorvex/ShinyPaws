@@ -813,7 +813,27 @@ async function pay() {
         customerEmail: email,
         bookingRef:    ref,
         successUrl:    location.origin + location.pathname,
-        cancelUrl:     location.origin + location.pathname
+        cancelUrl:     location.origin + location.pathname,
+        // Full booking snapshot for the Stripe webhook fallback. If the
+        // customer's browser dies between Stripe and our success page,
+        // the webhook reads this back from the session metadata and
+        // writes the booking to Firebase server-side.
+        booking: {
+          fname:        snapshot.fname,
+          lname:        snapshot.lname,
+          email:        snapshot.email,
+          phone:        snapshot.phone,
+          address:      snapshot.address,
+          city:         snapshot.city,
+          zip:          snapshot.zip,
+          petName:      snapshot.petName,
+          petBreed:     snapshot.breed,
+          service:      snapshot.selName,
+          date:         snapshot.date,
+          time:         snapshot.time,
+          notes:        snapshot.notes,
+          bookingToken: snapshot.bookingToken
+        }
       })
     });
     if (!res.ok) {
@@ -993,20 +1013,29 @@ function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, preset
       bookingToken: bookingToken,
       stripeSessionId: stripeSessionId || null,
       paymentStatus: stripeSessionId ? 'paid' : 'unpaid',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      source: 'browser'
     };
-    const newRef = window.db.ref('appointments').push(firebaseBooking);
-    newRef
-      .then(() => {
-        console.log('✅ Booking saved to Firebase successfully');
-      })
-      .catch(err => {
-        console.error('❌ Firebase error:', err);
-        console.error('Booking data:', firebaseBooking);
-      });
+
+    // If we have a Stripe session id, key the row by it so the server-side
+    // webhook (which writes to the same key) merges into this row instead of
+    // creating a duplicate. Otherwise fall back to push() with a random key.
+    let bookingRefDb;
+    if (stripeSessionId) {
+      bookingRefDb = window.db.ref('appointments/' + encodeURIComponent(stripeSessionId));
+      bookingRefDb.update(firebaseBooking)
+        .then(() => console.log('✅ Booking saved to Firebase (session-keyed)'))
+        .catch(err => console.error('❌ Firebase error:', err));
+    } else {
+      bookingRefDb = window.db.ref('appointments').push(firebaseBooking);
+      bookingRefDb
+        .then(() => console.log('✅ Booking saved to Firebase (auto-keyed)'))
+        .catch(err => console.error('❌ Firebase error:', err));
+    }
 
     // Look up the Stripe payment_intent from the session id and patch the booking
-    // so manage-booking.html can refund automatically on cancel.
+    // (used to be required for the customer-facing refund button — kept as a
+    // belt-and-suspenders since the webhook also sets this field).
     if (stripeSessionId) {
       fetch('/.netlify/functions/get-checkout-session', {
         method: 'POST',
@@ -1016,7 +1045,7 @@ function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, preset
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (!data || !data.paymentIntentId) return;
-          window.db.ref('appointments/' + newRef.key).update({
+          window.db.ref('appointments/' + encodeURIComponent(stripeSessionId)).update({
             stripePaymentIntentId: data.paymentIntentId,
             amountPaidCents: data.amountTotal || null,
             paymentStatus: data.status || 'paid'

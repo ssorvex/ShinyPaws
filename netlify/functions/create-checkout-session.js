@@ -44,6 +44,29 @@ exports.handler = async (event) => {
   const successBase = payload.successUrl || 'https://shinypawsla.com/shinypaws-checkout';
   const cancelBase  = payload.cancelUrl  || 'https://shinypawsla.com/shinypaws-checkout';
 
+  // Full booking snapshot — stashed in Stripe session metadata so the webhook
+  // can reconstruct the booking server-side if the customer's browser dies
+  // before reaching our success page. Each metadata value is capped at 500 chars.
+  const b = payload.booking || {};
+  const trim = (v, n) => String(v == null ? '' : v).slice(0, n || 500);
+  const bookingMetadata = {
+    bookingRef:   trim(bookingRef, 60),
+    bookingToken: trim(b.bookingToken, 80),
+    fname:        trim(b.fname, 80),
+    lname:        trim(b.lname, 80),
+    email:        trim(b.email || customerEmail, 200),
+    phone:        trim(b.phone, 40),
+    address:      trim(b.address, 200),
+    city:         trim(b.city, 80),
+    zip:          trim(b.zip, 20),
+    petName:      trim(b.petName, 80),
+    petBreed:     trim(b.petBreed, 80),
+    service:      trim(b.service, 200),
+    date:         trim(b.date, 20),
+    time:         trim(b.time, 10),
+    notes:        trim(b.notes, 500)
+  };
+
   if (!Number.isFinite(amountCents) || amountCents < 50) {
     return {
       statusCode: 400,
@@ -68,7 +91,7 @@ exports.handler = async (event) => {
         },
         quantity: 1
       }],
-      metadata: { bookingRef },
+      metadata: bookingMetadata,
       success_url: successBase + sep(successBase) + 'status=success&booking_ref=' + encodeURIComponent(bookingRef) + '&session_id={CHECKOUT_SESSION_ID}',
       cancel_url:  cancelBase  + sep(cancelBase)  + 'status=cancel&booking_ref='  + encodeURIComponent(bookingRef)
     });
