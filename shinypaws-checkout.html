@@ -251,6 +251,41 @@
     cursor: pointer; transition: opacity 0.15s;
   }
   .close-success-btn:hover { opacity: 0.85; }
+
+  /* Breed autocomplete dropdown */
+  .breed-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin-top: 2px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--border-mid, #d4b8d4);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(61,32,96,0.12);
+    display: none;
+  }
+  .breed-list.open { display: block; }
+  .breed-option {
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--purple, #3D2060);
+    border-bottom: 1px solid #f4ecf4;
+  }
+  .breed-option:last-child { border-bottom: none; }
+  .breed-option:hover,
+  .breed-option.active { background: var(--pink-light, #F8E4E4); }
+  .breed-option .match { font-weight: 600; color: var(--purple-mid, #5c3a8a); }
+  .breed-option-empty {
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--purple-soft, #7a56a8);
+    font-style: italic;
+  }
 </style>
 </head>
 <body>
@@ -344,7 +379,11 @@
             </div>
             <div class="row2">
               <div class="field"><label>Pet name</label><input type="text" id="pet-name" placeholder="Buddy" /></div>
-              <div class="field"><label>Breed</label><input type="text" id="pet-breed" placeholder="Poodle" /></div>
+              <div class="field" style="position:relative">
+                <label>Breed</label>
+                <input type="text" id="pet-breed" placeholder="Start typing… e.g. Poodle" autocomplete="off" />
+                <div id="breed-list" class="breed-list" role="listbox" aria-label="Dog breed suggestions"></div>
+              </div>
             </div>
             <div class="field"><label>Special notes</label><input type="text" id="pet-notes" placeholder="Sensitive skin, nervous around dryers..." /></div>
           </div>
@@ -1250,6 +1289,140 @@ document.getElementById('appt-date').min=today;
 document.getElementById('appt-date').value=today;
 updateSum();
 refreshBookedSlots();
+// ── DOG BREED AUTOCOMPLETE ──────────────────────────────────────────
+const DOG_BREEDS = [
+  "Affenpinscher","Afghan Hound","Airedale Terrier","Akbash Dog","Akita Inu","Alaskan Klee Kai","Alaskan Malamute",
+  "American Bulldog","American Cocker Spaniel","American Eskimo Dog","American Foxhound","American Pit Bull Terrier",
+  "American Staffordshire Terrier","American Water Spaniel","Anatolian Shepherd Dog","Aussiedoodle","Australian Cattle Dog",
+  "Australian Kelpie","Australian Shepherd","Australian Silky Terrier","Australian Terrier","Azawakh","Basenji","Basset Hound",
+  "Bavarian Mountain Hound","Beagle","Bearded Collie","Beauceron","Bedlington Terrier","Belgian Malinois","Belgian Sheepdog",
+  "Belgian Tervuren","Bernedoodle","Bernese Mountain Dog","Bichon Frise","Black and Tan Coonhound","Black Russian Terrier",
+  "Bloodhound","Bluetick Coonhound","Boerboel","Border Collie","Border Terrier","Borzoi","Boston Terrier","Bouvier des Flandres",
+  "Boxer","Boykin Spaniel","Briard","Brittany Spaniel","Brussels Griffon","Bull Terrier","Bulldog","Bullmastiff","Cairn Terrier",
+  "Canaan Dog","Cane Corso","Cardigan Welsh Corgi","Cavalier King Charles Spaniel","Cavapoo","Cesky Terrier",
+  "Chesapeake Bay Retriever","Chihuahua","Chinese Crested Dog","Chinese Shar-Pei","Chinook","Chow Chow","Clumber Spaniel",
+  "Cockapoo","Cocker Spaniel","Collie","Coonhound","Corgi (Pembroke and Cardigan)","Curly-Coated Retriever","Dachshund",
+  "Dalmatian","Dandie Dinmont Terrier","Doberman Pinscher","Dogo Argentino","Dogue de Bordeaux","Dutch Shepherd",
+  "English Bulldog","English Cocker Spaniel","English Foxhound","English Setter","English Springer Spaniel",
+  "Entlebucher Mountain Dog","Field Spaniel","Finnish Lapphund","Finnish Spitz","Flat-Coated Retriever","French Bulldog",
+  "German Pinscher","German Shepherd","German Shorthaired Pointer","German Wirehaired Pointer","Giant Schnauzer",
+  "Glen of Imaal Terrier","Golden Doodle","Golden Retriever","Gordon Setter","Great Dane","Great Pyrenees",
+  "Greater Swiss Mountain Dog","Greyhound","Harrier","Havanese","Ibizan Hound","Icelandic Sheepdog","Irish Doodle",
+  "Irish Setter","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Italian Greyhound","Jack Russell Terrier",
+  "Japanese Chin","Japanese Spitz","Kangal","Keeshond","Kerry Blue Terrier","King Charles Spaniel","Komondor","Kuvasz",
+  "Labradoodle","Labrador Retriever","Lagotto Romagnolo","Lakeland Terrier","Lhasa Apso","Lowchen","Maltese","Maltipoo",
+  "Manchester Terrier","Mastiff","Miniature Bull Terrier","Miniature Pinscher","Miniature Schnauzer","Mudi",
+  "Neapolitan Mastiff","Newfoundland","Norfolk Terrier","Norwegian Buhund","Norwegian Elkhound","Norwegian Lundehund",
+  "Nova Scotia Duck Tolling Retriever","Old English Sheepdog","Otterhound","Papillon","Pekingese","Pembroke Welsh Corgi",
+  "Perro de Presa Canario","Petit Basset Griffon Vendéen","Pharaoh Hound","Plott Hound","Pointer","Polish Lowland Sheepdog",
+  "Pomeranian","Poodle (Toy, Miniature, Standard)","Portuguese Water Dog","Pug","Puli","Pumi","Pyrenean Shepherd",
+  "Rat Terrier","Redbone Coonhound","Rhodesian Ridgeback","Rottweiler","Saluki","Samoyed","Schipperke","Schnauzer",
+  "Schnoodle","Scottish Deerhound","Scottish Terrier","Sealyham Terrier","Sheepadoodle","Shepadoodle","Shetland Sheepdog",
+  "Shiba Inu","Shih Tzu","Shih-Poo","Siberian Husky","Silky Terrier","Skye Terrier","Sloughi","Soft Coated Wheaten Terrier",
+  "Spanish Water Dog","Spinone Italiano","Staffordshire Bull Terrier","Standard Schnauzer","Sussex Spaniel","Swedish Vallhund",
+  "Thai Ridgeback","Tibetan Mastiff","Tibetan Spaniel","Tibetan Terrier","Toy Fox Terrier","Treeing Walker Coonhound",
+  "Vizsla","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Whoodle",
+  "Wire Fox Terrier","Wirehaired Pointing Griffon","Xoloitzcuintli","Yorkiepoo","Yorkshire Terrier",
+  "Mixed breed","Other / not listed"
+];
+
+(function initBreedAutocomplete(){
+  const input = document.getElementById('pet-breed');
+  const list  = document.getElementById('breed-list');
+  if (!input || !list) return;
+
+  let activeIndex = -1;
+  let currentMatches = [];
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function highlight(name, query){
+    if (!query) return escapeHtml(name);
+    const i = name.toLowerCase().indexOf(query.toLowerCase());
+    if (i < 0) return escapeHtml(name);
+    return escapeHtml(name.slice(0,i)) + '<span class="match">' + escapeHtml(name.slice(i, i+query.length)) + '</span>' + escapeHtml(name.slice(i+query.length));
+  }
+
+  function render(matches, query){
+    currentMatches = matches;
+    activeIndex = matches.length ? 0 : -1;
+    if (!matches.length) {
+      list.innerHTML = '<div class="breed-option-empty">No breed matches — you can type your own.</div>';
+      list.classList.add('open');
+      return;
+    }
+    list.innerHTML = matches.map((b, i) =>
+      '<div class="breed-option' + (i===activeIndex?' active':'') + '" role="option" data-breed="' + escapeHtml(b) + '">' + highlight(b, query) + '</div>'
+    ).join('');
+    list.classList.add('open');
+  }
+
+  function filterBreeds(q){
+    const query = q.trim().toLowerCase();
+    if (!query) {
+      // Show first ~12 alphabetically when empty (gives them something to scroll)
+      return DOG_BREEDS.slice(0, 12);
+    }
+    // Prioritize "starts with" then "contains"
+    const startsWith = [];
+    const contains = [];
+    for (const b of DOG_BREEDS) {
+      const lb = b.toLowerCase();
+      if (lb.startsWith(query)) startsWith.push(b);
+      else if (lb.includes(query)) contains.push(b);
+    }
+    return startsWith.concat(contains).slice(0, 30);
+  }
+
+  function setActive(idx){
+    const opts = list.querySelectorAll('.breed-option');
+    if (!opts.length) return;
+    activeIndex = (idx + opts.length) % opts.length;
+    opts.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
+    const a = opts[activeIndex];
+    if (a) a.scrollIntoView({ block: 'nearest' });
+  }
+
+  function pick(value){
+    input.value = value;
+    list.classList.remove('open');
+    activeIndex = -1;
+  }
+
+  input.addEventListener('focus', () => render(filterBreeds(input.value), input.value));
+  input.addEventListener('input', () => render(filterBreeds(input.value), input.value));
+
+  input.addEventListener('keydown', (e) => {
+    if (!list.classList.contains('open')) {
+      if (e.key === 'ArrowDown') { render(filterBreeds(input.value), input.value); e.preventDefault(); }
+      return;
+    }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(activeIndex + 1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIndex - 1); }
+    else if (e.key === 'Enter') {
+      if (activeIndex >= 0 && currentMatches[activeIndex]) {
+        e.preventDefault();
+        pick(currentMatches[activeIndex]);
+      }
+    }
+    else if (e.key === 'Escape') { list.classList.remove('open'); }
+  });
+
+  list.addEventListener('mousedown', (e) => {
+    // mousedown (not click) so it fires before input blur clears the list
+    const opt = e.target.closest('.breed-option');
+    if (!opt) return;
+    e.preventDefault();
+    pick(opt.getAttribute('data-breed'));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target !== input && !list.contains(e.target)) {
+      list.classList.remove('open');
+    }
+  });
+})();
+
 applyShinypawsPrefill();
 handleStripeReturn();
 
