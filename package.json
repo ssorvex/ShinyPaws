@@ -1,0 +1,9 @@
+{
+  "name": "shinypawsla-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "shinypawsla.com — static site + Netlify Functions (Stripe Checkout)",
+  "dependencies": {
+    "stripe": "^14.25.0"
+  }
+}
