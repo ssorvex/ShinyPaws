@@ -1128,13 +1128,11 @@ function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, preset
   document.getElementById('booking-ref').textContent = 'Booking reference: ' + ref;
 }
 
-function refreshBookedSlots() {
-  const date = document.getElementById('appt-date').value;
+function applyBookedToSelect(bookedTimes) {
   const select = document.querySelector('#appt-time-select');
-  if (!select || !date) return;
-  const booked = JSON.parse(localStorage.getItem('sp_booked_' + date) || '[]');
+  if (!select) return;
   Array.from(select.options).forEach(opt => {
-    if (booked.includes(opt.value)) {
+    if (bookedTimes.includes(opt.value)) {
       opt.disabled = true;
       opt.text = opt.value + ' — booked';
       opt.style.color = '#bbb';
@@ -1149,6 +1147,37 @@ function refreshBookedSlots() {
     for (let i = 0; i < select.options.length; i++) {
       if (!select.options[i].disabled) { select.selectedIndex = i; break; }
     }
+  }
+}
+
+async function refreshBookedSlots() {
+  const date = document.getElementById('appt-date').value;
+  const select = document.querySelector('#appt-time-select');
+  if (!select || !date) return;
+
+  // Fast first paint from localStorage so the UI doesn't flicker on slow networks
+  const localBooked = JSON.parse(localStorage.getItem('sp_booked_' + date) || '[]');
+  applyBookedToSelect(localBooked);
+
+  // Authoritative source: query Firebase for ALL bookings on this date,
+  // so customers on different browsers can't double-book the same slot.
+  if (!window.db) return;
+  try {
+    const snap = await window.db.ref('appointments').orderByChild('date').equalTo(date).once('value');
+    const all  = snap.val() || {};
+    const bookedTimes = [];
+    Object.values(all).forEach(apt => {
+      if (!apt || !apt.time) return;
+      // Skip cancelled bookings — those slots are free again
+      if (apt.status === 'cancelled' || apt.status === 'canceled') return;
+      if (!bookedTimes.includes(apt.time)) bookedTimes.push(apt.time);
+    });
+    // Merge with local (covers the rare race where webhook hasn't written yet)
+    localBooked.forEach(t => { if (!bookedTimes.includes(t)) bookedTimes.push(t); });
+    applyBookedToSelect(bookedTimes);
+  } catch (err) {
+    console.warn('Could not load booked slots from Firebase:', err);
+    // Fall back to localStorage-only view (already painted above)
   }
 }
 
