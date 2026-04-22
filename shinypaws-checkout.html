@@ -785,13 +785,31 @@ async function pay() {
   };
   try { sessionStorage.setItem('sp_checkout_pending', JSON.stringify(snapshot)); } catch(e){}
 
+  // Build a rich description that shows on the Stripe receipt
+  // e.g. "Shiny Paws — Full Grooming · Rex (Poodle) · Sat Apr 22, 2026 at 2:00 PM"
+  let prettyDate = date;
+  try {
+    const [yy, mm, dd] = date.split('-').map(Number);
+    prettyDate = new Date(yy, mm - 1, dd).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  } catch(e){}
+  let prettyTime = time;
+  try {
+    const [hh, mn] = time.split(':').map(Number);
+    const period = hh >= 12 ? 'PM' : 'AM';
+    const h12 = ((hh + 11) % 12) + 1;
+    prettyTime = h12 + ':' + String(mn).padStart(2,'0') + ' ' + period;
+  } catch(e){}
+  const petPart = snapshot.petName ? (' · ' + snapshot.petName + (snapshot.breed ? ' (' + snapshot.breed + ')' : '')) : '';
+  const addonPart = Object.keys(addons).length ? ' + ' + Object.keys(addons).join(', ') : '';
+  const richDescription = 'Shiny Paws — ' + selName + addonPart + petPart + ' · ' + prettyDate + ' at ' + prettyTime;
+
   try {
     const res = await fetch(CHECKOUT_FN, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amountCents:  snapshot.totalCents,
-        description:  selName + (Object.keys(addons).length ? ' + add-ons' : ''),
+        description:  richDescription,
         customerEmail: email,
         bookingRef:    ref,
         successUrl:    location.origin + location.pathname,
@@ -867,17 +885,21 @@ function handleStripeReturn() {
 
   // Use the same booking ref and token we created before redirect.
   // Also pass the Stripe session_id so showSuccess() can fetch + store the payment_intent
-  // on the Firebase booking (needed for auto-refund on customer cancel).
+  // on the Firebase booking. Pass date+time explicitly because the time-select dropdown
+  // is rebuilt asynchronously and may not have repopulated by the time showSuccess runs.
   const sessionId = params.get('session_id') || '';
-  showSuccess(snap.ref, snap.bookingToken, sessionId);
+  showSuccess(snap.ref, snap.bookingToken, sessionId, snap.date, snap.time);
 }
 
-function showSuccess(presetRef, presetToken, stripeSessionId) {
-  // Save the booked date+time to localStorage so it stays greyed out
-  // Use the date value directly from the input (YYYY-MM-DD format)
-  const date = document.getElementById('appt-date').value;
+function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, presetTime) {
+  // Save the booked date+time to localStorage so it stays greyed out.
+  // Prefer the preset values (passed in from the Stripe-return snapshot) over
+  // the DOM values, because the time-select dropdown is rebuilt asynchronously
+  // and may still be empty / showing its default first option (9:00 AM) when
+  // showSuccess() runs right after a redirect.
+  const date = presetDate || document.getElementById('appt-date').value;
   const timeEl = document.querySelector('#appt-time-select');
-  const time = timeEl ? timeEl.value : '';
+  const time = presetTime || (timeEl ? timeEl.value : '');
   if (date && time) {
     const key = 'sp_booked_' + date;
     const booked = JSON.parse(localStorage.getItem(key) || '[]');
