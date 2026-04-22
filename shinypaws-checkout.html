@@ -355,10 +355,7 @@
           <div class="card">
             <h2>Your details</h2>
 
-            <!-- Shown only when Stripe key is not set yet -->
-            <div id="local-notice">
-              ℹ️ <strong>Almost there!</strong> To activate card payments and Apple Pay, replace <code>YOUR_STRIPE_PUBLISHABLE_KEY</code> in the script with your real key from <a href="https://dashboard.stripe.com/apikeys" target="_blank" style="color:var(--purple)">Stripe Dashboard</a>.
-            </div>
+            <div id="local-notice" style="display:none"></div>
 
             <div class="row2">
               <div class="field"><label>First name</label><input type="text" id="fname" placeholder="Jane" /></div>
@@ -374,33 +371,16 @@
 
             <div class="divider"></div>
             <div class="slabel">Payment</div>
-
-            <!-- Apple Pay (only renders on live domain in Safari with Apple Pay) -->
-            <div id="express-wrap">
-              <div class="express-label">Express checkout</div>
-              <div id="payment-request-btn"></div>
-              <div id="apple-pay-notice"></div>
+            <div style="background:var(--pink-light);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;font-size:12px;color:var(--purple-soft);display:flex;align-items:center;gap:8px;">
+              🔒 You'll enter your card details on Stripe's secure payment page after clicking <strong>Book &amp; pay now</strong>.
             </div>
-            <div id="or-divider" class="or-divider" style="display:none">or pay by card</div>
+            <div class="chips" style="margin-top:8px;"><span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span><span class="chip">Apple Pay</span></div>
 
-            <div class="chips"><span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span><span class="chip">Discover</span></div>
-
-            <!-- Stripe Card Element (live) -->
-            <div id="stripe-card-wrap" class="field" style="display:none">
-              <label>Card details</label>
-              <div id="stripe-card-element" class="stripe-field"></div>
-              <div id="stripe-errors"></div>
-            </div>
-
-            <!-- Fallback plain fields (local preview / Stripe unavailable) -->
-            <div id="fallback-card">
-              <div class="field"><label>Card number</label><input type="text" id="card-num" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)" /></div>
-              <div class="row3">
-                <div class="field"><label>Expiry</label><input type="text" placeholder="MM / YY" maxlength="7" oninput="fmtExp(this)" /></div>
-                <div class="field"><label>CVC</label><input type="text" placeholder="123" maxlength="4" /></div>
-                <div class="field"><label>ZIP</label><input type="text" placeholder="90247" maxlength="5" /></div>
-              </div>
-            </div>
+            <!-- Hidden: legacy embedded card UI (replaced by hosted Stripe Checkout) -->
+            <div id="express-wrap" style="display:none"><div id="payment-request-btn"></div></div>
+            <div id="or-divider" class="or-divider" style="display:none"></div>
+            <div id="stripe-card-wrap" class="field" style="display:none"><div id="stripe-card-element" class="stripe-field"></div><div id="stripe-errors"></div></div>
+            <div id="fallback-card" style="display:none"></div>
 
             <div class="divider"></div>
             <div class="slabel">Promo code</div>
@@ -464,7 +444,9 @@ if (typeof firebase !== 'undefined') {
    Replace YOUR_STRIPE_PUBLISHABLE_KEY with your real key from:
    https://dashboard.stripe.com/apikeys
    ═══════════════════════════════════════════════════════════ */
-const STRIPE_KEY = 'YOUR_STRIPE_PUBLISHABLE_KEY';
+const STRIPE_KEY = 'pk_test_51TOVqxBNB9OiRx8wlp85gCABiudzBk2TGozBcGeYUtzz37g2wnbTiMxmsgKD4bcTUiMT65WNPJDPW1EXmDc6oVmD00pDQBxT3g';
+// Stripe Checkout (hosted) — backend at /.netlify/functions/create-checkout-session
+const CHECKOUT_FN = '/.netlify/functions/create-checkout-session';
 
 let stripeInstance = null;
 let cardElement    = null;
@@ -762,45 +744,132 @@ function fmtCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v
 function fmtExp(el){let v=el.value.replace(/\D/g,'');if(v.length>=3)v=v.substring(0,2)+' / '+v.substring(2,4);el.value=v;}
 
 async function pay() {
-  const gross=basePrice+Object.values(addons).reduce((a,b)=>a+b,0);
+  const gross = basePrice + Object.values(addons).reduce((a,b)=>a+b,0);
   if (gross===0){alert('Please select at least one service or add-on.');return;}
 
-  const btn=document.getElementById('pay-btn');
-  btn.disabled=true; btn.textContent='Processing…';
+  // Required fields
+  const fname = (document.getElementById('fname').value||'').trim();
+  const lname = (document.getElementById('lname').value||'').trim();
+  const email = (document.getElementById('email').value||'').trim();
+  const phone = (document.getElementById('phone').value||'').trim();
+  const date  = document.getElementById('appt-date').value;
+  const timeEl = document.querySelector('#appt-time-select');
+  const time  = timeEl ? timeEl.value : '';
+  if (!fname || !lname) { alert('Please enter your first and last name.'); return; }
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Please enter a valid email.'); return; }
+  if (!phone) { alert('Please enter a phone number.'); return; }
+  if (!date || !time) { alert('Please pick an appointment date and time.'); return; }
 
-  if (stripeReady && cardElement) {
-    // ── LIVE STRIPE PAYMENT ──
-    // Uncomment when backend is ready:
-    // try {
-    //   const res = await fetch('/.netlify/functions/create-payment-intent', {
-    //     method:'POST', headers:{'Content-Type':'application/json'},
-    //     body: JSON.stringify({ amount: getTotalCents(), currency:'usd',
-    //       receipt_email: document.getElementById('email').value })
-    //   });
-    //   const { clientSecret } = await res.json();
-    //   const { error } = await stripeInstance.confirmCardPayment(clientSecret, {
-    //     payment_method: { card: cardElement, billing_details: {
-    //       name: document.getElementById('fname').value+' '+document.getElementById('lname').value,
-    //       email: document.getElementById('email').value,
-    //       phone: document.getElementById('phone').value,
-    //     }}
-    //   });
-    //   if (error) {
-    //     document.getElementById('stripe-errors').textContent=error.message;
-    //     btn.disabled=false; btn.textContent='Book & pay now'; return;
-    //   }
-    //   showSuccess(); return;
-    // } catch(e) {
-    //   document.getElementById('stripe-errors').textContent='Payment failed. Please try again.';
-    //   btn.disabled=false; btn.textContent='Book & pay now'; return;
-    // }
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true; btn.textContent = 'Redirecting to secure payment…';
+
+  // Snapshot full form so we can finalize the booking after Stripe redirect
+  const ref = '#SP-' + Math.floor(100000 + Math.random() * 900000);
+  const bookingToken = Array.from(crypto.getRandomValues(new Uint8Array(18))).map(b => b.toString(16).padStart(2,'0')).join('');
+  const snapshot = {
+    fname, lname, email, phone,
+    address:  (document.getElementById('address')||{}).value || '',
+    city:     (document.getElementById('city')||{}).value    || '',
+    zip:      (document.getElementById('zip')||{}).value     || '',
+    petName:  (document.getElementById('pet-name')||{}).value || '',
+    breed:    (document.getElementById('pet-breed')||{}).value || '',
+    notes:    (document.getElementById('pet-notes')||{}).value || '',
+    selName, basePrice,
+    addons: Object.assign({}, addons),
+    discount,
+    date, time,
+    total: document.getElementById('total-val').textContent,
+    totalCents: getTotalCents(),
+    ref, bookingToken,
+    ts: Date.now()
+  };
+  try { sessionStorage.setItem('sp_checkout_pending', JSON.stringify(snapshot)); } catch(e){}
+
+  try {
+    const res = await fetch(CHECKOUT_FN, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amountCents:  snapshot.totalCents,
+        description:  selName + (Object.keys(addons).length ? ' + add-ons' : ''),
+        customerEmail: email,
+        bookingRef:    ref,
+        successUrl:    location.origin + location.pathname,
+        cancelUrl:     location.origin + location.pathname
+      })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Checkout function error:', errText);
+      alert('Payment setup failed. Please try again or call us at (310) 290-4970.');
+      btn.disabled = false; btn.textContent = 'Book & pay now';
+      return;
+    }
+    const { url } = await res.json();
+    if (!url) throw new Error('No session URL returned');
+    window.location.href = url;
+  } catch (err) {
+    console.error(err);
+    alert('Payment setup failed. Please check your connection and try again.');
+    btn.disabled = false; btn.textContent = 'Book & pay now';
   }
-
-  // Demo / local fallback
-  setTimeout(()=>{ showSuccess(); }, 900);
 }
 
-function showSuccess() {
+// After returning from Stripe (success or cancel)
+function handleStripeReturn() {
+  const params = new URLSearchParams(location.search);
+  const status = params.get('status');
+  if (!status) return;
+
+  // Strip query params from the URL bar
+  history.replaceState(null, '', location.pathname);
+
+  if (status === 'cancel') {
+    setTimeout(function(){
+      alert('Payment was cancelled. Your booking is not confirmed — feel free to try again.');
+    }, 200);
+    return;
+  }
+
+  if (status !== 'success') return;
+
+  // Restore the snapshot and finalize the booking
+  let snap = null;
+  try { snap = JSON.parse(sessionStorage.getItem('sp_checkout_pending') || 'null'); } catch(e){}
+  if (!snap) {
+    // Snapshot missing (browser cleared, different device, etc.) — still show success
+    document.getElementById('success-screen').style.display = 'block';
+    document.querySelector('.container').style.display = 'none';
+    return;
+  }
+  try { sessionStorage.removeItem('sp_checkout_pending'); } catch(e){}
+
+  // Restore form fields so showSuccess() can read them
+  function setVal(id, v){ var el=document.getElementById(id); if(el) el.value = v||''; }
+  setVal('fname', snap.fname);   setVal('lname', snap.lname);
+  setVal('email', snap.email);   setVal('phone', snap.phone);
+  setVal('address', snap.address); setVal('city', snap.city); setVal('zip', snap.zip);
+  setVal('pet-name', snap.petName); setVal('pet-breed', snap.breed); setVal('pet-notes', snap.notes);
+  setVal('appt-date', snap.date);
+  // appt-time-select is rebuilt by refreshBookedSlots — try to set it
+  setTimeout(function(){
+    var tEl = document.querySelector('#appt-time-select');
+    if (tEl) tEl.value = snap.time;
+  }, 50);
+
+  // Restore state vars used by showSuccess()
+  selName = snap.selName;
+  basePrice = snap.basePrice;
+  Object.keys(addons).forEach(function(k){ delete addons[k]; });
+  Object.assign(addons, snap.addons || {});
+  discount = snap.discount || 0;
+  updateSum();
+
+  // Use the same booking ref and token we created before redirect
+  showSuccess(snap.ref, snap.bookingToken);
+}
+
+function showSuccess(presetRef, presetToken) {
   // Save the booked date+time to localStorage so it stays greyed out
   // Use the date value directly from the input (YYYY-MM-DD format)
   const date = document.getElementById('appt-date').value;
@@ -814,8 +883,8 @@ function showSuccess() {
   }
 
   // Collect booking details
-  const ref = '#SP-' + Math.floor(100000 + Math.random() * 900000);
-  const bookingToken = Array.from(crypto.getRandomValues(new Uint8Array(18))).map(b => b.toString(16).padStart(2,'0')).join('');
+  const ref = presetRef || ('#SP-' + Math.floor(100000 + Math.random() * 900000));
+  const bookingToken = presetToken || Array.from(crypto.getRandomValues(new Uint8Array(18))).map(b => b.toString(16).padStart(2,'0')).join('');
   const fname    = document.getElementById('fname')     ? document.getElementById('fname').value     : '';
   const lname    = document.getElementById('lname')     ? document.getElementById('lname').value     : '';
   const email    = document.getElementById('email')     ? document.getElementById('email').value     : '';
@@ -1108,6 +1177,7 @@ document.getElementById('appt-date').value=today;
 updateSum();
 refreshBookedSlots();
 applyShinypawsPrefill();
+handleStripeReturn();
 
 // Refresh booked slots whenever date changes
 document.getElementById('appt-date').addEventListener('change', refreshBookedSlots);
@@ -1116,15 +1186,8 @@ document.getElementById('sp-overlay').addEventListener('click',function(e){
   if(e.target===this) closeSPCheckout();
 });
 
-// Load Stripe safely — won't crash if blocked or offline
-(function loadStripe() {
-  if (isLocal) { initStripe(); return; }
-  const s = document.createElement('script');
-  s.src = 'https://js.stripe.com/v3/';
-  s.onload = initStripe;
-  s.onerror = initStripe; // falls back to plain fields if Stripe can't load
-  document.head.appendChild(s);
-})();
+// Stripe.js is no longer loaded on this page — payment happens on Stripe's hosted Checkout.
+// (Embedded card UI is hidden; pay() POSTs to the Netlify function and redirects.)
 </script>
 
 </body>
