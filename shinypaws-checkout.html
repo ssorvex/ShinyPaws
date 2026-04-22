@@ -381,7 +381,7 @@
               <div class="field"><label>Pet name</label><input type="text" id="pet-name" placeholder="Buddy" /></div>
               <div class="field" style="position:relative">
                 <label>Breed</label>
-                <input type="text" id="pet-breed" placeholder="Start typing… e.g. Poodle" autocomplete="off" />
+                <input type="text" id="pet-breed" placeholder="Start typing… 190+ breeds (e.g. Poodle)" autocomplete="off" />
                 <div id="breed-list" class="breed-list" role="listbox" aria-label="Dog breed suggestions"></div>
               </div>
             </div>
@@ -1351,9 +1351,18 @@ const DOG_BREEDS = [
       list.classList.add('open');
       return;
     }
-    list.innerHTML = matches.map((b, i) =>
+    let html = matches.map((b, i) =>
       '<div class="breed-option' + (i===activeIndex?' active':'') + '" role="option" data-breed="' + escapeHtml(b) + '">' + highlight(b, query) + '</div>'
     ).join('');
+    // Footer hint when showing the empty-state preview (no query) so the
+    // customer knows there are way more breeds than the 12 they see.
+    if (!query) {
+      const remaining = DOG_BREEDS.length - matches.length;
+      if (remaining > 0) {
+        html += '<div class="breed-option-empty">+ ' + remaining + ' more breeds — keep typing to find yours</div>';
+      }
+    }
+    list.innerHTML = html;
     list.classList.add('open');
   }
 
