@@ -1159,17 +1159,46 @@ async function refreshBookedSlots() {
   const localBooked = JSON.parse(localStorage.getItem('sp_booked_' + date) || '[]');
   applyBookedToSelect(localBooked);
 
-  // Authoritative source: query Firebase for ALL bookings on this date,
-  // so customers on different browsers can't double-book the same slot.
+  // Authoritative source: query Firebase for ALL bookings, then match by date
+  // client-side. We do client-side matching (instead of orderByChild) because
+  // older bookings may store the date in different formats (yyyy-mm-dd,
+  // mm/dd/yyyy, etc.) — normalizing here is more forgiving.
   if (!window.db) return;
   try {
-    const snap = await window.db.ref('appointments').orderByChild('date').equalTo(date).once('value');
+    // Normalize any date string to yyyy-mm-dd for comparison
+    const normalizeDate = (s) => {
+      if (!s) return '';
+      s = String(s).trim();
+      // Already yyyy-mm-dd
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      // mm/dd/yyyy or m/d/yyyy
+      const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (m) {
+        const mm = m[1].padStart(2,'0');
+        const dd = m[2].padStart(2,'0');
+        return m[3] + '-' + mm + '-' + dd;
+      }
+      // Fallback: try Date parse
+      const d = new Date(s);
+      if (!isNaN(d.getTime())) {
+        return d.getFullYear() + '-' +
+               String(d.getMonth()+1).padStart(2,'0') + '-' +
+               String(d.getDate()).padStart(2,'0');
+      }
+      return s;
+    };
+    const targetDate = normalizeDate(date);
+
+    const snap = await window.db.ref('appointments').once('value');
     const all  = snap.val() || {};
     const bookedTimes = [];
     Object.values(all).forEach(apt => {
       if (!apt || !apt.time) return;
       // Skip cancelled bookings — those slots are free again
       if (apt.status === 'cancelled' || apt.status === 'canceled') return;
+      // Try every plausible date field name and normalize
+      const aptDate = normalizeDate(apt.date || apt.appointmentDate || apt.bookingDate || '');
+      if (aptDate !== targetDate) return;
       if (!bookedTimes.includes(apt.time)) bookedTimes.push(apt.time);
     });
     // Merge with local (covers the rare race where webhook hasn't written yet)
