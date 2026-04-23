@@ -1137,12 +1137,33 @@ function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, preset
 window._slotsCache = window._slotsCache || {};   // { 'yyyy-mm-dd': ['12:30 PM', ...] }
 window._slotsLastDate = null;
 
+// One-time: stamp each option with its ORIGINAL time string in a data-time
+// attribute, and force a clean value="" attribute. Older versions of the
+// render code corrupted opt.value by writing labels like "12:30 PM — booked"
+// straight onto the text content; once that happened the corrupted string
+// became the new "value" and stuck forever. This snapshot rescues us.
+function _ensureSlotKeys() {
+  const select = document.querySelector('#appt-time-select');
+  if (!select || select.dataset.keysReady === '1') return;
+  Array.from(select.options).forEach(opt => {
+    if (!opt.dataset.time) {
+      // Strip any leftover "— booked" from a previous corrupted state
+      const cleaned = (opt.value || opt.textContent || '').replace(/\s*[—-]\s*booked\s*$/i, '').trim();
+      opt.dataset.time = cleaned;
+      opt.value        = cleaned;
+      opt.textContent  = cleaned;
+    }
+  });
+  select.dataset.keysReady = '1';
+}
+
 function _renderSlotsFor(date) {
   const select = document.querySelector('#appt-time-select');
   if (!select) return;
+  _ensureSlotKeys();
   const booked = window._slotsCache[date] || [];
   Array.from(select.options).forEach(opt => {
-    const raw = opt.value; // value is the canonical time string, never modified
+    const raw = opt.dataset.time;          // canonical, never corrupted
     if (booked.indexOf(raw) >= 0) {
       opt.disabled    = true;
       opt.textContent = raw + ' — booked';
