@@ -1132,22 +1132,52 @@ function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, preset
 // Reads from Firebase (authoritative across all customers/devices) and skips
 // cancelled bookings. Exposed on window so the console + handlers can call it.
 
+// Cache the last-known booked map so we can re-render synchronously on every
+// date change without waiting for Firebase. Firebase refreshes update this.
+window._slotsCache = window._slotsCache || {};   // { 'yyyy-mm-dd': ['12:30 PM', ...] }
+window._slotsLastDate = null;
+
+function _renderSlotsFor(date) {
+  const select = document.querySelector('#appt-time-select');
+  if (!select) return;
+  const booked = window._slotsCache[date] || [];
+  Array.from(select.options).forEach(opt => {
+    const raw = opt.value; // value is the canonical time string, never modified
+    if (booked.indexOf(raw) >= 0) {
+      opt.disabled    = true;
+      opt.textContent = raw + ' — booked';
+      opt.style.color = '#bbb';
+    } else {
+      opt.disabled    = false;
+      opt.textContent = raw;
+      opt.style.color = '';
+    }
+  });
+  if (select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
+    for (let i = 0; i < select.options.length; i++) {
+      if (!select.options[i].disabled) { select.selectedIndex = i; break; }
+    }
+  }
+}
+
 window.refreshBookedSlots = async function refreshBookedSlots() {
   const dateInput = document.getElementById('appt-date');
   const select    = document.querySelector('#appt-time-select');
-  if (!dateInput || !select) { console.log('[slots] missing elements'); return; }
+  if (!dateInput || !select) return;
   const date = dateInput.value;
-  if (!date) { console.log('[slots] no date selected'); return; }
+  if (!date) return;
 
-  // Reset every option first so a date change actually clears stale "— booked" labels
-  Array.from(select.options).forEach(opt => {
-    opt.disabled = false;
-    opt.text     = opt.value;
-    opt.style.color = '';
-  });
+  // STEP 1 — synchronous: render whatever we know for this date right now.
+  // This guarantees that switching dates clears stale labels immediately,
+  // even before Firebase responds.
+  if (date !== window._slotsLastDate) {
+    window._slotsLastDate = date;
+    _renderSlotsFor(date);
+  }
 
-  if (!window.db) { console.log('[slots] firebase not ready'); return; }
+  if (!window.db) return;
 
+  // STEP 2 — async: refresh the cache from Firebase, then re-render.
   let snap;
   try {
     snap = await window.db.ref('appointments').once('value');
@@ -1156,31 +1186,22 @@ window.refreshBookedSlots = async function refreshBookedSlots() {
     return;
   }
 
+  // Rebuild cache for ALL dates we've seen in this session
   const all = snap.val() || {};
-  const bookedTimes = new Set();
+  const fresh = {};
   Object.values(all).forEach(apt => {
     if (!apt || !apt.time || !apt.date) return;
     if (apt.status === 'cancelled' || apt.status === 'canceled') return;
-    if (String(apt.date).trim() !== date) return;
-    bookedTimes.add(String(apt.time).trim());
+    const d = String(apt.date).trim();
+    const t = String(apt.time).trim();
+    if (!fresh[d]) fresh[d] = [];
+    if (fresh[d].indexOf(t) < 0) fresh[d].push(t);
   });
+  window._slotsCache = fresh;
 
-  console.log('[slots] date=' + date + ' booked=' + JSON.stringify([...bookedTimes]));
+  console.log('[slots] date=' + date + ' booked=' + JSON.stringify(fresh[date] || []));
 
-  Array.from(select.options).forEach(opt => {
-    if (bookedTimes.has(opt.value)) {
-      opt.disabled    = true;
-      opt.text        = opt.value + ' — booked';
-      opt.style.color = '#bbb';
-    }
-  });
-
-  // If the currently-selected option is now booked, jump to the next free one
-  if (select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
-    for (let i = 0; i < select.options.length; i++) {
-      if (!select.options[i].disabled) { select.selectedIndex = i; break; }
-    }
-  }
+  _renderSlotsFor(date);
 };
 
 // Back-compat: keep the bare name working for inline callers below
@@ -1488,6 +1509,19 @@ if (timeSelectEl) {
 // window.db was ready. Cheap and idempotent.
 setTimeout(refreshBookedSlots, 800);
 setTimeout(refreshBookedSlots, 2500);
+
+// Brute-force safety net: poll the date input every 500ms. If it changed
+// (regardless of whether change/input/blur events fired), re-render slots
+// from cache instantly. This catches every conceivable browser quirk.
+setInterval(() => {
+  const di = document.getElementById('appt-date');
+  if (!di) return;
+  if (di.value && di.value !== window._slotsLastDate) {
+    window._slotsLastDate = di.value;
+    _renderSlotsFor(di.value);
+    refreshBookedSlots();   // also kick a fresh Firebase read
+  }
+}, 500);
 
 document.getElementById('sp-overlay').addEventListener('click',function(e){
   if(e.target===this) closeSPCheckout();
