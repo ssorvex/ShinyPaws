@@ -3,1554 +3,1547 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Book an Appointment — Shiny Paws</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<title>Shiny Paws — Book Appointment (Preview v2)</title>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --purple:#5b3a87;
+    --purple-soft:#7B5EA7;
+    --lilac:#b9a4dc;
+    --pink-light:#fff5f5;
+    --pink-warm:#fbeaea;
+    --border:#e8d5e8;
+    --border-mid:#cfb6cf;
+    --text:#3a2d4d;
+    --muted:#8a7a99;
+    --accent:#e89cae;
+    --green:#2e9b5a;
+    --green-soft:#e6f5ec;
+    --red:#c54545;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'DM Sans',-apple-system,sans-serif;
+    background:linear-gradient(135deg,#fdf6f6 0%,#f6effd 100%);
+    color:var(--text);min-height:100vh;padding:20px 20px 120px;
+  }
+  @media (max-width:560px){body{padding:12px 12px 130px}}
+  .wrap{max-width:760px;margin:0 auto}
 
-  :root {
-    --pink-main:   #F2D2D2;
-    --pink-light:  #F8E4E4;
-    --pink-warm:   #EECFCF;
-    --lilac:       #C9B8FF;
-    --lilac-dusty: #D4B8E0;
-    --purple:      #3D2060;
-    --purple-mid:  #5c3a8a;
-    --purple-soft: #7a56a8;
-    --bg:          #fdf5f5;
-    --surface:     #ffffff;
-    --border:      #e8d0d0;
-    --border-mid:  #d4b8d4;
-    --radius:      14px;
-    --radius-sm:   9px;
+  .header{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:14px 20px;background:#fff;border-radius:14px;margin-bottom:16px;
+    box-shadow:0 2px 12px rgba(91,58,135,.05)
+  }
+  .header h1{font-size:18px;margin:0;color:var(--purple);font-weight:600}
+  @media (max-width:560px){.header h1{font-size:15px}.header{padding:10px 14px}}
+  .returning-btn{
+    background:transparent;border:1px solid var(--lilac);color:var(--purple);
+    padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap
+  }
+  .returning-btn:hover{background:#f3efff}
+
+  /* Progress bar */
+  .progress{display:flex;gap:6px;margin-bottom:8px;padding:0 4px}
+  .progress-step{flex:1;height:6px;background:#e8d5e8;border-radius:3px;cursor:pointer;transition:background .2s}
+  .progress-step.done{background:var(--lilac)}
+  .progress-step.active{background:var(--purple)}
+  .progress-labels{display:flex;gap:6px;margin-bottom:18px;padding:0 4px;font-size:11px;color:var(--muted)}
+  .progress-labels > div{flex:1;text-align:center;cursor:pointer}
+  .progress-labels > div.active{color:var(--purple);font-weight:600}
+  @media (max-width:560px){.progress-labels{font-size:10px}}
+
+  /* Card / panel */
+  .panel{background:#fff;border-radius:16px;padding:26px;box-shadow:0 4px 20px rgba(91,58,135,.06);margin-bottom:16px}
+  @media (max-width:560px){.panel{padding:18px}}
+  .panel h2{margin:0 0 6px;font-size:22px;color:var(--purple)}
+  .panel .sub{color:var(--muted);font-size:14px;margin-bottom:22px}
+
+  /* Pet tabs (for multi-pet flow) */
+  .pet-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .pet-tab{
+    padding:6px 12px;background:#f3efff;border:1px solid var(--border);border-radius:18px;
+    font-size:12px;color:var(--purple);cursor:pointer;display:inline-flex;align-items:center;gap:6px
+  }
+  .pet-tab.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .pet-tab .x{opacity:.7;font-weight:bold}
+  .pet-tab .x:hover{opacity:1}
+
+  /* Service category cards (Step 1) */
+  .cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .cat-card{
+    background:var(--pink-light);border:2px solid var(--border);border-radius:14px;
+    padding:22px 16px;cursor:pointer;text-align:center;transition:all .15s
+  }
+  .cat-card:hover{border-color:var(--lilac);background:#fff;transform:translateY(-2px)}
+  .cat-card.selected{border-color:var(--purple);background:#f3efff}
+  .cat-card .icon{display:flex;justify-content:center;margin-bottom:10px}
+  .cat-card .icon svg{width:42px;height:42px;color:var(--purple-soft)}
+  .cat-card .name{font-weight:600;font-size:15px;color:var(--purple);margin-bottom:4px}
+  .cat-card .desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+  /* Service item rows */
+  .service-list{display:flex;flex-direction:column;gap:10px}
+  .service-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 16px;background:var(--pink-light);border:2px solid var(--border);
+    border-radius:12px;cursor:pointer;transition:all .15s;position:relative
+  }
+  .service-row:hover{border-color:var(--lilac);background:#fff}
+  .service-row.selected{border-color:var(--purple);background:#f3efff}
+  .service-row.suggested{border-color:var(--green);background:var(--green-soft)}
+  .service-row.suggested.selected{border-color:var(--purple);background:#f3efff}
+  .service-row .sname{font-weight:600;font-size:14px;color:var(--text)}
+  .service-row .sdesc{font-size:12px;color:var(--muted);margin-top:2px}
+  .service-row .sprice{font-weight:600;font-size:15px;color:var(--purple);white-space:nowrap;margin-left:14px}
+  .service-row .duration{font-size:11px;color:var(--muted);margin-top:2px}
+  .badge-suggested{
+    position:absolute;top:-9px;left:14px;background:var(--green);color:#fff;
+    font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;letter-spacing:.04em;text-transform:uppercase
   }
 
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--purple); min-height: 100vh; }
-
-  #sp-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(30,10,50,0.55); z-index: 9999;
-    align-items: center; justify-content: center;
-    padding: 1rem; backdrop-filter: blur(3px);
+  /* Quick service add-on chips */
+  .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:8px}
+  @media (max-width:480px){.quick-grid{grid-template-columns:1fr}}
+  .quick-card{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 14px;background:#fff;border:2px solid var(--border);border-radius:10px;
+    cursor:pointer;font-size:13px;transition:all .15s;color:var(--text)
   }
-  #sp-overlay.open { display: flex; }
-
-  #sp-modal {
-    background: var(--bg); border-radius: 20px;
-    width: 100%; max-width: 980px; max-height: 92vh;
-    overflow-y: auto; position: relative;
-    box-shadow: 0 24px 60px rgba(61,32,96,0.25);
+  .quick-card:hover{border-color:var(--lilac)}
+  .quick-card.selected{border-color:var(--purple);background:var(--purple);color:#fff}
+  .quick-card.selected .qname{color:#fff}
+  .quick-card.selected .qprice{color:#fff}
+  .quick-card .qname{font-weight:600}
+  .quick-card .qprice{color:var(--purple);font-weight:600}
+  .quick-card .qcheck{
+    display:inline-block;width:18px;height:18px;border:2px solid var(--border-mid);
+    border-radius:4px;margin-right:8px;vertical-align:middle;text-align:center;
+    line-height:14px;font-size:12px;color:transparent;background:#fff
   }
+  .quick-card.selected .qcheck{background:#fff;border-color:#fff;color:var(--purple)}
 
-  #standalone-header {
-    background: var(--purple); padding: 1.1rem 2rem;
-    display: flex; align-items: center; justify-content: space-between;
-    border-radius: 20px 20px 0 0;
+  /* Form fields */
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+  .field input,.field select,.field textarea{
+    width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
+    font-size:14px;font-family:inherit;background:#fff
   }
-  .logo { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--pink-light); }
-  .logo span { color: var(--lilac); }
-  .header-addr { font-size: 12px; color: var(--lilac-dusty); }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--lilac)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-  #back-btn {
-    display: flex; align-items: center; gap: 5px;
-    background: rgba(255,255,255,0.12); border: 0.5px solid rgba(255,255,255,0.25);
-    color: var(--pink-light); font-size: 12px; font-weight: 500;
-    cursor: pointer; padding: 6px 12px; border-radius: 20px;
-    font-family: 'DM Sans', sans-serif; transition: background 0.15s;
-    white-space: nowrap;
+  /* Pet type pills */
+  .pet-type-row{display:flex;gap:10px;margin-bottom:14px}
+  .pet-type-btn{
+    flex:1;padding:14px;border:2px solid var(--border);border-radius:12px;
+    background:#fff;cursor:pointer;font-size:15px;font-weight:600;color:var(--purple);
+    text-align:center;transition:all .15s
   }
-  #back-btn:hover { background: rgba(255,255,255,0.22); }
+  .pet-type-btn:hover{border-color:var(--lilac)}
+  .pet-type-btn.selected{border-color:var(--purple);background:#f3efff}
+  .pet-type-btn .icon{font-size:28px;display:block;margin-bottom:4px}
 
-  #prefill-banner {
-    display: none; background: #f3efff;
-    border-bottom: 0.5px solid var(--lilac);
-    padding: 0.75rem 1.5rem; font-size: 12px;
-    color: var(--purple-mid); align-items: center; gap: 8px;
+  /* Temperament chips */
+  .chip-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    padding:8px 14px;border:1.5px solid var(--border);border-radius:20px;
+    background:#fff;cursor:pointer;font-size:13px;color:var(--text);transition:all .12s
   }
-  #prefill-banner.visible { display: flex; }
+  .chip:hover{border-color:var(--lilac)}
+  .chip.selected{background:var(--purple);border-color:var(--purple);color:#fff}
 
-  .container {
-    padding: 1.5rem;
-    display: grid; grid-template-columns: 1.1fr 1fr;
-    gap: 1.25rem; align-items: start;
+  /* Breed combobox */
+  .breed-wrap{position:relative}
+  .breed-list{
+    position:absolute;left:0;right:0;top:100%;margin-top:2px;
+    background:#fff;border:1px solid var(--border);border-radius:10px;
+    max-height:240px;overflow-y:auto;z-index:50;
+    box-shadow:0 6px 20px rgba(91,58,135,.12);display:none
   }
-  @media (max-width: 680px) {
-    .container { grid-template-columns: 1fr; }
-    #standalone-header { flex-direction: column; gap: 4px; }
+  .breed-list.open{display:block}
+  .breed-option{padding:10px 14px;font-size:13px;cursor:pointer}
+  .breed-option:hover,.breed-option.active{background:#f3efff}
+  .breed-empty{padding:10px 14px;font-size:12px;color:var(--muted);font-style:italic}
+
+  /* Calendar strip */
+  .cal-wrap{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 10px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+  .cal-day{
+    flex:0 0 64px;scroll-snap-align:start;background:#fff;border:1.5px solid var(--border);
+    border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;
+    transition:all .12s;position:relative;font-family:inherit
   }
-
-  .card {
-    background: var(--surface); border: 0.5px solid var(--border);
-    border-radius: var(--radius); padding: 1.4rem;
+  .cal-day:hover{border-color:var(--lilac)}
+  .cal-day.selected{border-color:var(--purple);background:#f3efff}
+  .cal-day.full{opacity:.4;cursor:not-allowed}
+  .cal-day .dow{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .cal-day .dom{font-size:18px;font-weight:700;color:var(--text);margin:2px 0}
+  .cal-day.selected .dom{color:var(--purple)}
+  .cal-day .mon{font-size:10px;color:var(--muted)}
+  .cal-day .dot{
+    display:inline-block;width:5px;height:5px;border-radius:50%;margin-top:4px;
+    background:var(--green)
   }
+  .cal-day.busy .dot{background:#e8a838}
+  .cal-day.full .dot{background:var(--red)}
 
-  h2 { font-family: 'DM Serif Display', serif; font-size: 17px; font-weight: 400; color: var(--purple); margin-bottom: 1rem; }
-  .slabel { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--purple-soft); margin-bottom: 0.5rem; font-weight: 500; }
-
-  .cat-tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 0.8rem; }
-  .cat-tab {
-    padding: 5px 13px; border: 0.5px solid var(--lilac-dusty);
-    border-radius: 20px; font-size: 12px; cursor: pointer;
-    background: var(--pink-light); color: var(--purple-soft);
-    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  /* Time slot grid */
+  .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+  @media (max-width:560px){.time-grid{grid-template-columns:repeat(3,1fr)}}
+  .time-slot{
+    padding:10px;border:1.5px solid var(--border);border-radius:10px;
+    background:#fff;text-align:center;cursor:pointer;font-size:13px;font-weight:500;
+    font-family:inherit;color:var(--text)
   }
-  .cat-tab.active { background: var(--purple); color: var(--pink-light); border-color: var(--purple); }
-  .cat-tab:hover:not(.active) { background: var(--pink-warm); }
+  .time-slot:hover:not(:disabled){border-color:var(--lilac)}
+  .time-slot.selected{border-color:var(--purple);background:#f3efff;color:var(--purple);font-weight:700}
+  .time-slot:disabled{opacity:.35;cursor:not-allowed;text-decoration:line-through}
 
-  .service-card {
-    background: var(--pink-light); border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm); padding: 0.75rem 0.9rem;
-    margin-bottom: 0.5rem; cursor: pointer;
-    transition: border-color 0.15s, background 0.15s; display: none;
+  /* Step nav buttons */
+  .nav-row{display:flex;justify-content:space-between;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .btn{
+    padding:13px 22px;border-radius:10px;font-size:14px;font-weight:600;
+    cursor:pointer;font-family:inherit;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;justify-content:center
   }
-  .service-card.visible { display: block; }
-  .service-card.selected { border: 2px solid var(--lilac); background: #f3efff; }
-  .service-card:hover:not(.selected) { background: var(--pink-warm); border-color: var(--border-mid); }
+  .btn-primary{background:var(--purple);color:#fff}
+  .btn-primary:hover{background:#4a2e6e}
+  .btn-primary:disabled{background:#bca6c9;cursor:not-allowed}
+  .btn-secondary{background:#fff;color:var(--purple);border:1.5px solid var(--lilac)}
+  .btn-secondary:hover{background:#f3efff}
+  .btn-ghost{background:transparent;color:var(--purple);border:1px dashed var(--lilac)}
+  .btn-ghost:hover{background:#f3efff}
+  .spinner{width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
 
-  .srow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .sname { font-size: 13px; font-weight: 500; color: var(--purple); }
-  .sdesc { font-size: 11px; color: var(--purple-soft); margin-top: 2px; }
-  .sprice { font-size: 13px; font-weight: 500; color: var(--purple); white-space: nowrap; }
-
-  .addon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 0.5rem; }
-  .addon-card {
-    background: var(--pink-light); border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm); padding: 0.65rem 0.8rem;
-    cursor: pointer; display: flex; justify-content: space-between;
-    align-items: center; gap: 6px; transition: border-color 0.15s, background 0.15s;
+  /* Sticky bottom price bar */
+  .sticky-total{
+    position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.97);
+    backdrop-filter:blur(8px);border-top:1px solid var(--border);
+    box-shadow:0 -4px 20px rgba(91,58,135,.08);padding:12px 20px;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:100
   }
-  .addon-card.picked { border: 2px solid var(--lilac); background: #f3efff; }
-  .addon-card:hover:not(.picked) { background: var(--pink-warm); border-color: var(--border-mid); }
-  .addon-name { font-size: 12px; font-weight: 500; color: var(--purple); }
-  .addon-price { font-size: 11px; color: var(--purple-soft); margin-top: 1px; }
-  .addon-check { font-size: 13px; color: var(--purple-mid); display: none; }
-  .addon-card.picked .addon-check { display: inline; }
+  .sticky-total .summary-text{font-size:13px;color:var(--text);line-height:1.3;flex:1;min-width:0}
+  .sticky-total .summary-text .label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;display:block}
+  .sticky-total .summary-text .body{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sticky-total .total-amt{font-weight:700;font-size:20px;color:var(--purple);white-space:nowrap}
+  .sticky-total .total-amt .lbl{display:block;font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;text-align:right}
+  @media (max-width:560px){.sticky-total{padding:10px 14px}.sticky-total .total-amt{font-size:18px}}
 
-  .divider { height: 0.5px; background: var(--border); margin: 1rem 0; }
-  .field { margin-bottom: 0.8rem; }
-  label { display: block; font-size: 11px; color: var(--purple-soft); margin-bottom: 4px; font-weight: 500; }
-
-  input, select {
-    width: 100%; padding: 9px 12px;
-    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
-    font-size: 13px; background: #fff; color: var(--purple);
-    font-family: 'DM Sans', sans-serif; outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s; -webkit-appearance: none;
+  /* Final summary box */
+  .summary-box{
+    background:#fff;border:1px dashed var(--lilac);border-radius:12px;
+    padding:14px 16px;font-size:13px;margin-top:16px
   }
-  input:focus, select:focus { border-color: var(--lilac); box-shadow: 0 0 0 3px rgba(201,184,255,0.25); }
-  input::placeholder { color: var(--lilac-dusty); }
+  .summary-box .srow-r{display:flex;justify-content:space-between;padding:4px 0}
+  .summary-box .srow-r.total{border-top:1px solid var(--border);margin-top:6px;padding-top:8px;font-weight:700;color:var(--purple)}
+  .summary-box .empty{color:var(--muted);font-style:italic}
+  .summary-box .pet-block{padding:8px 0;border-bottom:1px dashed var(--border)}
+  .summary-box .pet-block:last-of-type{border-bottom:none}
+  .summary-box .pet-block .pname{font-weight:600;color:var(--purple);margin-bottom:4px}
 
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  /* Returning customer panel */
+  .rc-panel{background:#fff;border:1px solid var(--lilac);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
+  .rc-panel.open{display:block}
+  .rc-row{display:flex;gap:8px}
+  .rc-row input{flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px}
+  .rc-row button{padding:10px 16px;background:var(--purple);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600}
+  .rc-status{margin-top:8px;font-size:12px;color:var(--muted)}
 
-  /* Apple Pay */
-  .express-label {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11px; color: var(--purple-soft);
-    text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.6rem;
+  /* Restore prompt */
+  .restore-prompt{
+    background:#f3efff;border:1px solid var(--lilac);border-radius:12px;padding:14px 16px;
+    margin-bottom:16px;display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap
   }
-  .express-label::before, .express-label::after { content:''; flex:1; height:0.5px; background:var(--border); }
+  .restore-prompt.open{display:flex}
+  .restore-prompt .msg{font-size:13px;color:var(--purple)}
+  .restore-prompt .actions{display:flex;gap:8px}
+  .restore-prompt button{font-family:inherit;cursor:pointer;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600}
+  .restore-prompt .resume{background:var(--purple);color:#fff}
+  .restore-prompt .discard{background:#fff;color:var(--muted);border:1px solid var(--border)}
 
-  #payment-request-btn { min-height: 44px; border-radius: var(--radius-sm); overflow: hidden; }
-
-  /* Shown locally or when Apple Pay unavailable */
-  #apple-pay-notice {
-    background: var(--pink-light); border: 0.5px solid var(--border);
-    border-radius: var(--radius-sm); padding: 10px 14px;
-    font-size: 12px; color: var(--purple-soft); text-align: center;
-    display: none;
+  /* Helper / hint / reassurance */
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .reassure{
+    display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);
+    background:#f8f5fc;padding:8px 12px;border-radius:8px;margin-top:8px
   }
+  .reassure svg{flex-shrink:0;color:var(--green)}
+  .pay-methods{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;color:var(--muted);font-size:11px;flex-wrap:wrap}
+  .pay-methods .pm{padding:3px 8px;background:#fff;border:1px solid var(--border);border-radius:6px;font-weight:600;color:var(--text)}
 
-  .or-divider {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 11px; color: var(--purple-soft); margin: 0.9rem 0;
+  /* Validation hint */
+  .validation-hint{
+    font-size:12px;color:var(--accent);margin-top:8px;padding:8px 12px;
+    background:#fdf0f3;border-radius:8px;display:none
   }
-  .or-divider::before, .or-divider::after { content:''; flex:1; height:0.5px; background:var(--border); }
+  .validation-hint.show{display:block}
 
-  /* Stripe Card Element */
-  .stripe-field {
-    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
-    padding: 10px 12px; background: #fff;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .stripe-field.focused { border-color: var(--lilac); box-shadow: 0 0 0 3px rgba(201,184,255,0.25); }
-  .stripe-field.error { border-color: #c0392b; }
-
-  /* Fallback plain card fields (shown when Stripe can't load) */
-  #fallback-card { display: none; }
-
-  #stripe-errors { font-size: 11px; color: #c0392b; margin-top: 5px; min-height: 16px; }
-
-  .promo-row { display: flex; gap: 7px; }
-  .promo-row input { flex: 1; }
-  .apply-btn {
-    padding: 9px 15px; background: var(--pink-main);
-    border: 0.5px solid var(--border-mid); border-radius: var(--radius-sm);
-    font-size: 12px; font-weight: 500; cursor: pointer; color: var(--purple);
-    white-space: nowrap; font-family: 'DM Sans', sans-serif; transition: background 0.15s;
-  }
-  .apply-btn:hover { background: var(--pink-warm); }
-
-  .pmsg-ok  { font-size: 11px; color: #3a7050; margin-top: 4px; }
-  .pmsg-err { font-size: 11px; color: #a03030; margin-top: 4px; }
-
-  .sum-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--purple-soft); margin-bottom: 7px; }
-  .sum-row.total { font-size: 15px; font-weight: 500; color: var(--purple); margin-top: 4px; }
-  .sum-row.disc { color: #3a7050; }
-
-  .pay-btn {
-    width: 100%; padding: 13px; background: var(--purple);
-    color: var(--pink-light); border: none; border-radius: var(--radius);
-    font-size: 15px; font-weight: 500; cursor: pointer;
-    font-family: 'DM Serif Display', serif; letter-spacing: 0.02em;
-    transition: opacity 0.15s, transform 0.1s; margin-top: 1rem;
-  }
-  .pay-btn:hover { opacity: 0.88; }
-  .pay-btn:active { transform: scale(0.99); }
-  .pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-  .secure { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--purple-soft); justify-content: center; margin-top: 0.65rem; }
-  .chips { display: flex; gap: 5px; margin-bottom: 9px; flex-wrap: wrap; }
-  .chip { font-size: 10px; padding: 3px 9px; border: 0.5px solid var(--border); border-radius: 4px; color: var(--purple-soft); background: var(--pink-light); }
-
-  .addon-only-note {
-    font-size: 12px; color: var(--purple-soft); font-style: italic;
-    padding: 0.65rem 0.9rem; background: var(--pink-light);
-    border: 0.5px solid var(--border); border-radius: var(--radius-sm);
-    margin-bottom: 0.65rem; display: none;
+  /* Preview banner */
+  .preview-banner{
+    background:#fff3cd;border:1px solid #ffd966;color:#664d00;
+    padding:10px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;text-align:center
   }
 
-  /* Local testing notice */
-  #local-notice {
-    background: #fff8e6; border: 1px solid #f0c040;
-    border-radius: var(--radius-sm); padding: 10px 14px;
-    font-size: 12px; color: #7a5a00; margin-bottom: 1rem;
-    line-height: 1.6; display: none;
+  /* Confused? Call us — sticky-feeling banner shown above every step */
+  .call-banner{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    background:linear-gradient(135deg,#f3efff 0%,#fbeaea 100%);
+    border:2px dashed var(--lilac);color:var(--purple);
+    padding:11px 16px;border-radius:12px;margin-bottom:14px;font-size:13px;
+    text-decoration:none;font-weight:500;transition:all .15s
   }
-  #local-notice code { background: #ffeea0; padding: 1px 5px; border-radius: 3px; }
+  .call-banner:hover{background:#fff;border-style:solid;transform:translateY(-1px);box-shadow:0 4px 14px rgba(91,58,135,.08)}
+  .call-banner b{font-weight:700;letter-spacing:.02em}
+  @media (max-width:560px){.call-banner{font-size:12px;padding:10px 12px}}
 
-  #success-screen {
-    display: none; text-align: center;
-    padding: 3rem 2rem; background: var(--surface);
-    border-radius: 0 0 20px 20px;
+  /* No-show fee notice (Step 5) */
+  .no-show-notice{
+    display:flex;align-items:flex-start;gap:10px;
+    background:#fff8e6;border:1px solid #f5c969;color:#704a00;
+    padding:12px 14px;border-radius:10px;margin-top:12px;font-size:12.5px;line-height:1.45
   }
-  .check-circle {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: #f3efff; border: 2px solid var(--lilac);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; color: var(--purple); margin: 0 auto 1.25rem;
-  }
-  #success-screen h2 { font-size: 24px; margin-bottom: 0.75rem; font-family: 'DM Serif Display', serif; }
-  #success-screen p  { font-size: 14px; color: var(--purple-soft); line-height: 1.6; }
-  #booking-ref { font-size: 12px; color: var(--lilac-dusty); margin-top: 0.75rem; }
-  .close-success-btn {
-    margin-top: 1.5rem; padding: 10px 28px;
-    background: var(--purple); color: var(--pink-light);
-    border: none; border-radius: var(--radius);
-    font-family: 'DM Serif Display', serif; font-size: 14px;
-    cursor: pointer; transition: opacity 0.15s;
-  }
-  .close-success-btn:hover { opacity: 0.85; }
+  .no-show-notice .ico{font-size:16px;line-height:1}
 
-  /* Breed autocomplete dropdown */
-  .breed-list {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    margin-top: 2px;
-    max-height: 220px;
-    overflow-y: auto;
-    background: #fff;
-    border: 1px solid var(--border-mid, #d4b8d4);
-    border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(61,32,96,0.12);
-    display: none;
+  /* "Included" pill on quick-extras when bundled with grooming */
+  .quick-card.included{
+    background:var(--green-soft);border-color:var(--green);cursor:not-allowed;opacity:.95
   }
-  .breed-list.open { display: block; }
-  .breed-option {
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    color: var(--purple, #3D2060);
-    border-bottom: 1px solid #f4ecf4;
+  .quick-card.included .qprice{color:var(--green);font-weight:700}
+  .quick-card.included .qcheck{background:var(--green);color:#fff;border-color:var(--green)}
+  .included-badge{
+    display:inline-block;background:var(--green);color:#fff;font-size:9px;font-weight:700;
+    padding:2px 6px;border-radius:8px;margin-left:6px;letter-spacing:.04em;text-transform:uppercase
   }
-  .breed-option:last-child { border-bottom: none; }
-  .breed-option:hover,
-  .breed-option.active { background: var(--pink-light, #F8E4E4); }
-  .breed-option .match { font-weight: 600; color: var(--purple-mid, #5c3a8a); }
-  .breed-option-empty {
-    padding: 10px 12px;
-    font-size: 12px;
-    color: var(--purple-soft, #7a56a8);
-    font-style: italic;
+
+  /* ═══ Shiny mascot side guide ═══ */
+  .mascot{
+    position:fixed;right:24px;top:90px;width:280px;z-index:90;
+    display:flex;flex-direction:column;align-items:center;pointer-events:none
+  }
+  .mascot-bubble{
+    background:#fff;border:2px solid var(--lilac);border-radius:18px;
+    padding:14px 16px;font-size:13px;color:var(--text);line-height:1.45;
+    box-shadow:0 6px 20px rgba(91,58,135,.12);position:relative;margin-bottom:10px;
+    pointer-events:auto;animation:bubble-pop .35s ease-out
+  }
+  .mascot-bubble:after{
+    content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+    border:10px solid transparent;border-top-color:var(--lilac);border-bottom:0
+  }
+  .mascot-bubble:before{
+    content:'';position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);
+    border:8px solid transparent;border-top-color:#fff;border-bottom:0;z-index:1
+  }
+  .mascot-bubble .name{font-weight:700;color:var(--purple);font-size:12px;margin-bottom:3px;display:block;letter-spacing:.03em;text-transform:uppercase}
+  .mascot-img{
+    width:240px;height:280px;border-radius:28px;
+    background:linear-gradient(135deg,#f3efff 0%,#fbeaea 100%);
+    border:3px solid var(--lilac);
+    display:flex;align-items:center;justify-content:center;font-size:64px;overflow:hidden;
+    box-shadow:0 12px 32px rgba(91,58,135,.22);pointer-events:auto
+  }
+  .mascot-img model-viewer{width:100%;height:100%;background:transparent;--poster-color:transparent}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @keyframes bubble-pop{from{opacity:0;transform:scale(.8) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+  /* Mobile / narrow screens — collapse to a tappable corner bubble */
+  @media (max-width:1100px){
+    .mascot{
+      right:12px;bottom:90px;top:auto;width:auto;flex-direction:row;align-items:flex-end;gap:8px
+    }
+    .mascot-bubble{
+      max-width:220px;font-size:12px;padding:10px 12px;margin-bottom:0;margin-right:6px;
+      display:none
+    }
+    .mascot.open .mascot-bubble{display:block}
+    .mascot-bubble:after,.mascot-bubble:before{display:none}
+    .mascot-img{width:80px;height:90px;cursor:pointer;border-radius:18px}
+  }
+  @media (max-width:560px){
+    .mascot{bottom:80px;right:8px}
+    .mascot-img{width:64px;height:72px;border-radius:14px}
   }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div id="sp-overlay" class="open">
-  <div id="sp-modal">
+  <div class="preview-banner">
+    🚧 PREVIEW MODE — UX prototype. Stripe/Firebase not wired yet. Click around to test the flow.
+  </div>
 
-    <div id="standalone-header">
-      <button id="back-btn" onclick="goBack()" title="Back to main site">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Back
+  <div class="header">
+    <h1>🐾 Shiny Paws — Book your appointment</h1>
+    <button class="returning-btn" onclick="toggleReturning()">Returning? →</button>
+  </div>
+
+  <!-- Confused? Call us — visible on every step -->
+  <a href="tel:+13102904970" class="call-banner">
+    📞 Confused? Call us — <b>(310) 290-4970</b> — and we'll book you in 60 seconds.
+  </a>
+
+  <div class="rc-panel" id="rc-panel">
+    <div style="font-weight:600;color:var(--purple);margin-bottom:8px;font-size:14px">Welcome back!</div>
+    <div class="rc-row">
+      <input type="tel" id="rc-phone" placeholder="Enter your phone number" />
+      <button onclick="lookupCustomer()">Find →</button>
+    </div>
+    <div class="rc-status" id="rc-status">Your last visit details will autofill so you can book in seconds.</div>
+  </div>
+
+  <div class="restore-prompt" id="restore-prompt">
+    <div class="msg">👋 Welcome back! Want to continue where you left off?</div>
+    <div class="actions">
+      <button class="resume" onclick="restoreState()">Continue</button>
+      <button class="discard" onclick="clearSavedState()">Start over</button>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress" id="progress">
+    <div class="progress-step active" data-step="1" onclick="gotoStep(1)"></div>
+    <div class="progress-step" data-step="2" onclick="gotoStep(2)"></div>
+    <div class="progress-step" data-step="3" onclick="gotoStep(3)"></div>
+    <div class="progress-step" data-step="4" onclick="gotoStep(4)"></div>
+    <div class="progress-step" data-step="5" onclick="gotoStep(5)"></div>
+  </div>
+  <div class="progress-labels" id="progress-labels">
+    <div class="active" data-step="1" onclick="gotoStep(1)">1. Service</div>
+    <div data-step="2" onclick="gotoStep(2)">2. Your pet</div>
+    <div data-step="3" onclick="gotoStep(3)">3. Pick package</div>
+    <div data-step="4" onclick="gotoStep(4)">4. When</div>
+    <div data-step="5" onclick="gotoStep(5)">5. Confirm</div>
+  </div>
+
+  <!-- Pet tabs (multi-pet) -->
+  <div class="pet-tabs" id="pet-tabs"></div>
+
+  <!-- ════════════ STEP 1 ════════════ -->
+  <div class="panel step-panel" id="step-1">
+    <h2 id="step1-title">What can we help with today?</h2>
+    <p class="sub">Pick the main service. You can add quick extras (like nail trim) on the next step.</p>
+    <div class="cat-grid">
+      <div class="cat-card" data-cat="grooming" onclick="selectCategory('grooming',this)">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg></div>
+        <div class="name">Grooming</div>
+        <div class="desc">Full bath + cut. Scissor or clipper.</div>
+      </div>
+      <div class="cat-card" data-cat="bath" onclick="selectCategory('bath',this)">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-3 0V12a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V8H9z"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M7 19l-1 3"/><path d="M17 19l1 3"/></svg></div>
+        <div class="name">Bath only</div>
+        <div class="desc">Shampoo, blow-dry, brush out.</div>
+      </div>
+      <div class="cat-card" data-cat="daycare" onclick="selectCategory('daycare',this)">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5l-1.5 4L4 10l4 3-1 5 4-2.5L15 18l-1-5 4-3-5.5-1z"/><circle cx="20" cy="5" r="1.5"/></svg></div>
+        <div class="name">Day care</div>
+        <div class="desc">Hourly, half-day, full day, overnight.</div>
+      </div>
+      <div class="cat-card" data-cat="quick" onclick="selectCategory('quick',this)">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div class="name">Quick services</div>
+        <div class="desc">Just nail trim, eye cleaning, etc.</div>
+      </div>
+    </div>
+    <div class="validation-hint" id="hint-1">Pick a service category to continue.</div>
+    <div class="nav-row">
+      <span></span>
+      <button class="btn btn-primary" id="btn-next-1" onclick="gotoStep(2)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ════════════ STEP 2 — Pet info ════════════ -->
+  <div class="panel step-panel" id="step-2" style="display:none">
+    <h2>Tell us about your pet</h2>
+    <p class="sub">This helps our groomers prepare the right tools and approach. We'll auto-suggest the right size on the next step.</p>
+
+    <div class="field">
+      <label>Pet type</label>
+      <div class="pet-type-row">
+        <div class="pet-type-btn" data-type="dog" onclick="setPetType('dog',this)">
+          <span class="icon">🐕</span>
+          Dog
+        </div>
+        <div class="pet-type-btn" data-type="cat" onclick="setPetType('cat',this)">
+          <span class="icon">🐈</span>
+          Cat
+        </div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Pet name</label>
+      <input type="text" id="pet-name" placeholder="e.g. Buddy" />
+    </div>
+
+    <div class="field breed-wrap" id="breed-wrap" style="display:none">
+      <label>Breed</label>
+      <input type="text" id="pet-breed" placeholder="Start typing breed name…" autocomplete="off" />
+      <div class="breed-list" id="breed-list"></div>
+      <div class="hint" id="breed-hint">We use the breed to auto-suggest the right size on the next step.</div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Age</label>
+        <input type="number" id="pet-age" min="0" max="25" step="1" placeholder="e.g. 3" />
+        <div class="hint">Years (0–25). For puppies/kittens under 1, use 0 + months below.</div>
+      </div>
+      <div class="field" id="age-months-field" style="display:none">
+        <label>Months <span style="color:var(--muted);font-weight:400;text-transform:none">(if &lt; 1 yr)</span></label>
+        <input type="number" id="pet-age-months" min="0" max="11" step="1" placeholder="e.g. 6" />
+      </div>
+    </div>
+
+    <div class="field" id="spay-field" style="display:none">
+      <label>Spay / Neuter status</label>
+      <select id="pet-fixed">
+        <option value="">— Select —</option>
+        <option value="spayed">Spayed (female, fixed)</option>
+        <option value="neutered">Neutered (male, fixed)</option>
+        <option value="intact-female">Intact female</option>
+        <option value="intact-male">Intact male</option>
+        <option value="unsure">Not sure</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Temperament <span style="color:var(--muted);font-weight:400;text-transform:none">(pick all that apply)</span></label>
+      <div class="chip-grid" id="temperament-chips"></div>
+    </div>
+
+    <div class="field">
+      <label>Notes for the groomer <span style="color:var(--accent);font-weight:600">*</span></label>
+      <textarea id="pet-notes" rows="2" placeholder="Any allergies, sensitivities, prior matting, etc. — type 'none' if nothing to add."></textarea>
+      <div class="hint">Required — if nothing to add, type <b>none</b> or click below.</div>
+      <button type="button" class="btn btn-ghost" style="margin-top:8px;padding:6px 12px;font-size:12px" onclick="setNotesNone()">No notes</button>
+    </div>
+
+    <div class="validation-hint" id="hint-2">Add pet name, breed, age, and notes to continue.</div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="gotoStep(1)">← Back</button>
+      <button class="btn btn-primary" id="btn-next-2" onclick="advanceFromPet()" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ════════════ STEP 3 — Service detail ════════════ -->
+  <div class="panel step-panel" id="step-3" style="display:none">
+    <h2 id="step3-title">Pick your service</h2>
+    <p class="sub" id="step3-sub">Select size and type.</p>
+
+    <div id="grooming-tabs" style="display:none;margin-bottom:14px">
+      <button class="btn btn-secondary" onclick="setGroomType('scissor')" id="tab-scissor" style="margin-right:6px">Scissor cut</button>
+      <button class="btn btn-secondary" onclick="setGroomType('clipper')" id="tab-clipper">Clipper cut</button>
+    </div>
+
+    <div class="service-list" id="service-list"></div>
+
+    <div id="quick-extras-section" style="margin-top:24px;padding-top:18px;border-top:1px dashed var(--border)">
+      <div style="font-weight:600;color:var(--purple);margin-bottom:4px;font-size:14px">Add quick extras (optional)</div>
+      <div class="hint" style="margin-bottom:10px">Stack any of these on top of your main service.</div>
+      <div class="quick-grid" id="quick-extras-grid"></div>
+    </div>
+
+    <div class="validation-hint" id="hint-3">Pick at least one service to continue.</div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="gotoStep(2)">← Back</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="addAnotherPet()">+ Add another pet</button>
+        <button class="btn btn-primary" id="btn-next-3" onclick="gotoStep(4)" disabled>Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ STEP 4 ════════════ -->
+  <div class="panel step-panel" id="step-4" style="display:none">
+    <h2>When would you like to come in?</h2>
+    <p class="sub">Pick a date — green dot means open, orange means filling up, red means full.</p>
+
+    <div class="field">
+      <label>Date</label>
+      <div class="cal-wrap" id="cal-wrap"></div>
+      <div class="hint">Scroll right for more dates.</div>
+    </div>
+
+    <div class="field">
+      <label>Time</label>
+      <div class="time-grid" id="time-grid"></div>
+    </div>
+
+    <div class="reassure">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Free cancellation up to 24h before your appointment.
+    </div>
+
+    <div class="validation-hint" id="hint-4">Pick a date and time to continue.</div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="gotoStep(3)">← Back</button>
+      <button class="btn btn-primary" id="btn-next-4" onclick="gotoStep(5)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ════════════ STEP 5 — Confirm (no online payment) ════════════ -->
+  <div class="panel step-panel" id="step-5" style="display:none">
+    <h2>Almost done — your contact info</h2>
+    <p class="sub">We'll send confirmation by email and a reminder by text. Payment happens in-store after the service.</p>
+
+    <div class="row2">
+      <div class="field"><label>First name</label><input type="text" id="cust-fname" /></div>
+      <div class="field"><label>Last name</label><input type="text" id="cust-lname" /></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Email</label><input type="email" id="cust-email" /></div>
+      <div class="field"><label>Phone</label><input type="tel" id="cust-phone" /></div>
+    </div>
+    <div class="field"><label>Address</label><input type="text" id="cust-address" placeholder="Street, City, ZIP" /></div>
+
+    <div class="reassure">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Your info is private — never shared, never sold.
+    </div>
+
+    <div class="summary-box" id="summary-final"></div>
+
+    <!-- Pay-at-pickup callout -->
+    <div id="pay-pickup-box" style="background:linear-gradient(135deg,#f3efff 0%,#fbeaea 100%);border:2px solid var(--lilac);border-radius:14px;padding:18px;margin-top:16px;text-align:center">
+      <div style="font-size:11px;color:var(--purple);text-transform:uppercase;letter-spacing:.08em;font-weight:600">💳 Pay at pickup</div>
+      <div id="pay-pickup-amt" style="font-size:32px;font-weight:700;color:var(--purple);margin:6px 0">$0</div>
+      <div style="font-size:12px;color:var(--muted)">Card or cash at the store after your pet's service. No charge today.</div>
+    </div>
+
+    <!-- No-show / late-cancel policy notice -->
+    <div class="no-show-notice">
+      <span class="ico">⚠️</span>
+      <div>
+        <b>Heads up — $25 no-show fee.</b> If you miss your appointment or cancel within 2 hours of the start time, a one-time $25 fee will be added to your <b>next visit</b>. Need to reschedule? Just call us at <a href="tel:+13102904970" style="color:var(--purple);font-weight:600">(310) 290-4970</a> — no fee.
+      </div>
+    </div>
+
+    <div class="reassure">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      First-time customer? You'll sign a quick liability form when you arrive — takes 30 seconds on our tablet.
+    </div>
+
+    <div class="validation-hint" id="hint-5">Fill in your name, email, and phone to confirm.</div>
+
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="gotoStep(4)">← Back</button>
+      <button class="btn btn-primary" id="btn-pay" onclick="confirmBooking()" disabled>
+        <span id="pay-text">Confirm booking →</span>
       </button>
-      <div class="logo">Shiny <span>Paws</span></div>
-      <div class="header-addr">Pet Styling Studio &nbsp;·&nbsp; Gardena, CA</div>
     </div>
+  </div>
 
-    <div id="prefill-banner">
-      <span>✦</span>
-      <span>Pre-filled from your selection: <strong id="prefill-label"></strong></span>
-    </div>
+</div>
 
-    <div id="checkout-body">
-
-      <!-- ── RETURNING CUSTOMER BANNER ── -->
-      <div style="padding:0.85rem 1.5rem 0">
-        <button id="rc-toggle" onclick="toggleReturning()" style="width:100%;padding:11px 16px;background:var(--pink-light);border:1px solid var(--lilac);border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--purple-mid);font-weight:500;display:flex;align-items:center;justify-content:center;gap:7px;transition:background 0.15s;" onmouseover="this.style.background='#ede8ff'" onmouseout="this.style.background=document.getElementById('rc-panel').style.display==='block'?'#ede8ff':'var(--pink-light)'">
-          <span style="font-size:15px">↩</span> Returning customer? Auto-fill my details
-        </button>
-        <div id="rc-panel" style="display:none;background:#f7f4ff;border:1px solid var(--lilac);border-top:none;border-radius:0 0 var(--radius-sm) var(--radius-sm);padding:13px 14px;">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--purple-soft);font-weight:500;margin-bottom:8px">Enter your phone number</div>
-          <div style="display:flex;gap:7px">
-            <input type="tel" id="rc-phone" placeholder="(310) 555-0100" style="flex:1;padding:9px 12px;border:0.5px solid var(--border-mid);border-radius:var(--radius-sm);font-size:13px;background:#fff;color:var(--purple);font-family:'DM Sans',sans-serif;outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();lookupCustomer()}" />
-            <button onclick="lookupCustomer()" id="rc-btn" style="padding:9px 16px;background:var(--purple);color:var(--pink-light);border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;white-space:nowrap;transition:opacity 0.15s">Find →</button>
-          </div>
-          <div id="rc-status" style="margin-top:7px;font-size:12px;min-height:16px"></div>
-          <div id="rc-pets" style="display:none;margin-top:10px"></div>
-        </div>
-      </div>
-
-      <div class="container">
-
-        <!-- LEFT -->
-        <div>
-          <div class="card">
-            <h2>Select your service</h2>
-            <div class="slabel">Category</div>
-            <div class="cat-tabs">
-              <button class="cat-tab active" onclick="filterCat('scissor',this)">Scissor cut</button>
-              <button class="cat-tab" onclick="filterCat('machine',this)">Machine cut</button>
-              <button class="cat-tab" onclick="filterCat('bath',this)">Bath only</button>
-              <button class="cat-tab" onclick="filterCat('daycare',this)">Day care</button>
-              <button class="cat-tab" onclick="filterCat('addons',this)">Add-ons only</button>
-            </div>
-            <div class="addon-only-note" id="addon-only-note">No base service needed — choose any add-ons below and we'll take care of the rest.</div>
-            <div id="service-list">
-              <div class="service-card visible selected" onclick="pick(this,'Scissor Cut — Small',80)" data-cat="scissor" data-value="Scissor Cut - Small"><div class="srow"><div><div class="sname">Scissor cut — small</div><div class="sdesc">0–15 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$80</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Scissor Cut — Medium',95)" data-cat="scissor" data-value="Scissor Cut - Medium"><div class="srow"><div><div class="sname">Scissor cut — medium</div><div class="sdesc">16–30 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$95</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Scissor Cut — Large',120)" data-cat="scissor" data-value="Scissor Cut - Large"><div class="srow"><div><div class="sname">Scissor cut — large</div><div class="sdesc">31–60 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$120</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Scissor Cut — XL',150)" data-cat="scissor" data-value="Scissor Cut - XL"><div class="srow"><div><div class="sname">Scissor cut — XL</div><div class="sdesc">61–90 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$150</div></div></div>
-              <div class="service-card visible" onclick="pick(this,'Scissor Cut — XXL',185)" data-cat="scissor" data-value="Scissor Cut - XXL"><div class="srow"><div><div class="sname">Scissor cut — XXL</div><div class="sdesc">91+ lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland</div></div><div class="sprice">$185</div></div></div>
-              <div class="service-card" onclick="pick(this,'Machine Cut — Small',65)" data-cat="machine" data-value="Machine Cut - Small"><div class="srow"><div><div class="sname">Machine cut — small</div><div class="sdesc">0–15 lbs · clipper cut, bath, brush</div></div><div class="sprice">$65</div></div></div>
-              <div class="service-card" onclick="pick(this,'Machine Cut — Medium',80)" data-cat="machine" data-value="Machine Cut - Medium"><div class="srow"><div><div class="sname">Machine cut — medium</div><div class="sdesc">16–30 lbs · clipper cut, bath, brush</div></div><div class="sprice">$80</div></div></div>
-              <div class="service-card" onclick="pick(this,'Machine Cut — Large',100)" data-cat="machine" data-value="Machine Cut - Large"><div class="srow"><div><div class="sname">Machine cut — large</div><div class="sdesc">31–60 lbs · clipper cut, bath, brush</div></div><div class="sprice">$100</div></div></div>
-              <div class="service-card" onclick="pick(this,'Machine Cut — XL',125)" data-cat="machine" data-value="Machine Cut - XL"><div class="srow"><div><div class="sname">Machine cut — XL</div><div class="sdesc">61–90 lbs · clipper cut, bath, brush</div></div><div class="sprice">$125</div></div></div>
-              <div class="service-card" onclick="pick(this,'Machine Cut — XXL',155)" data-cat="machine" data-value="Machine Cut - XXL"><div class="srow"><div><div class="sname">Machine cut — XXL</div><div class="sdesc">91+ lbs · clipper cut, bath, brush</div></div><div class="sprice">$155</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Small',40)" data-cat="bath" data-value="Bath Only - Small"><div class="srow"><div><div class="sname">Bath only — small</div><div class="sdesc">0–15 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$40</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Medium',50)" data-cat="bath" data-value="Bath Only - Medium"><div class="srow"><div><div class="sname">Bath only — medium</div><div class="sdesc">16–30 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$50</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — Large',65)" data-cat="bath" data-value="Bath Only - Large"><div class="srow"><div><div class="sname">Bath only — large</div><div class="sdesc">31–60 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$65</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — XL',80)" data-cat="bath" data-value="Bath Only - XL"><div class="srow"><div><div class="sname">Bath only — XL</div><div class="sdesc">61–90 lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$80</div></div></div>
-              <div class="service-card" onclick="pick(this,'Bath Only — XXL',95)" data-cat="bath" data-value="Bath Only - XXL"><div class="srow"><div><div class="sname">Bath only — XXL</div><div class="sdesc">91+ lbs · shampoo, blow-dry, brush out</div></div><div class="sprice">$95</div></div></div>
-              <div class="service-card" onclick="pick(this,'Day Care — 1 Hour',15)" data-cat="daycare" data-value="Day Care - 1 Hour"><div class="srow"><div><div class="sname">Day care — 1 hour</div><div class="sdesc">Supervised play &amp; socialization</div></div><div class="sprice">$15</div></div></div>
-              <div class="service-card" onclick="pick(this,'Day Care — Half Day',28)" data-cat="daycare" data-value="Day Care - Half Day"><div class="srow"><div><div class="sname">Day care — half day</div><div class="sdesc">Up to 5 hours supervised play</div></div><div class="sprice">$28</div></div></div>
-              <div class="service-card" onclick="pick(this,'Day Care — Full Day',45)" data-cat="daycare" data-value="Day Care - Full Day"><div class="srow"><div><div class="sname">Day care — full day</div><div class="sdesc">All-day supervised care</div></div><div class="sprice">$45</div></div></div>
-              <div class="service-card" onclick="pick(this,'Overnight Boarding',75)" data-cat="daycare" data-value="Overnight Boarding"><div class="srow"><div><div class="sname">Overnight boarding</div><div class="sdesc">Overnight stay with attentive care</div></div><div class="sprice">$75</div></div></div>
-            </div>
-            <div class="divider"></div>
-            <div class="slabel">Add-ons <span style="text-transform:none;letter-spacing:0;font-weight:400;font-style:italic"> — optional, select any</span></div>
-            <div class="addon-grid">
-              <div class="addon-card" onclick="toggleAddon(this,'Nail trim',18)"><div><div class="addon-name">Nail trim</div><div class="addon-price">$18</div></div><span class="addon-check">✓</span></div>
-              <div class="addon-card" onclick="toggleAddon(this,'Ear cleaning',15)"><div><div class="addon-name">Ear cleaning</div><div class="addon-price">$15</div></div><span class="addon-check">✓</span></div>
-              <div class="addon-card" onclick="toggleAddon(this,'Eye cleaning',12)"><div><div class="addon-name">Eye cleaning</div><div class="addon-price">$12</div></div><span class="addon-check">✓</span></div>
-              <div class="addon-card" onclick="toggleAddon(this,'Anal gland expression',20)"><div><div class="addon-name">Anal gland expression</div><div class="addon-price">$20</div></div><span class="addon-check">✓</span></div>
-            </div>
-          </div>
-
-          <div class="card" style="margin-top:1.25rem">
-            <h2>Appointment &amp; pet info</h2>
-            <div class="row2">
-              <div class="field"><label>Date</label><input type="date" id="appt-date" /></div>
-              <div class="field"><label>Time</label><select id="appt-time-select"><option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option><option>10:30 AM</option><option>11:00 AM</option><option>11:30 AM</option><option>12:00 PM</option><option>12:30 PM</option><option>1:00 PM</option><option>1:30 PM</option><option>2:00 PM</option><option>2:30 PM</option><option>3:00 PM</option><option>3:30 PM</option><option>4:00 PM</option><option>4:30 PM</option><option>5:00 PM</option><option>5:30 PM</option><option>6:00 PM</option></select></div>
-            </div>
-            <div class="row2">
-              <div class="field"><label>Pet name</label><input type="text" id="pet-name" placeholder="Buddy" /></div>
-              <div class="field" style="position:relative">
-                <label>Breed</label>
-                <input type="text" id="pet-breed" placeholder="Start typing… 190+ breeds (e.g. Poodle)" autocomplete="off" />
-                <div id="breed-list" class="breed-list" role="listbox" aria-label="Dog breed suggestions"></div>
-              </div>
-            </div>
-            <div class="field"><label>Special notes</label><input type="text" id="pet-notes" placeholder="Sensitive skin, nervous around dryers..." /></div>
-          </div>
-        </div>
-
-        <!-- RIGHT -->
-        <div>
-          <div class="card">
-            <h2>Your details</h2>
-
-            <div id="local-notice" style="display:none"></div>
-
-            <div class="row2">
-              <div class="field"><label>First name</label><input type="text" id="fname" placeholder="Jane" /></div>
-              <div class="field"><label>Last name</label><input type="text" id="lname" placeholder="Smith" /></div>
-            </div>
-            <div class="field"><label>Email</label><input type="email" id="email" placeholder="jane@email.com" /></div>
-            <div class="field"><label>Phone</label><input type="tel" id="phone" placeholder="(310) 555-0100" /></div>
-            <div class="field"><label>Address</label><input type="text" id="address" placeholder="1234 Main St" /></div>
-            <div class="row2">
-              <div class="field"><label>City</label><input type="text" id="city" placeholder="Gardena" /></div>
-              <div class="field"><label>ZIP</label><input type="text" id="zip" placeholder="90247" maxlength="5" /></div>
-            </div>
-
-            <div class="divider"></div>
-            <div class="slabel">Payment</div>
-            <div style="background:var(--pink-light);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;font-size:12px;color:var(--purple-soft);display:flex;align-items:center;gap:8px;">
-              🔒 You'll enter your card details on Stripe's secure payment page after clicking <strong>Book &amp; pay now</strong>.
-            </div>
-            <div class="chips" style="margin-top:8px;"><span class="chip">Visa</span><span class="chip">Mastercard</span><span class="chip">Amex</span><span class="chip">Apple Pay</span></div>
-
-            <!-- Hidden: legacy embedded card UI (replaced by hosted Stripe Checkout) -->
-            <div id="express-wrap" style="display:none"><div id="payment-request-btn"></div></div>
-            <div id="or-divider" class="or-divider" style="display:none"></div>
-            <div id="stripe-card-wrap" class="field" style="display:none"><div id="stripe-card-element" class="stripe-field"></div><div id="stripe-errors"></div></div>
-            <div id="fallback-card" style="display:none"></div>
-
-            <div class="divider"></div>
-            <div class="slabel">Promo code</div>
-            <div class="promo-row">
-              <input type="text" id="promo-input" placeholder="Enter promo code" oninput="clearPromo()" />
-              <button class="apply-btn" onclick="applyPromo()">Apply</button>
-            </div>
-            <div id="promo-msg"></div>
-
-            <div class="divider"></div>
-            <div class="slabel">Order summary</div>
-            <div class="sum-row" id="base-row"><span id="sname-sum">Full Grooming — Small</span><span id="sprice-sum">$100.00</span></div>
-            <div id="addons-summary"></div>
-            <div class="sum-row disc" id="disc-row" style="display:none"><span>Promo discount</span><span id="disc-val"></span></div>
-            <div class="sum-row"><span>Tax (9.5%)</span><span id="tax-val">$9.50</span></div>
-            <div class="divider" style="margin:0.65rem 0"></div>
-            <div class="sum-row total"><span>Total due today</span><span id="total-val">$109.50</span></div>
-
-            <button class="pay-btn" id="pay-btn" onclick="pay()">Book &amp; pay now</button>
-            <div class="secure">
-              <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><rect x="0.6" y="5" width="8.8" height="7" rx="1.2" stroke="currentColor" stroke-width="1.1"/><path d="M2.5 5V3.5a2.5 2.5 0 0 1 5 0V5" stroke="currentColor" stroke-width="1.1"/></svg>
-              Secured by Stripe &nbsp;·&nbsp; 256-bit TLS encryption
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div id="success-screen">
-      <div class="check-circle">✓</div>
-      <h2>Booking confirmed!</h2>
-      <p>A confirmation email has been sent.<br>We look forward to seeing your furry friend at Shiny Paws in Gardena!</p>
-      <div id="booking-ref"></div>
-      <p style="margin-top:1rem;font-size:13px;color:var(--purple-mid)">To cancel or reschedule, please call us at <a href="tel:+13102904970" style="color:var(--purple-mid);text-decoration:underline">(310) 290-4970</a>.</p>
-      <button class="close-success-btn" onclick="goBack()">← Back to home</button>
-    </div>
-
+<!-- Shiny mascot side-guide -->
+<div class="mascot" id="mascot" onclick="toggleMascot()">
+  <div class="mascot-bubble" id="mascot-bubble">
+    <span class="name">Shiny says</span>
+    <span id="mascot-text">Hi! I'm Shiny 🐾 Let's book your pet's pampering day!</span>
+  </div>
+  <div class="mascot-img">
+    <model-viewer
+      src="shiny-3d.glb"
+      alt="Shiny the dog mascot"
+      autoplay
+      auto-rotate
+      auto-rotate-delay="0"
+      rotation-per-second="20deg"
+      camera-orbit="0deg 78deg 1.8m"
+      shadow-intensity="0.6"
+      exposure="1.1"
+      disable-zoom
+      interaction-prompt="none"
+      loading="lazy"></model-viewer>
   </div>
 </div>
 
-
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
-<script>
-// Firebase Configuration
-const firebaseConfig = {
-    databaseURL: "https://shiny-paws-default-rtdb.firebaseio.com"
-};
-
-// Initialize Firebase
-if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-    window.db = firebase.database();
-}
-</script>
+<!-- Sticky bottom price bar -->
+<div class="sticky-total" id="sticky-total" style="display:none">
+  <div class="summary-text">
+    <span class="label">Booking</span>
+    <span class="body" id="sticky-body">Pick a service to start</span>
+  </div>
+  <div class="total-amt">
+    <span class="lbl">Total</span>
+    <span id="sticky-amt">$0</span>
+  </div>
+</div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   SHINY PAWS CHECKOUT
-   Replace YOUR_STRIPE_PUBLISHABLE_KEY with your real key from:
-   https://dashboard.stripe.com/apikeys
-   ═══════════════════════════════════════════════════════════ */
-const STRIPE_KEY = 'pk_test_51TOVqxBNB9OiRx8wlp85gCABiudzBk2TGozBcGeYUtzz37g2wnbTiMxmsgKD4bcTUiMT65WNPJDPW1EXmDc6oVmD00pDQBxT3g';
-// Stripe Checkout (hosted) — backend at /.netlify/functions/create-checkout-session
-const CHECKOUT_FN = '/.netlify/functions/create-checkout-session';
-
-let stripeInstance = null;
-let cardElement    = null;
-let paymentRequest = null;
-let stripeReady    = false;
-
-// Detect if running as a local file (file:// protocol)
-const isLocal = location.protocol === 'file:' || STRIPE_KEY === 'YOUR_STRIPE_PUBLISHABLE_KEY';
-
-function initStripe() {
-  if (isLocal) {
-    // Local file — Stripe won't load, show friendly notice + fallback fields
-    document.getElementById('local-notice').style.display = 'block';
-    document.getElementById('express-wrap').style.display = 'none';
-    document.getElementById('or-divider').style.display   = 'none';
-    document.getElementById('fallback-card').style.display = 'block';
-    return;
-  }
-
-  if (typeof Stripe === 'undefined') {
-    // Stripe script failed to load on a live domain — show fallback silently
-    document.getElementById('express-wrap').style.display  = 'none';
-    document.getElementById('or-divider').style.display    = 'none';
-    document.getElementById('fallback-card').style.display = 'block';
-    return;
-  }
-
-  // ── Stripe loaded successfully ──
-  stripeReady    = true;
-  stripeInstance = Stripe(STRIPE_KEY);
-  const elements = stripeInstance.elements();
-
-  // Card Element
-  cardElement = elements.create('card', {
-    style: {
-      base: {
-        fontFamily: "'DM Sans', sans-serif",
-        fontSize: '14px',
-        color: '#3D2060',
-        '::placeholder': { color: '#D4B8E0' },
-        iconColor: '#7a56a8',
-      },
-      invalid: { color: '#c0392b', iconColor: '#c0392b' }
-    },
-    hidePostalCode: true
-  });
-
-  document.getElementById('stripe-card-wrap').style.display = 'block';
-  cardElement.mount('#stripe-card-element');
-
-  cardElement.on('focus',  () => document.getElementById('stripe-card-element').classList.add('focused'));
-  cardElement.on('blur',   () => document.getElementById('stripe-card-element').classList.remove('focused'));
-  cardElement.on('change', e => {
-    const el  = document.getElementById('stripe-card-element');
-    const err = document.getElementById('stripe-errors');
-    if (e.error) { el.classList.add('error'); err.textContent = e.error.message; }
-    else         { el.classList.remove('error'); err.textContent = ''; }
-  });
-
-  // Apple Pay via Payment Request Button
-  paymentRequest = stripeInstance.paymentRequest({
-    country: 'US', currency: 'usd',
-    total: { label: 'Shiny Paws · ' + selName, amount: getTotalCents() },
-    requestPayerName: true, requestPayerEmail: true, requestPayerPhone: true,
-  });
-
-  const prButton = elements.create('paymentRequestButton', {
-    paymentRequest,
-    style: { paymentRequestButton: { type: 'default', theme: 'dark', height: '46px' } }
-  });
-
-  paymentRequest.canMakePayment().then(result => {
-    if (result) {
-      prButton.mount('#payment-request-btn');
-      document.getElementById('or-divider').style.display = 'flex';
-    } else {
-      // Apple Pay not available — hide the whole express section silently
-      document.getElementById('express-wrap').style.display = 'none';
-      document.getElementById('or-divider').style.display   = 'none';
-    }
-  });
-
-  paymentRequest.on('paymentmethod', async (ev) => {
-    // Uncomment when backend is ready:
-    // const res = await fetch('/.netlify/functions/create-payment-intent', {
-    //   method: 'POST', headers: {'Content-Type':'application/json'},
-    //   body: JSON.stringify({ amount: getTotalCents(), currency: 'usd' })
-    // });
-    // const { clientSecret } = await res.json();
-    // const { error } = await stripeInstance.confirmCardPayment(clientSecret,
-    //   { payment_method: ev.paymentMethod.id }, { handleActions: false });
-    // if (error) { ev.complete('fail'); return; }
-    ev.complete('success');
-    showSuccess();
-  });
-}
-
-// ── STATE ────────────────────────────────────────────────────────────
-let basePrice = 80, discount = 0, selName = 'Scissor Cut — Small';
-const addons = {}, TAX = 0.095;
-
-function getTotalCents() {
-  const at = Object.values(addons).reduce((a,b)=>a+b,0);
-  return Math.round((Math.max(0, basePrice+at-discount) * (1+TAX)) * 100);
-}
-
-// ── PUBLIC API ───────────────────────────────────────────────────────
-function openSPCheckout() {
-  document.getElementById('sp-overlay').classList.add('open');
-  document.getElementById('sp-modal').scrollTop = 0;
-  document.body.style.overflow = 'hidden';
-}
-
-// Cat-tab order: scissor=0, machine=1, bath=2, daycare=3, addons=4
-const CAT_TAB_INDEX = {scissor:0, machine:1, bath:2, daycare:3, addons:4};
-
-function openBookingWith(service, details, serviceValue) {
-  openSPCheckout();
-  document.getElementById('prefill-label').textContent = serviceValue || service;
-  document.getElementById('prefill-banner').classList.add('visible');
-  const cards = document.querySelectorAll('.service-card');
-  let matched = false;
-  cards.forEach(card => {
-    if (card.dataset.value && card.dataset.value.toLowerCase() === (serviceValue||'').toLowerCase()) {
-      const cat = card.dataset.cat;
-      const tabs = document.querySelectorAll('.cat-tab');
-      if (tabs[CAT_TAB_INDEX[cat]]) filterCat(cat, tabs[CAT_TAB_INDEX[cat]]);
-      card.click(); matched = true;
-    }
-  });
-  if (!matched) {
-    const tabs = document.querySelectorAll('.cat-tab');
-    const fallback = (service==='Day Care') ? 'daycare' : 'scissor';
-    filterCat(fallback, tabs[CAT_TAB_INDEX[fallback]]);
-  }
-}
-
-// Apply prefill saved by the game-world Grooming overlay (sessionStorage key 'shinypaws_prefill').
-// Payload shape: { type:'bath'|'machine'|'scissor', size:'Small'|..., sizePrice:number|null, addons:[{name,price}], weight:string }
-function applyShinypawsPrefill() {
-  let raw;
-  try { raw = sessionStorage.getItem('shinypaws_prefill'); } catch(e){ return; }
-  if (!raw) return;
-  let data;
-  try { data = JSON.parse(raw); } catch(e){ return; }
-  // One-shot: clear so a refresh doesn't re-apply stale state
-  try { sessionStorage.removeItem('shinypaws_prefill'); } catch(e){}
-
-  const TYPE_LABEL = {bath:'Bath Only', machine:'Machine Cut', scissor:'Scissor Cut'};
-  const tabs = document.querySelectorAll('.cat-tab');
-
-  // Daycare flow (from game-world daycare overlay)
-  if (data.category === 'daycare') {
-    if (tabs[CAT_TAB_INDEX.daycare]) filterCat('daycare', tabs[CAT_TAB_INDEX.daycare]);
-    if (data.value) {
-      const card = document.querySelector('.service-card[data-value="' + data.value + '"]');
-      if (card) {
-        card.click();
-        document.getElementById('prefill-label').textContent = data.label || data.value;
-        document.getElementById('prefill-banner').classList.add('visible');
-      }
-    }
-    if (data.addons && data.addons.length) applyPrefillAddons(data.addons);
-    return;
-  }
-
-  // Add-ons-only flow (no service tier picked)
-  if (!data.type || !data.size) {
-    if (data.addons && data.addons.length) {
-      filterCat('addons', tabs[CAT_TAB_INDEX.addons]);
-      document.getElementById('prefill-label').textContent = 'Add-ons only';
-      document.getElementById('prefill-banner').classList.add('visible');
-      applyPrefillAddons(data.addons);
-    }
-    return;
-  }
-
-  // Service tier + size
-  const cat = data.type;
-  const value = TYPE_LABEL[data.type] + ' - ' + data.size;
-  if (tabs[CAT_TAB_INDEX[cat]]) filterCat(cat, tabs[CAT_TAB_INDEX[cat]]);
-  const card = document.querySelector('.service-card[data-value="' + value + '"]');
-  if (card) {
-    card.click();
-    document.getElementById('prefill-label').textContent = value + (data.weight ? ' · ' + data.weight : '');
-    document.getElementById('prefill-banner').classList.add('visible');
-  }
-  if (data.addons && data.addons.length) applyPrefillAddons(data.addons);
-}
-
-function applyPrefillAddons(list) {
-  const cards = document.querySelectorAll('.addon-card');
-  list.forEach(a => {
-    cards.forEach(c => {
-      const name = (c.querySelector('.addon-name')||{}).textContent;
-      if (name && name.toLowerCase() === a.name.toLowerCase() && !c.classList.contains('picked')) {
-        c.click();
-      }
-    });
-  });
-}
-
-function openZone(zone) { if (zone==='booking') openSPCheckout(); }
-
-// ── NAVIGATION ───────────────────────────────────────────────────────
-function goBack() {
-  if (window.history.length > 1) {
-    window.history.back();
-  } else {
-    window.location.href = 'index.html';
-  }
-}
-
-function closeSPCheckout() {
-  goBack();
-}
-
-// ── SERVICES ─────────────────────────────────────────────────────────
-function filterCat(cat, btn) {
-  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.service-card').forEach(c=>{
-    c.classList.remove('visible','selected');
-    if (c.dataset.cat===cat) c.classList.add('visible');
-  });
-  discount=0;
-  document.getElementById('promo-msg').innerHTML='';
-  document.getElementById('promo-input').value='';
-  const note = document.getElementById('addon-only-note');
-  if (cat==='addons') {
-    basePrice=0; selName='Add-ons only';
-    document.getElementById('base-row').style.display='none';
-    note.style.display='block';
-  } else {
-    document.getElementById('base-row').style.display='flex';
-    note.style.display='none';
-    const first = document.querySelector('.service-card.visible');
-    if (first) first.click();
-  }
-  updateSum();
-}
-
-function pick(el, name, price) {
-  document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');
-  basePrice=price; selName=name; discount=0;
-  document.getElementById('promo-msg').innerHTML='';
-  document.getElementById('promo-input').value='';
-  document.getElementById('base-row').style.display='flex';
-  updateSum();
-}
-
-function toggleAddon(el, name, price) {
-  if (addons[name]) { delete addons[name]; el.classList.remove('picked'); }
-  else { addons[name]=price; el.classList.add('picked'); }
-  updateSum();
-}
-
-function updateSum() {
-  const at=Object.values(addons).reduce((a,b)=>a+b,0);
-  const gross=basePrice+at, net=Math.max(0,gross-discount);
-  const tax=net*TAX, total=net+tax;
-  document.getElementById('sname-sum').textContent=selName;
-  document.getElementById('sprice-sum').textContent=basePrice>0?'$'+basePrice.toFixed(2):'';
-  const ac=document.getElementById('addons-summary'); ac.innerHTML='';
-  Object.entries(addons).forEach(([n,p])=>{
-    const r=document.createElement('div'); r.className='sum-row';
-    r.innerHTML='<span style="padding-left:8px;font-size:12px">+ '+n+'</span><span>$'+p.toFixed(2)+'</span>';
-    ac.appendChild(r);
-  });
-  const dr=document.getElementById('disc-row');
-  if (discount>0){dr.style.display='flex';document.getElementById('disc-val').textContent='-$'+discount.toFixed(2);}
-  else dr.style.display='none';
-  document.getElementById('tax-val').textContent='$'+tax.toFixed(2);
-  document.getElementById('total-val').textContent='$'+total.toFixed(2);
-  if (paymentRequest) paymentRequest.update({total:{label:'Shiny Paws · '+selName,amount:getTotalCents()}});
-}
-
-function applyPromo() {
-  const code=document.getElementById('promo-input').value.trim().toUpperCase();
-  const msg=document.getElementById('promo-msg');
-  const codes={WELCOME10:{pct:0.10,label:'10% off'},PETSPA20:{pct:0.20,label:'20% off'},FIRSTVISIT:{flat:15,label:'$15 off'}};
-  const gross=basePrice+Object.values(addons).reduce((a,b)=>a+b,0);
-  if (codes[code]){
-    const c=codes[code];
-    discount=c.flat?Math.min(c.flat,gross):Math.round(gross*c.pct*100)/100;
-    msg.className='pmsg-ok'; msg.textContent='Code applied: '+c.label; updateSum();
-  } else {
-    discount=0; updateSum();
-    msg.className='pmsg-err'; msg.textContent='Invalid code. Try WELCOME10 or PETSPA20.';
-  }
-}
-function clearPromo(){document.getElementById('promo-msg').innerHTML='';}
-function fmtCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v.replace(/(.{4})/g,'$1 ').trim();}
-function fmtExp(el){let v=el.value.replace(/\D/g,'');if(v.length>=3)v=v.substring(0,2)+' / '+v.substring(2,4);el.value=v;}
-
-async function pay() {
-  const gross = basePrice + Object.values(addons).reduce((a,b)=>a+b,0);
-  if (gross===0){alert('Please select at least one service or add-on.');return;}
-
-  // Required fields
-  const fname = (document.getElementById('fname').value||'').trim();
-  const lname = (document.getElementById('lname').value||'').trim();
-  const email = (document.getElementById('email').value||'').trim();
-  const phone = (document.getElementById('phone').value||'').trim();
-  const date  = document.getElementById('appt-date').value;
-  const timeEl = document.querySelector('#appt-time-select');
-  const time  = timeEl ? timeEl.value : '';
-  if (!fname || !lname) { alert('Please enter your first and last name.'); return; }
-  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Please enter a valid email.'); return; }
-  if (!phone) { alert('Please enter a phone number.'); return; }
-  if (!date || !time) { alert('Please pick an appointment date and time.'); return; }
-
-  const btn = document.getElementById('pay-btn');
-  btn.disabled = true; btn.textContent = 'Redirecting to secure payment…';
-
-  // Snapshot full form so we can finalize the booking after Stripe redirect
-  const ref = '#SP-' + Math.floor(100000 + Math.random() * 900000);
-  const bookingToken = Array.from(crypto.getRandomValues(new Uint8Array(18))).map(b => b.toString(16).padStart(2,'0')).join('');
-  const snapshot = {
-    fname, lname, email, phone,
-    address:  (document.getElementById('address')||{}).value || '',
-    city:     (document.getElementById('city')||{}).value    || '',
-    zip:      (document.getElementById('zip')||{}).value     || '',
-    petName:  (document.getElementById('pet-name')||{}).value || '',
-    breed:    (document.getElementById('pet-breed')||{}).value || '',
-    notes:    (document.getElementById('pet-notes')||{}).value || '',
-    selName, basePrice,
-    addons: Object.assign({}, addons),
-    discount,
-    date, time,
-    total: document.getElementById('total-val').textContent,
-    totalCents: getTotalCents(),
-    ref, bookingToken,
-    ts: Date.now()
-  };
-  try { sessionStorage.setItem('sp_checkout_pending', JSON.stringify(snapshot)); } catch(e){}
-
-  // Build a rich description that shows on the Stripe receipt
-  // e.g. "Shiny Paws — Full Grooming · Rex (Poodle) · Sat Apr 22, 2026 at 2:00 PM"
-  let prettyDate = date;
-  try {
-    const [yy, mm, dd] = date.split('-').map(Number);
-    prettyDate = new Date(yy, mm - 1, dd).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-  } catch(e){}
-  let prettyTime = time;
-  try {
-    const [hh, mn] = time.split(':').map(Number);
-    const period = hh >= 12 ? 'PM' : 'AM';
-    const h12 = ((hh + 11) % 12) + 1;
-    prettyTime = h12 + ':' + String(mn).padStart(2,'0') + ' ' + period;
-  } catch(e){}
-  const petPart = snapshot.petName ? (' · ' + snapshot.petName + (snapshot.breed ? ' (' + snapshot.breed + ')' : '')) : '';
-  const addonPart = Object.keys(addons).length ? ' + ' + Object.keys(addons).join(', ') : '';
-  const richDescription = 'Shiny Paws — ' + selName + addonPart + petPart + ' · ' + prettyDate + ' at ' + prettyTime;
-
-  try {
-    const res = await fetch(CHECKOUT_FN, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amountCents:  snapshot.totalCents,
-        description:  richDescription,
-        customerEmail: email,
-        bookingRef:    ref,
-        successUrl:    location.origin + location.pathname,
-        cancelUrl:     location.origin + location.pathname,
-        // Full booking snapshot for the Stripe webhook fallback. If the
-        // customer's browser dies between Stripe and our success page,
-        // the webhook reads this back from the session metadata and
-        // writes the booking to Firebase server-side.
-        booking: {
-          fname:        snapshot.fname,
-          lname:        snapshot.lname,
-          email:        snapshot.email,
-          phone:        snapshot.phone,
-          address:      snapshot.address,
-          city:         snapshot.city,
-          zip:          snapshot.zip,
-          petName:      snapshot.petName,
-          petBreed:     snapshot.breed,
-          service:      snapshot.selName,
-          date:         snapshot.date,
-          time:         snapshot.time,
-          notes:        snapshot.notes,
-          bookingToken: snapshot.bookingToken
-        }
-      })
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error('Checkout function error:', errText);
-      alert('Payment setup failed. Please try again or call us at (310) 290-4970.');
-      btn.disabled = false; btn.textContent = 'Book & pay now';
-      return;
-    }
-    const { url } = await res.json();
-    if (!url) throw new Error('No session URL returned');
-    window.location.href = url;
-  } catch (err) {
-    console.error(err);
-    alert('Payment setup failed. Please check your connection and try again.');
-    btn.disabled = false; btn.textContent = 'Book & pay now';
-  }
-}
-
-// After returning from Stripe (success or cancel)
-function handleStripeReturn() {
-  const params = new URLSearchParams(location.search);
-  const status = params.get('status');
-  if (!status) return;
-
-  // Strip query params from the URL bar
-  history.replaceState(null, '', location.pathname);
-
-  if (status === 'cancel') {
-    setTimeout(function(){
-      alert('Payment was cancelled. Your booking is not confirmed — feel free to try again.');
-    }, 200);
-    return;
-  }
-
-  if (status !== 'success') return;
-
-  // Restore the snapshot and finalize the booking
-  let snap = null;
-  try { snap = JSON.parse(sessionStorage.getItem('sp_checkout_pending') || 'null'); } catch(e){}
-  if (!snap) {
-    // Snapshot missing (browser cleared, different device, etc.) — still show success
-    document.getElementById('success-screen').style.display = 'block';
-    document.querySelector('.container').style.display = 'none';
-    return;
-  }
-  try { sessionStorage.removeItem('sp_checkout_pending'); } catch(e){}
-
-  // Restore form fields so showSuccess() can read them
-  function setVal(id, v){ var el=document.getElementById(id); if(el) el.value = v||''; }
-  setVal('fname', snap.fname);   setVal('lname', snap.lname);
-  setVal('email', snap.email);   setVal('phone', snap.phone);
-  setVal('address', snap.address); setVal('city', snap.city); setVal('zip', snap.zip);
-  setVal('pet-name', snap.petName); setVal('pet-breed', snap.breed); setVal('pet-notes', snap.notes);
-  setVal('appt-date', snap.date);
-  // appt-time-select is rebuilt by refreshBookedSlots — try to set it
-  setTimeout(function(){
-    var tEl = document.querySelector('#appt-time-select');
-    if (tEl) tEl.value = snap.time;
-  }, 50);
-
-  // Restore state vars used by showSuccess()
-  selName = snap.selName;
-  basePrice = snap.basePrice;
-  Object.keys(addons).forEach(function(k){ delete addons[k]; });
-  Object.assign(addons, snap.addons || {});
-  discount = snap.discount || 0;
-  updateSum();
-
-  // Use the same booking ref and token we created before redirect.
-  // Also pass the Stripe session_id so showSuccess() can fetch + store the payment_intent
-  // on the Firebase booking. Pass date+time explicitly because the time-select dropdown
-  // is rebuilt asynchronously and may not have repopulated by the time showSuccess runs.
-  const sessionId = params.get('session_id') || '';
-  showSuccess(snap.ref, snap.bookingToken, sessionId, snap.date, snap.time);
-}
-
-function showSuccess(presetRef, presetToken, stripeSessionId, presetDate, presetTime) {
-  // Save the booked date+time to localStorage so it stays greyed out.
-  // Prefer the preset values (passed in from the Stripe-return snapshot) over
-  // the DOM values, because the time-select dropdown is rebuilt asynchronously
-  // and may still be empty / showing its default first option (9:00 AM) when
-  // showSuccess() runs right after a redirect.
-  const date = presetDate || document.getElementById('appt-date').value;
-  const timeEl = document.querySelector('#appt-time-select');
-  const time = presetTime || (timeEl ? timeEl.value : '');
-  if (date && time) {
-    const key = 'sp_booked_' + date;
-    const booked = JSON.parse(localStorage.getItem(key) || '[]');
-    if (!booked.includes(time)) booked.push(time);
-    localStorage.setItem(key, JSON.stringify(booked));
-  }
-
-  // Collect booking details
-  const ref = presetRef || ('#SP-' + Math.floor(100000 + Math.random() * 900000));
-  const bookingToken = presetToken || Array.from(crypto.getRandomValues(new Uint8Array(18))).map(b => b.toString(16).padStart(2,'0')).join('');
-  const fname    = document.getElementById('fname')     ? document.getElementById('fname').value     : '';
-  const lname    = document.getElementById('lname')     ? document.getElementById('lname').value     : '';
-  const email    = document.getElementById('email')     ? document.getElementById('email').value     : '';
-  const phone    = document.getElementById('phone')     ? document.getElementById('phone').value     : '';
-  const address  = document.getElementById('address')   ? document.getElementById('address').value   : '';
-  const city     = document.getElementById('city')      ? document.getElementById('city').value      : '';
-  const zip      = document.getElementById('zip')       ? document.getElementById('zip').value       : '';
-  const petName  = document.getElementById('pet-name')  ? document.getElementById('pet-name').value  : '';
-  const breed    = document.getElementById('pet-breed') ? document.getElementById('pet-breed').value : '';
-  const notes    = document.getElementById('pet-notes') ? document.getElementById('pet-notes').value : '';
-  const addonList = Object.keys(addons).join(', ') || 'None';
-  const bookingData = {
-    reference:    ref,
-    name:         fname + ' ' + lname,
-    email:        email,
-    phone:        phone,
-    service:      selName,
-    addons:       addonList,
-    date:         date,
-    time:         time,
-    pet_name:     petName,
-    breed:        breed,
-    notes:        notes,
-    total:        document.getElementById('total-val').textContent,
-    submitted_at: new Date().toLocaleString('en-US', {timeZone: 'America/Los_Angeles'})
-  };
-
-  // ── SEND CONFIRMATION EMAIL TO CUSTOMER ──────────────────
-  const customerConfirmationEmail = {
-    email: email,
-    name: fname + ' ' + lname,
-    _subject: '✅ Your Shiny Paws Appointment is Confirmed!',
-    _template: 'table',
-    reference: ref,
-    petName: petName,
-    petBreed: breed,
-    service: selName,
-    date: date,
-    time: time,
-    total: document.getElementById('total-val').textContent,
-    notes: notes,
-    businessPhone: '(310) 290-4970',
-    businessEmail: 'info@shinypawsla.com',
-    cancellationPolicy: 'To cancel or reschedule, please call us at (310) 290-4970. Free cancellation up to 24 hours before your appointment; cancellations within 24 hours may be subject to a fee.'
-  };
-  
-  fetch('https://formspree.io/f/mgopplba', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(customerConfirmationEmail)
-  }).then(() => {
-    console.log('✅ Confirmation email sent to customer');
-  }).catch(err => console.log('Email error:', err));
-  
-  // ── FORMSPREE — sends you (admin) an email notification ──────────────────
-  fetch('https://formspree.io/f/mgopplba', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify(bookingData)
-  }).catch(err => console.log('Formspree error:', err));
-
-  // ── FIREBASE — saves booking to admin dashboard database ───────
-  if (window.db) {
-    const firebaseBooking = {
-      customerName: fname + ' ' + lname,
-      customerFirstName: fname,
-      customerLastName: lname,
-      customerEmail: email,
-      customerPhone: phone,
-      customerAddress: address,
-      customerCity: city,
-      customerZip: zip,
-      petName: petName,
-      petBreed: breed,
-      service: selName,
-      date: date,
-      time: time,
-      notes: notes,
-      status: 'pending',
-      bookingRef: ref,
-      bookingToken: bookingToken,
-      stripeSessionId: stripeSessionId || null,
-      paymentStatus: stripeSessionId ? 'paid' : 'unpaid',
-      createdAt: new Date().toISOString(),
-      source: 'browser'
-    };
-
-    // If we have a Stripe session id, key the row by it so the server-side
-    // webhook (which writes to the same key) merges into this row instead of
-    // creating a duplicate. Otherwise fall back to push() with a random key.
-    let bookingRefDb;
-    if (stripeSessionId) {
-      bookingRefDb = window.db.ref('appointments/' + encodeURIComponent(stripeSessionId));
-      bookingRefDb.update(firebaseBooking)
-        .then(() => console.log('✅ Booking saved to Firebase (session-keyed)'))
-        .catch(err => console.error('❌ Firebase error:', err));
-    } else {
-      bookingRefDb = window.db.ref('appointments').push(firebaseBooking);
-      bookingRefDb
-        .then(() => console.log('✅ Booking saved to Firebase (auto-keyed)'))
-        .catch(err => console.error('❌ Firebase error:', err));
-    }
-
-    // Look up the Stripe payment_intent from the session id and patch the booking
-    // (used to be required for the customer-facing refund button — kept as a
-    // belt-and-suspenders since the webhook also sets this field).
-    if (stripeSessionId) {
-      fetch('/.netlify/functions/get-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: stripeSessionId })
-      })
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (!data || !data.paymentIntentId) return;
-          window.db.ref('appointments/' + encodeURIComponent(stripeSessionId)).update({
-            stripePaymentIntentId: data.paymentIntentId,
-            amountPaidCents: data.amountTotal || null,
-            paymentStatus: data.status || 'paid'
-          });
-        })
-        .catch(err => console.warn('Could not fetch Stripe session:', err));
-    }
-  } else {
-    console.warn('⚠️ Firebase not initialized - booking may not be saved to admin dashboard');
-  }
-
-  // ── GOOGLE SHEETS — logs every booking to your spreadsheet ───────
-  // Step 1: Create a Google Sheet
-  // Step 2: Go to Extensions → Apps Script → paste the script below → Save & Deploy
-  // Step 3: Replace YOUR_GOOGLE_SCRIPT_URL below with your Web App URL
-  //
-  // Apps Script code to paste:
-  // function doPost(e) {
-  //   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  //   var data = JSON.parse(e.postData.contents);
-  //   sheet.appendRow([
-  //     data.submitted_at, data.reference, data.name, data.email,
-  //     data.phone, data.service, data.addons, data.date, data.time,
-  //     data.pet_name, data.breed, data.notes, data.total
-  //   ]);
-  //   return ContentService.createTextOutput('OK');
-  // }
-  //
-  const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzk_OshQbx_n0wHhR5n8w_dY9v97agpACpDFm9b8ym84-O6Z66B519Ya5wl0hK0J_PK/exec';
-  if (GOOGLE_SCRIPT_URL !== 'YOUR_GOOGLE_SCRIPT_URL') {
-    fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookingData)
-    }).catch(err => console.log('Sheets error:', err));
-  }
-
-  document.getElementById('checkout-body').style.display = 'none';
-  document.getElementById('success-screen').style.display = 'block';
-  document.getElementById('booking-ref').textContent = 'Booking reference: ' + ref;
-}
-
-// Slot blocking — disable time-dropdown options that already have a booking.
-// Reads from Firebase (authoritative across all customers/devices) and skips
-// cancelled bookings. Exposed on window so the console + handlers can call it.
-
-// Cache the last-known booked map so we can re-render synchronously on every
-// date change without waiting for Firebase. Firebase refreshes update this.
-window._slotsCache = window._slotsCache || {};   // { 'yyyy-mm-dd': ['12:30 PM', ...] }
-window._slotsLastDate = null;
-
-// One-time: stamp each option with its ORIGINAL time string in a data-time
-// attribute, and force a clean value="" attribute. Older versions of the
-// render code corrupted opt.value by writing labels like "12:30 PM — booked"
-// straight onto the text content; once that happened the corrupted string
-// became the new "value" and stuck forever. This snapshot rescues us.
-function _ensureSlotKeys() {
-  const select = document.querySelector('#appt-time-select');
-  if (!select || select.dataset.keysReady === '1') return;
-  Array.from(select.options).forEach(opt => {
-    if (!opt.dataset.time) {
-      // Strip any leftover "— booked" from a previous corrupted state
-      const cleaned = (opt.value || opt.textContent || '').replace(/\s*[—-]\s*booked\s*$/i, '').trim();
-      opt.dataset.time = cleaned;
-      opt.value        = cleaned;
-      opt.textContent  = cleaned;
-    }
-  });
-  select.dataset.keysReady = '1';
-}
-
-function _renderSlotsFor(date) {
-  const select = document.querySelector('#appt-time-select');
-  if (!select) return;
-  _ensureSlotKeys();
-  const booked = window._slotsCache[date] || [];
-  Array.from(select.options).forEach(opt => {
-    const raw = opt.dataset.time;          // canonical, never corrupted
-    if (booked.indexOf(raw) >= 0) {
-      opt.disabled    = true;
-      opt.textContent = raw + ' — booked';
-      opt.style.color = '#bbb';
-    } else {
-      opt.disabled    = false;
-      opt.textContent = raw;
-      opt.style.color = '';
-    }
-  });
-  if (select.options[select.selectedIndex] && select.options[select.selectedIndex].disabled) {
-    for (let i = 0; i < select.options.length; i++) {
-      if (!select.options[i].disabled) { select.selectedIndex = i; break; }
-    }
-  }
-}
-
-window.refreshBookedSlots = async function refreshBookedSlots() {
-  const dateInput = document.getElementById('appt-date');
-  const select    = document.querySelector('#appt-time-select');
-  if (!dateInput || !select) return;
-  const date = dateInput.value;
-  if (!date) return;
-
-  // STEP 1 — synchronous: render whatever we know for this date right now.
-  // This guarantees that switching dates clears stale labels immediately,
-  // even before Firebase responds.
-  if (date !== window._slotsLastDate) {
-    window._slotsLastDate = date;
-    _renderSlotsFor(date);
-  }
-
-  if (!window.db) return;
-
-  // STEP 2 — async: refresh the cache from Firebase, then re-render.
-  let snap;
-  try {
-    snap = await window.db.ref('appointments').once('value');
-  } catch (err) {
-    console.warn('[slots] firebase read failed:', err);
-    return;
-  }
-
-  // Rebuild cache for ALL dates we've seen in this session
-  const all = snap.val() || {};
-  const fresh = {};
-  Object.values(all).forEach(apt => {
-    if (!apt || !apt.time || !apt.date) return;
-    if (apt.status === 'cancelled' || apt.status === 'canceled') return;
-    const d = String(apt.date).trim();
-    const t = String(apt.time).trim();
-    if (!fresh[d]) fresh[d] = [];
-    if (fresh[d].indexOf(t) < 0) fresh[d].push(t);
-  });
-  window._slotsCache = fresh;
-
-  console.log('[slots] date=' + date + ' booked=' + JSON.stringify(fresh[date] || []));
-
-  _renderSlotsFor(date);
+/* ═════════════════════════ DATA ═════════════════════════ */
+
+const SERVICES = {
+  grooming: {
+    scissor: [
+      {v:'Scissor Cut — X-Small', size:'xs', d:'0–10 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland', p:75, mins:90},
+      {v:'Scissor Cut — Small',   size:'s',  d:'11–20 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland', p:90, mins:105},
+      {v:'Scissor Cut — Medium',  size:'m',  d:'21–40 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland', p:110, mins:120},
+      {v:'Scissor Cut — Large',   size:'l',  d:'41–70 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland', p:140, mins:150},
+      {v:'Scissor Cut — XL',      size:'xl', d:'71–100 lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland', p:170, mins:180},
+      {v:'Scissor Cut — XXL',     size:'xxl',d:'100+ lbs · hand-finished cut, bath, brush, nails, ears, eyes, anal gland', p:195, mins:210}
+    ],
+    clipper: [
+      {v:'Clipper Cut — X-Small', size:'xs', d:'0–10 lbs · clipper cut, bath, brush, nails, ears, eyes, anal gland', p:60, mins:75},
+      {v:'Clipper Cut — Small',   size:'s',  d:'11–20 lbs · clipper cut, bath, brush, nails, ears, eyes, anal gland', p:75, mins:90},
+      {v:'Clipper Cut — Medium',  size:'m',  d:'21–40 lbs · clipper cut, bath, brush, nails, ears, eyes, anal gland', p:90, mins:105},
+      {v:'Clipper Cut — Large',   size:'l',  d:'41–70 lbs · clipper cut, bath, brush, nails, ears, eyes, anal gland', p:115, mins:120},
+      {v:'Clipper Cut — XL',      size:'xl', d:'71–100 lbs · clipper cut, bath, brush, nails, ears, eyes, anal gland', p:140, mins:150},
+      {v:'Clipper Cut — XXL',     size:'xxl',d:'100+ lbs · clipper cut, bath, brush, nails, ears, eyes, anal gland', p:165, mins:180}
+    ]
+  },
+  bath: [
+    {v:'Bath Only — X-Small', size:'xs', d:'0–10 lbs · shampoo, blow-dry, brush', p:35, mins:45},
+    {v:'Bath Only — Small',   size:'s',  d:'11–20 lbs · shampoo, blow-dry, brush', p:45, mins:60},
+    {v:'Bath Only — Medium',  size:'m',  d:'21–40 lbs · shampoo, blow-dry, brush', p:55, mins:75},
+    {v:'Bath Only — Large',   size:'l',  d:'41–70 lbs · shampoo, blow-dry, brush', p:70, mins:90},
+    {v:'Bath Only — XL',      size:'xl', d:'71–100 lbs · shampoo, blow-dry, brush', p:85, mins:105},
+    {v:'Bath Only — XXL',     size:'xxl',d:'100+ lbs · shampoo, blow-dry, brush', p:100, mins:120}
+  ],
+  daycare: [
+    {v:'Day Care — 1 Hour',   d:'Supervised play & socialization', p:15, mins:60},
+    {v:'Day Care — Half Day', d:'Up to 5 hours supervised play', p:28, mins:300},
+    {v:'Day Care — Full Day', d:'All-day supervised care', p:45, mins:480},
+    {v:'Overnight Boarding',  d:'Overnight stay with attentive care', p:75, mins:720}
+  ],
+  quick: [
+    {v:'Nail Trim',     d:'Quick nail clip & file', p:18, mins:15},
+    {v:'Eye Cleaning',  d:'Gentle wipe around eyes', p:12, mins:10},
+    {v:'Ear Cleaning',  d:'Inner-ear wipe & flush', p:15, mins:15},
+    {v:'Teeth Brushing',d:'Pet-safe toothpaste', p:12, mins:10},
+    {v:'Anal Gland Expression', d:'External expression', p:20, mins:15},
+    {v:'De-shedding Treatment', d:'Reduces shedding', p:25, mins:30}
+  ]
 };
 
-// Back-compat: keep the bare name working for inline callers below
-function refreshBookedSlots() { return window.refreshBookedSlots(); }
+const QUICK_EXTRAS = [
+  {v:'Nail Trim', p:18},
+  {v:'Eye Cleaning', p:12},
+  {v:'Ear Cleaning', p:15},
+  {v:'Teeth Brushing', p:12},
+  {v:'De-shedding', p:25}
+];
 
-// ── RETURNING CUSTOMER ────────────────────────────────────────────────
-function toggleReturning() {
-  const panel = document.getElementById('rc-panel');
-  const btn   = document.getElementById('rc-toggle');
-  const open  = panel.style.display === 'none' || panel.style.display === '';
-  panel.style.display = open ? 'block' : 'none';
-  btn.style.background = open ? '#ede9ff' : '';
-  if (open) document.getElementById('rc-phone').focus();
+// Extras that come bundled FREE with full grooming (scissor or clipper).
+// Teeth Brushing & De-shedding are NOT included — those stay paid add-ons.
+const GROOMING_INCLUDED = ['Nail Trim','Eye Cleaning','Ear Cleaning'];
+function isExtraIncluded(p, extraName){
+  return p && p.category === 'grooming' && GROOMING_INCLUDED.includes(extraName);
 }
 
-function showRcStatus(msg, type) {
-  const el = document.getElementById('rc-status');
-  el.textContent = msg;
-  el.style.color = type === 'error' ? '#c0392b' : type === 'success' ? '#27ae60' : 'var(--purple-soft)';
-}
-
-async function lookupCustomer() {
-  const raw = document.getElementById('rc-phone').value.trim();
-  if (!raw) { showRcStatus('Please enter your phone number', 'error'); return; }
-
-  // Normalize: keep digits only for comparison
-  const normalize = s => s.replace(/\D/g,'');
-  const search = normalize(raw);
-  if (search.length < 7) { showRcStatus('Enter a valid phone number', 'error'); return; }
-
-  const btn = document.getElementById('rc-btn');
-  btn.textContent = '...'; btn.disabled = true;
-  showRcStatus('Looking up your info…', 'info');
-
-  try {
-    if (!window.db) throw new Error('Database unavailable');
-
-    const snap = await window.db.ref('appointments').once('value');
-    const all  = snap.val() || {};
-
-    // Collect all appointments matching this phone
-    const matches = Object.values(all).filter(apt =>
-      apt.customerPhone && normalize(apt.customerPhone).includes(search)
-    );
-
-    if (matches.length === 0) {
-      showRcStatus('No bookings found for that number. Please fill in your details.', 'error');
-      btn.textContent = 'Find →'; btn.disabled = false;
-      return;
-    }
-
-    // Use the most recent booking for customer info
-    matches.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-    const latest = matches[0];
-
-    // Fill customer fields
-    if (latest.customerFirstName) {
-      const f = document.getElementById('fname'); if (f) f.value = latest.customerFirstName;
-    } else if (latest.customerName) {
-      const parts = latest.customerName.split(' ');
-      const f = document.getElementById('fname'); if (f) f.value = parts[0] || '';
-      const l = document.getElementById('lname'); if (l) l.value = parts.slice(1).join(' ') || '';
-    }
-    if (latest.customerLastName) {
-      const l = document.getElementById('lname'); if (l) l.value = latest.customerLastName;
-    }
-    if (latest.customerEmail) {
-      const e = document.getElementById('email'); if (e) e.value = latest.customerEmail;
-    }
-    if (latest.customerPhone) {
-      const p = document.getElementById('phone'); if (p) p.value = latest.customerPhone;
-    }
-    if (latest.customerAddress) {
-      const a = document.getElementById('address'); if (a) a.value = latest.customerAddress;
-    }
-    if (latest.customerCity) {
-      const c = document.getElementById('city'); if (c) c.value = latest.customerCity;
-    }
-    if (latest.customerZip) {
-      const z = document.getElementById('zip'); if (z) z.value = latest.customerZip;
-    }
-
-    // Collect unique pets from all their bookings
-    const petMap = {};
-    matches.forEach(apt => {
-      if (apt.petName) {
-        const key = apt.petName.toLowerCase();
-        if (!petMap[key]) petMap[key] = { name: apt.petName, breed: apt.petBreed || '' };
-      }
-    });
-    const pets = Object.values(petMap);
-
-    showRcStatus('✓ Details filled in!', 'success');
-    if (pets.length > 0) showPetSelection(pets);
-    else {
-      document.getElementById('rc-pets').style.display = 'none';
-      updateSum();
-    }
-  } catch (err) {
-    console.error('Lookup error:', err);
-    showRcStatus('Could not look up your info. Please fill in manually.', 'error');
-  }
-
-  btn.textContent = 'Find →'; btn.disabled = false;
-}
-
-function showPetSelection(pets) {
-  const container = document.getElementById('rc-pets');
-  container.style.display = 'block';
-  container.innerHTML = `
-    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--purple-soft);font-weight:500;margin-bottom:7px">Which pet are you booking for?</div>
-    <div style="display:flex;flex-wrap:wrap;gap:6px">
-      ${pets.map(p => `
-        <button onclick="selectPet('${p.name.replace(/'/g,"\\'")}','${p.breed.replace(/'/g,"\\'")}');event.preventDefault()"
-          style="padding:6px 13px;border:1px solid var(--lilac);border-radius:20px;background:#fff;color:var(--purple);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s"
-          onmouseover="this.style.background='var(--purple)';this.style.color='var(--pink-light)'"
-          onmouseout="this.style.background='#fff';this.style.color='var(--purple)'">
-          ${p.name}${p.breed ? ' · ' + p.breed : ''}
-        </button>
-      `).join('')}
-      <button onclick="document.getElementById('rc-pets').style.display='none';event.preventDefault()"
-        style="padding:6px 13px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--purple-soft);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif">
-        + New pet
-      </button>
-    </div>
-  `;
-}
-
-function selectPet(name, breed) {
-  const n = document.getElementById('pet-name');  if (n) n.value = name;
-  const b = document.getElementById('pet-breed'); if (b) b.value = breed;
-  document.getElementById('rc-pets').style.display = 'none';
-  showRcStatus('✓ Pet selected: ' + name, 'success');
-  updateSum();
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────
-const today=new Date().toISOString().split('T')[0];
-document.getElementById('appt-date').min=today;
-document.getElementById('appt-date').value=today;
-updateSum();
-refreshBookedSlots();
-// ── DOG BREED AUTOCOMPLETE ──────────────────────────────────────────
 const DOG_BREEDS = [
-  "Affenpinscher","Afghan Hound","Airedale Terrier","Akbash Dog","Akita Inu","Alaskan Klee Kai","Alaskan Malamute",
-  "American Bulldog","American Cocker Spaniel","American Eskimo Dog","American Foxhound","American Pit Bull Terrier",
-  "American Staffordshire Terrier","American Water Spaniel","Anatolian Shepherd Dog","Aussiedoodle","Australian Cattle Dog",
-  "Australian Kelpie","Australian Shepherd","Australian Silky Terrier","Australian Terrier","Azawakh","Basenji","Basset Hound",
-  "Bavarian Mountain Hound","Beagle","Bearded Collie","Beauceron","Bedlington Terrier","Belgian Malinois","Belgian Sheepdog",
-  "Belgian Tervuren","Bernedoodle","Bernese Mountain Dog","Bichon Frise","Black and Tan Coonhound","Black Russian Terrier",
-  "Bloodhound","Bluetick Coonhound","Boerboel","Border Collie","Border Terrier","Borzoi","Boston Terrier","Bouvier des Flandres",
-  "Boxer","Boykin Spaniel","Briard","Brittany Spaniel","Brussels Griffon","Bull Terrier","Bulldog","Bullmastiff","Cairn Terrier",
-  "Canaan Dog","Cane Corso","Cardigan Welsh Corgi","Cavalier King Charles Spaniel","Cavapoo","Cesky Terrier",
-  "Chesapeake Bay Retriever","Chihuahua","Chinese Crested Dog","Chinese Shar-Pei","Chinook","Chow Chow","Clumber Spaniel",
-  "Cockapoo","Cocker Spaniel","Collie","Coonhound","Corgi (Pembroke and Cardigan)","Curly-Coated Retriever","Dachshund",
-  "Dalmatian","Dandie Dinmont Terrier","Doberman Pinscher","Dogo Argentino","Dogue de Bordeaux","Dutch Shepherd",
-  "English Bulldog","English Cocker Spaniel","English Foxhound","English Setter","English Springer Spaniel",
-  "Entlebucher Mountain Dog","Field Spaniel","Finnish Lapphund","Finnish Spitz","Flat-Coated Retriever","French Bulldog",
-  "German Pinscher","German Shepherd","German Shorthaired Pointer","German Wirehaired Pointer","Giant Schnauzer",
-  "Glen of Imaal Terrier","Golden Doodle","Golden Retriever","Gordon Setter","Great Dane","Great Pyrenees",
-  "Greater Swiss Mountain Dog","Greyhound","Harrier","Havanese","Ibizan Hound","Icelandic Sheepdog","Irish Doodle",
-  "Irish Setter","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Italian Greyhound","Jack Russell Terrier",
-  "Japanese Chin","Japanese Spitz","Kangal","Keeshond","Kerry Blue Terrier","King Charles Spaniel","Komondor","Kuvasz",
-  "Labradoodle","Labrador Retriever","Lagotto Romagnolo","Lakeland Terrier","Lhasa Apso","Lowchen","Maltese","Maltipoo",
-  "Manchester Terrier","Mastiff","Miniature Bull Terrier","Miniature Pinscher","Miniature Schnauzer","Mudi",
-  "Neapolitan Mastiff","Newfoundland","Norfolk Terrier","Norwegian Buhund","Norwegian Elkhound","Norwegian Lundehund",
-  "Nova Scotia Duck Tolling Retriever","Old English Sheepdog","Otterhound","Papillon","Pekingese","Pembroke Welsh Corgi",
-  "Perro de Presa Canario","Petit Basset Griffon Vendéen","Pharaoh Hound","Plott Hound","Pointer","Polish Lowland Sheepdog",
-  "Pomeranian","Poodle (Toy, Miniature, Standard)","Portuguese Water Dog","Pug","Puli","Pumi","Pyrenean Shepherd",
-  "Rat Terrier","Redbone Coonhound","Rhodesian Ridgeback","Rottweiler","Saluki","Samoyed","Schipperke","Schnauzer",
-  "Schnoodle","Scottish Deerhound","Scottish Terrier","Sealyham Terrier","Sheepadoodle","Shepadoodle","Shetland Sheepdog",
-  "Shiba Inu","Shih Tzu","Shih-Poo","Siberian Husky","Silky Terrier","Skye Terrier","Sloughi","Soft Coated Wheaten Terrier",
-  "Spanish Water Dog","Spinone Italiano","Staffordshire Bull Terrier","Standard Schnauzer","Sussex Spaniel","Swedish Vallhund",
-  "Thai Ridgeback","Tibetan Mastiff","Tibetan Spaniel","Tibetan Terrier","Toy Fox Terrier","Treeing Walker Coonhound",
-  "Vizsla","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Whoodle",
-  "Wire Fox Terrier","Wirehaired Pointing Griffon","Xoloitzcuintli","Yorkiepoo","Yorkshire Terrier",
+  "Affenpinscher","Afghan Hound","Airedale Terrier","Akita","Alaskan Malamute","American Bulldog","American Eskimo Dog","American Foxhound","American Pit Bull Terrier","American Staffordshire Terrier","American Water Spaniel","Anatolian Shepherd","Australian Cattle Dog","Australian Kelpie","Australian Shepherd","Australian Terrier","Basenji","Basset Hound","Beagle","Bearded Collie","Beauceron","Bedlington Terrier","Belgian Malinois","Belgian Sheepdog","Belgian Tervuren","Bernese Mountain Dog","Bichon Frise","Black and Tan Coonhound","Black Russian Terrier","Bloodhound","Bluetick Coonhound","Boerboel","Border Collie","Border Terrier","Borzoi","Boston Terrier","Bouvier des Flandres","Boxer","Boykin Spaniel","Bracco Italiano","Briard","Brittany","Brussels Griffon","Bull Terrier","Bulldog","Bullmastiff","Cairn Terrier","Canaan Dog","Cane Corso","Cardigan Welsh Corgi","Cavalier King Charles Spaniel","Cavapoo","Cesky Terrier","Chesapeake Bay Retriever","Chihuahua","Chinese Crested","Chinese Shar-Pei","Chinook","Chow Chow","Clumber Spaniel","Cockapoo","Cocker Spaniel","Collie","Coton de Tulear","Curly-Coated Retriever","Dachshund","Dalmatian","Dandie Dinmont Terrier","Doberman Pinscher","Dogo Argentino","Dogue de Bordeaux","Dutch Shepherd","English Bulldog","English Cocker Spaniel","English Foxhound","English Setter","English Springer Spaniel","Entlebucher Mountain Dog","Field Spaniel","Finnish Lapphund","Finnish Spitz","Flat-Coated Retriever","French Bulldog","German Pinscher","German Shepherd","German Shorthaired Pointer","German Wirehaired Pointer","Giant Schnauzer","Glen of Imaal Terrier","Golden Doodle","Golden Retriever","Gordon Setter","Great Dane","Great Pyrenees","Greater Swiss Mountain Dog","Greyhound","Harrier","Havanese","Ibizan Hound","Icelandic Sheepdog","Irish Doodle","Irish Setter","Irish Terrier","Irish Water Spaniel","Irish Wolfhound","Italian Greyhound","Jack Russell Terrier","Japanese Chin","Japanese Spitz","Kangal","Keeshond","Kerry Blue Terrier","King Charles Spaniel","Komondor","Kuvasz","Labradoodle","Labrador Retriever","Lagotto Romagnolo","Lakeland Terrier","Lhasa Apso","Lowchen","Maltese","Maltipoo","Manchester Terrier","Mastiff","Miniature Bull Terrier","Miniature Pinscher","Miniature Schnauzer","Mudi","Neapolitan Mastiff","Newfoundland","Norfolk Terrier","Norwegian Buhund","Norwegian Elkhound","Norwegian Lundehund","Nova Scotia Duck Tolling Retriever","Old English Sheepdog","Otterhound","Papillon","Pekingese","Pembroke Welsh Corgi","Perro de Presa Canario","Petit Basset Griffon Vendéen","Pharaoh Hound","Plott Hound","Pointer","Polish Lowland Sheepdog","Pomeranian","Poodle (Toy, Miniature, Standard)","Portuguese Water Dog","Pug","Puli","Pumi","Pyrenean Shepherd","Rat Terrier","Redbone Coonhound","Rhodesian Ridgeback","Rottweiler","Saluki","Samoyed","Schipperke","Schnauzer","Schnoodle","Scottish Deerhound","Scottish Terrier","Sealyham Terrier","Sheepadoodle","Shepadoodle","Shetland Sheepdog","Shiba Inu","Shih Tzu","Shih-Poo","Siberian Husky","Silky Terrier","Skye Terrier","Sloughi","Smooth Fox Terrier","Soft Coated Wheaten Terrier","Spinone Italiano","Staffordshire Bull Terrier","Standard Schnauzer","Sussex Spaniel","Swedish Vallhund","Tibetan Mastiff","Tibetan Spaniel","Tibetan Terrier","Toy Fox Terrier","Treeing Walker Coonhound","Vizsla","Weimaraner","Welsh Springer Spaniel","Welsh Terrier","West Highland White Terrier","Whippet","Wire Fox Terrier","Wirehaired Pointing Griffon","Xoloitzcuintli","Yorkipoo","Yorkshire Terrier",
   "Mixed breed","Other / not listed"
 ];
 
-(function initBreedAutocomplete(){
-  const input = document.getElementById('pet-breed');
-  const list  = document.getElementById('breed-list');
-  if (!input || !list) return;
+const CAT_BREEDS = [
+  "Abyssinian","American Bobtail","American Curl","American Shorthair","American Wirehair","Balinese","Bengal","Birman","Bombay","British Longhair","British Shorthair","Burmese","Burmilla","Chartreux","Chausie","Cornish Rex","Cymric","Devon Rex","Egyptian Mau","Exotic Shorthair","Havana Brown","Highlander","Himalayan","Japanese Bobtail","Khao Manee","Korat","LaPerm","Lykoi","Maine Coon","Manx","Munchkin","Nebelung","Norwegian Forest Cat","Ocicat","Oriental","Persian","Peterbald","Pixie-bob","Ragamuffin","Ragdoll","Russian Blue","Savannah","Scottish Fold","Selkirk Rex","Siamese","Siberian","Singapura","Snowshoe","Somali","Sphynx","Tonkinese","Toyger","Turkish Angora","Turkish Van",
+  "Mixed breed","Other / not listed"
+];
 
-  let activeIndex = -1;
-  let currentMatches = [];
-
-  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
-  function highlight(name, query){
-    if (!query) return escapeHtml(name);
-    const i = name.toLowerCase().indexOf(query.toLowerCase());
-    if (i < 0) return escapeHtml(name);
-    return escapeHtml(name.slice(0,i)) + '<span class="match">' + escapeHtml(name.slice(i, i+query.length)) + '</span>' + escapeHtml(name.slice(i+query.length));
-  }
-
-  function render(matches, query){
-    currentMatches = matches;
-    activeIndex = matches.length ? 0 : -1;
-    if (!matches.length) {
-      list.innerHTML = '<div class="breed-option-empty">No breed matches — you can type your own.</div>';
-      list.classList.add('open');
-      return;
-    }
-    let html = matches.map((b, i) =>
-      '<div class="breed-option' + (i===activeIndex?' active':'') + '" role="option" data-breed="' + escapeHtml(b) + '">' + highlight(b, query) + '</div>'
-    ).join('');
-    // Footer hint when showing the empty-state preview (no query) so the
-    // customer knows there are way more breeds than the 12 they see.
-    if (!query) {
-      const remaining = DOG_BREEDS.length - matches.length;
-      if (remaining > 0) {
-        html += '<div class="breed-option-empty">+ ' + remaining + ' more breeds — keep typing to find yours</div>';
-      }
-    }
-    list.innerHTML = html;
-    list.classList.add('open');
-  }
-
-  function filterBreeds(q){
-    const query = q.trim().toLowerCase();
-    if (!query) {
-      // Show first ~12 alphabetically when empty (gives them something to scroll)
-      return DOG_BREEDS.slice(0, 12);
-    }
-    // Prioritize "starts with" then "contains"
-    const startsWith = [];
-    const contains = [];
-    for (const b of DOG_BREEDS) {
-      const lb = b.toLowerCase();
-      if (lb.startsWith(query)) startsWith.push(b);
-      else if (lb.includes(query)) contains.push(b);
-    }
-    return startsWith.concat(contains).slice(0, 30);
-  }
-
-  function setActive(idx){
-    const opts = list.querySelectorAll('.breed-option');
-    if (!opts.length) return;
-    activeIndex = (idx + opts.length) % opts.length;
-    opts.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
-    const a = opts[activeIndex];
-    if (a) a.scrollIntoView({ block: 'nearest' });
-  }
-
-  function pick(value){
-    input.value = value;
-    list.classList.remove('open');
-    activeIndex = -1;
-  }
-
-  input.addEventListener('focus', () => render(filterBreeds(input.value), input.value));
-  input.addEventListener('input', () => render(filterBreeds(input.value), input.value));
-
-  input.addEventListener('keydown', (e) => {
-    if (!list.classList.contains('open')) {
-      if (e.key === 'ArrowDown') { render(filterBreeds(input.value), input.value); e.preventDefault(); }
-      return;
-    }
-    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(activeIndex + 1); }
-    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIndex - 1); }
-    else if (e.key === 'Enter') {
-      if (activeIndex >= 0 && currentMatches[activeIndex]) {
-        e.preventDefault();
-        pick(currentMatches[activeIndex]);
-      }
-    }
-    else if (e.key === 'Escape') { list.classList.remove('open'); }
-  });
-
-  list.addEventListener('mousedown', (e) => {
-    // mousedown (not click) so it fires before input blur clears the list
-    const opt = e.target.closest('.breed-option');
-    if (!opt) return;
-    e.preventDefault();
-    pick(opt.getAttribute('data-breed'));
-  });
-
-  document.addEventListener('click', (e) => {
-    if (e.target !== input && !list.contains(e.target)) {
-      list.classList.remove('open');
-    }
-  });
-})();
-
-applyShinypawsPrefill();
-handleStripeReturn();
-
-// Refresh booked slots whenever date changes (covers both picker and manual edits)
-document.getElementById('appt-date').addEventListener('change', refreshBookedSlots);
-document.getElementById('appt-date').addEventListener('input',  refreshBookedSlots);
-document.getElementById('appt-date').addEventListener('blur',   refreshBookedSlots);
-
-// Belt + suspenders: refresh every time the user opens the time dropdown.
-// Date-change events are unreliable across browsers/pickers, but the user
-// HAS to click the time field to pick a slot — so this guarantees they see
-// current booked state at the moment of selection.
-const timeSelectEl = document.getElementById('appt-time-select');
-if (timeSelectEl) {
-  timeSelectEl.addEventListener('mousedown', refreshBookedSlots);
-  timeSelectEl.addEventListener('focus',     refreshBookedSlots);
+// Breed → size hint. Anything not listed → 'm' (medium) default.
+const BREED_SIZE = {
+  // X-Small
+  "Chihuahua":"xs","Yorkshire Terrier":"xs","Maltese":"xs","Pomeranian":"xs","Toy Fox Terrier":"xs","Papillon":"xs","Japanese Chin":"xs","Affenpinscher":"xs","Brussels Griffon":"xs","Pekingese":"xs","Italian Greyhound":"xs","Silky Terrier":"xs","Maltipoo":"xs","Yorkipoo":"xs","Miniature Pinscher":"xs","Chinese Crested":"xs",
+  // Small
+  "Shih Tzu":"s","Cavalier King Charles Spaniel":"s","Bichon Frise":"s","Boston Terrier":"s","Pug":"s","French Bulldog":"s","Dachshund":"s","Jack Russell Terrier":"s","Cairn Terrier":"s","Lhasa Apso":"s","Havanese":"s","Cockapoo":"s","Coton de Tulear":"s","Norfolk Terrier":"s","West Highland White Terrier":"s","Scottish Terrier":"s","Miniature Schnauzer":"s","Shih-Poo":"s","Cavapoo":"s","Pembroke Welsh Corgi":"s","Cardigan Welsh Corgi":"s","Shiba Inu":"s","Beagle":"s",
+  // Medium
+  "Cocker Spaniel":"m","English Cocker Spaniel":"m","Border Collie":"m","Australian Shepherd":"m","Bulldog":"m","English Bulldog":"m","Brittany":"m","Whippet":"m","Basset Hound":"m","Standard Schnauzer":"m","Soft Coated Wheaten Terrier":"m","Portuguese Water Dog":"m","Australian Cattle Dog":"m","Springer Spaniel":"m","English Springer Spaniel":"m",
+  // Large
+  "Labrador Retriever":"l","Golden Retriever":"l","Golden Doodle":"l","Labradoodle":"l","German Shepherd":"l","Boxer":"l","Doberman Pinscher":"l","Belgian Malinois":"l","Vizsla":"l","Weimaraner":"l","Dalmatian":"l","Chesapeake Bay Retriever":"l","Pointer":"l","Rhodesian Ridgeback":"l","Siberian Husky":"l","Alaskan Malamute":"l","Akita":"l","Chow Chow":"l","Samoyed":"l","Old English Sheepdog":"l","Bernese Mountain Dog":"l","Greyhound":"l",
+  // XL
+  "Rottweiler":"xl","Bullmastiff":"xl","Cane Corso":"xl","Doberman":"xl","Great Pyrenees":"xl","Newfoundland":"xl","Anatolian Shepherd":"xl","Saint Bernard":"xl","Leonberger":"xl",
+  // XXL
+  "Great Dane":"xxl","Mastiff":"xxl","Neapolitan Mastiff":"xxl","Tibetan Mastiff":"xxl","Irish Wolfhound":"xxl","Saint Bernard ":"xxl","English Mastiff":"xxl","Kangal":"xxl","Dogue de Bordeaux":"xxl"
+};
+// Cats default to xs
+function getBreedSize(petType, breed){
+  if (petType === 'cat') return 'xs';
+  return BREED_SIZE[breed] || 'm';
 }
 
-// Re-run after Firebase finishes loading, in case the initial call fired before
-// window.db was ready. Cheap and idempotent.
-setTimeout(refreshBookedSlots, 800);
-setTimeout(refreshBookedSlots, 2500);
+const TEMPERAMENTS = ["Friendly","Energetic","Shy","Calm","Aggressive","Anxious","Protective","Playful"];
 
-// Brute-force safety net: poll the date input every 500ms. If it changed
-// (regardless of whether change/input/blur events fired), re-render slots
-// from cache instantly. This catches every conceivable browser quirk.
-setInterval(() => {
-  const di = document.getElementById('appt-date');
-  if (!di) return;
-  if (di.value && di.value !== window._slotsLastDate) {
-    window._slotsLastDate = di.value;
-    _renderSlotsFor(di.value);
-    refreshBookedSlots();   // also kick a fresh Firebase read
+const TIME_SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","12:00 PM","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM","4:30 PM","5:00 PM","5:30 PM","6:00 PM"];
+
+/* ═════════════════════════ STATE ═════════════════════════ */
+
+function newPet() {
+  return {
+    category:null, groomType:'scissor', service:null, extras:[],
+    type:null, name:'', breed:'', ageYears:null, ageMonths:null,
+    fixed:'', temperament:[], notes:''
+  };
+}
+
+const state = {
+  step: 1,
+  currentPetIdx: 0,
+  pets: [ newPet() ],
+  appt: { date:'', time:'' },
+  customer: { fname:'', lname:'', email:'', phone:'', address:'' }
+};
+
+function pet() { return state.pets[state.currentPetIdx]; }
+
+/* ═════════════════════════ LOCALSTORAGE ═════════════════════════ */
+
+const STORE_KEY = 'shinypaws_checkout_v2_state';
+const STORE_TTL_MS = 1000 * 60 * 60 * 24 * 3; // 3 days
+
+function saveState() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({ savedAt: Date.now(), state }));
+  } catch(e) {}
+}
+function loadSavedState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || !data.savedAt || (Date.now() - data.savedAt) > STORE_TTL_MS) {
+      localStorage.removeItem(STORE_KEY);
+      return null;
+    }
+    return data.state;
+  } catch(e) { return null; }
+}
+function clearSavedState() {
+  localStorage.removeItem(STORE_KEY);
+  document.getElementById('restore-prompt').classList.remove('open');
+}
+function restoreState() {
+  const s = loadSavedState();
+  if (!s) return;
+  Object.assign(state, s);
+  document.getElementById('restore-prompt').classList.remove('open');
+  // Re-render everything
+  renderPetTabs();
+  renderTemperament();
+  if (pet().type) {
+    const btn = document.querySelector('.pet-type-btn[data-type="'+pet().type+'"]');
+    if (btn) btn.classList.add('selected');
+    document.getElementById('breed-wrap').style.display = 'block';
+    document.getElementById('spay-field').style.display = pet().type === 'dog' ? 'block' : 'none';
+    initBreedAutocomplete();
   }
-}, 500);
+  document.getElementById('pet-name').value = pet().name || '';
+  document.getElementById('pet-breed').value = pet().breed || '';
+  document.getElementById('pet-age').value = pet().ageYears == null ? '' : pet().ageYears;
+  document.getElementById('pet-age-months').value = pet().ageMonths == null ? '' : pet().ageMonths;
+  if (pet().ageYears === 0) document.getElementById('age-months-field').style.display = 'block';
+  document.getElementById('pet-fixed').value = pet().fixed || '';
+  document.getElementById('pet-notes').value = pet().notes || '';
+  ['fname','lname','email','phone','address'].forEach(k => {
+    document.getElementById('cust-'+k).value = state.customer[k] || '';
+  });
+  if (pet().category) {
+    const c = document.querySelector('.cat-card[data-cat="'+pet().category+'"]');
+    if (c) c.classList.add('selected');
+  }
+  gotoStep(state.step);
+  updateStickyTotal();
+}
 
-document.getElementById('sp-overlay').addEventListener('click',function(e){
-  if(e.target===this) closeSPCheckout();
+/* ═════════════════════════ STEP NAV ═════════════════════════ */
+
+function gotoStep(n) {
+  if (n > state.step && !canAdvanceTo(n)) {
+    showHint(state.step);
+    return;
+  }
+  state.step = n;
+  for (let i = 1; i <= 5; i++) {
+    document.getElementById('step-' + i).style.display = (i === n ? 'block' : 'none');
+  }
+  document.querySelectorAll('.progress-step').forEach(el => {
+    const s = +el.dataset.step;
+    el.classList.toggle('active', s === n);
+    el.classList.toggle('done', s < n);
+  });
+  document.querySelectorAll('.progress-labels > div').forEach(el => {
+    el.classList.toggle('active', +el.dataset.step === n);
+  });
+  hideAllHints();
+  if (n === 2) renderPetInfo();
+  if (n === 3) renderServiceDetail();
+  if (n === 4) { renderCalendar(); renderTimes(); }
+  if (n === 5) renderFinalSummary();
+  refreshNextButtons();
+  updateStickyTotal();
+  renderPetTabs();
+  shinySays(n);
+  saveState();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function canAdvanceTo(n) {
+  const p = pet();
+  if (n >= 2 && !p.category) return false;
+  if (n >= 3) {
+    // Pet info required for current pet
+    if (!p.type || !p.name || !p.breed || p.ageYears === null) return false;
+    if (!p.notes || !p.notes.trim()) return false;
+  }
+  if (n >= 4) {
+    // All pets must have service + valid info
+    for (const pp of state.pets) {
+      if (!pp.type || !pp.name || !pp.breed || pp.ageYears === null) return false;
+      if (!pp.notes || !pp.notes.trim()) return false;
+      if (pp.category !== 'quick' && !pp.service) return false;
+      if (pp.category === 'quick' && pp.extras.length === 0) return false;
+    }
+  }
+  if (n >= 5 && (!state.appt.date || !state.appt.time)) return false;
+  return true;
+}
+
+function showHint(stepNum) {
+  hideAllHints();
+  const el = document.getElementById('hint-' + stepNum);
+  if (el) {
+    const p = pet();
+    let msg = '';
+    if (stepNum === 1) msg = 'Pick a service category to continue.';
+    else if (stepNum === 2) {
+      const missing = [];
+      if (!p.type) missing.push('pet type');
+      if (!p.name) missing.push('name');
+      if (!p.breed) missing.push('breed');
+      if (p.ageYears === null) missing.push('age');
+      if (!p.notes || !p.notes.trim()) missing.push('notes (or click "No notes")');
+      msg = missing.length ? 'Add ' + missing.join(', ') + ' to continue.' : 'Looks good — click Next.';
+    }
+    else if (stepNum === 3) msg = 'Pick at least one service to continue.';
+    else if (stepNum === 4) msg = 'Pick a date and time to continue.';
+    else if (stepNum === 5) msg = 'Fill in your name, email, and phone to continue.';
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+}
+function hideAllHints() {
+  document.querySelectorAll('.validation-hint').forEach(el => el.classList.remove('show'));
+}
+
+function refreshNextButtons() {
+  const p = pet();
+  document.getElementById('btn-next-1').disabled = !p.category;
+  // Step 2 = pet info
+  const okPet = !!(p.type && p.name && p.breed && p.ageYears !== null && p.notes && p.notes.trim());
+  document.getElementById('btn-next-2').disabled = !okPet;
+  // Step 3 = service detail
+  document.getElementById('btn-next-3').disabled = (p.category !== 'quick' && !p.service) || (p.category === 'quick' && p.extras.length === 0);
+  document.getElementById('btn-next-4').disabled = !state.appt.date || !state.appt.time;
+  const c = state.customer;
+  document.getElementById('btn-pay').disabled = !(c.fname && c.lname && c.email && c.phone);
+  // Hide hint for current step if it's now valid
+  const cur = state.step;
+  const hint = document.getElementById('hint-' + cur);
+  if (hint && hint.classList.contains('show')) {
+    let nowValid = false;
+    if (cur === 1) nowValid = !!p.category;
+    else if (cur === 2) nowValid = okPet;
+    else if (cur === 3) nowValid = !document.getElementById('btn-next-3').disabled;
+    else if (cur === 4) nowValid = !!(state.appt.date && state.appt.time);
+    else if (cur === 5) nowValid = !!(c.fname && c.lname && c.email && c.phone);
+    if (nowValid) hint.classList.remove('show');
+  }
+}
+
+// Wrapper for "Next" on pet step — auto-fills "none" if notes empty
+function advanceFromPet() {
+  const p = pet();
+  if (!p.notes || !p.notes.trim()) {
+    p.notes = 'none';
+    document.getElementById('pet-notes').value = 'none';
+  }
+  refreshNextButtons();
+  gotoStep(3);
+}
+function setNotesNone() {
+  pet().notes = 'none';
+  document.getElementById('pet-notes').value = 'none';
+  refreshNextButtons();
+  saveState();
+}
+
+/* ═════════════════════════ MULTI-PET ═════════════════════════ */
+
+function renderPetTabs() {
+  const wrap = document.getElementById('pet-tabs');
+  if (state.pets.length <= 1 && state.step <= 1 && !state.pets[0].name) {
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = state.pets.map((p, i) => {
+    const label = p.name || ('Pet ' + (i+1));
+    const active = i === state.currentPetIdx ? 'active' : '';
+    const xBtn = state.pets.length > 1 ? `<span class="x" onclick="event.stopPropagation();removePet(${i})">×</span>` : '';
+    return `<div class="pet-tab ${active}" onclick="switchPet(${i})">🐾 ${label} ${xBtn}</div>`;
+  }).join('');
+}
+function switchPet(idx) {
+  state.currentPetIdx = idx;
+  if (state.step === 1) {
+    document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+    if (pet().category) {
+      const c = document.querySelector('.cat-card[data-cat="'+pet().category+'"]');
+      if (c) c.classList.add('selected');
+    }
+  }
+  if (state.step === 2) renderPetInfo();
+  if (state.step === 3) renderServiceDetail();
+  refreshNextButtons();
+  renderPetTabs();
+  updateStickyTotal();
+  saveState();
+}
+function removePet(idx) {
+  if (state.pets.length <= 1) return;
+  state.pets.splice(idx, 1);
+  if (state.currentPetIdx >= state.pets.length) state.currentPetIdx = state.pets.length - 1;
+  renderPetTabs();
+  refreshNextButtons();
+  updateStickyTotal();
+  saveState();
+}
+function addAnotherPet() {
+  state.pets.push(newPet());
+  state.currentPetIdx = state.pets.length - 1;
+  renderPetTabs();
+  gotoStep(1);
+}
+
+/* ═════════════════════════ STEP 1 ═════════════════════════ */
+
+function selectCategory(cat, el) {
+  pet().category = cat;
+  pet().service = null;
+  pet().extras = [];
+  document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  refreshNextButtons();
+  updateStickyTotal();
+  saveState();
+}
+
+/* ═════════════════════════ STEP 2 ═════════════════════════ */
+
+function renderServiceDetail() {
+  const p = pet();
+  const titleEl = document.getElementById('step3-title');
+  const subEl = document.getElementById('step3-sub');
+  const tabsEl = document.getElementById('grooming-tabs');
+  const listEl = document.getElementById('service-list');
+  const quickGrid = document.getElementById('quick-extras-grid');
+  const quickSection = document.getElementById('quick-extras-section');
+
+  let services = [];
+  tabsEl.style.display = 'none';
+  quickSection.style.display = 'block';
+
+  if (p.category === 'grooming') {
+    titleEl.textContent = 'Pick your grooming service';
+    subEl.textContent = p.breed
+      ? `Based on ${p.breed}, we suggest the highlighted size — change it if needed.`
+      : 'Choose scissor or clipper, then size.';
+    tabsEl.style.display = 'block';
+    document.getElementById('tab-scissor').classList.toggle('btn-primary', p.groomType === 'scissor');
+    document.getElementById('tab-scissor').classList.toggle('btn-secondary', p.groomType !== 'scissor');
+    document.getElementById('tab-clipper').classList.toggle('btn-primary', p.groomType === 'clipper');
+    document.getElementById('tab-clipper').classList.toggle('btn-secondary', p.groomType !== 'clipper');
+    services = SERVICES.grooming[p.groomType];
+  } else if (p.category === 'bath') {
+    titleEl.textContent = 'Pick a bath option';
+    subEl.textContent = p.breed
+      ? `Based on ${p.breed}, we suggest the highlighted size — change it if needed.`
+      : 'Choose by your pet\'s size.';
+    services = SERVICES.bath;
+  } else if (p.category === 'daycare') {
+    titleEl.textContent = 'Pick a day care option';
+    subEl.textContent = 'Hourly through overnight.';
+    services = SERVICES.daycare;
+  } else if (p.category === 'quick') {
+    titleEl.textContent = 'Pick your quick service(s)';
+    subEl.textContent = 'No full appointment needed — just the basics.';
+    services = SERVICES.quick;
+    quickSection.style.display = 'none';
+  }
+
+  // If this is a grooming service, strip any "included" extras the user previously
+  // added — they're bundled free now, no double-charging in totals or summary.
+  if (p.category === 'grooming') {
+    p.extras = p.extras.filter(x => !GROOMING_INCLUDED.includes(x.v));
+  }
+
+  const suggestSize = (p.breed && p.type) ? getBreedSize(p.type, p.breed) : null;
+
+  // Auto-pick suggested size if no manual selection yet
+  if (suggestSize && !p.service && (p.category === 'grooming' || p.category === 'bath')) {
+    const match = services.find(s => s.size === suggestSize);
+    if (match) p.service = match;
+  }
+
+  listEl.innerHTML = services.map(s => {
+    const isSel = p.service && p.service.v === s.v;
+    const isSuggest = suggestSize && s.size === suggestSize;
+    const cls = `service-row ${isSel?'selected':''} ${isSuggest && !isSel?'suggested':''}`;
+    const dur = s.mins ? `<div class="duration">~${s.mins>=60? Math.floor(s.mins/60)+'h'+(s.mins%60?(' '+(s.mins%60)+'m'):'') : s.mins+'m'}</div>` : '';
+    const badge = isSuggest ? `<span class="badge-suggested">Suggested for ${p.breed||'your pet'}</span>` : '';
+    return `<div class="${cls}" onclick='pickService(${JSON.stringify(s)})'>
+       ${badge}
+       <div><div class="sname">${s.v}</div><div class="sdesc">${s.d}</div>${dur}</div>
+       <div class="sprice">$${s.p}</div>
+     </div>`;
+  }).join('');
+
+  quickGrid.innerHTML = QUICK_EXTRAS.map(e => {
+    const included = isExtraIncluded(p, e.v);
+    const sel = p.extras.some(x => x.v === e.v);
+    if (included) {
+      return `<div class="quick-card included" title="Included free with grooming">
+                <span><span class="qcheck">✓</span><span class="qname">${e.v}<span class="included-badge">Included</span></span></span>
+                <span class="qprice">FREE</span>
+              </div>`;
+    }
+    return `<div class="quick-card ${sel?'selected':''}" onclick='toggleExtra(${JSON.stringify(e)})'>
+              <span><span class="qcheck">✓</span><span class="qname">${e.v}</span></span>
+              <span class="qprice">+$${e.p}</span>
+            </div>`;
+  }).join('');
+
+  refreshNextButtons();
+  updateStickyTotal();
+}
+
+function setGroomType(t) {
+  pet().groomType = t;
+  pet().service = null;
+  renderServiceDetail();
+  saveState();
+}
+function pickService(s) {
+  const p = pet();
+  if (p.category === 'quick') { toggleExtra(s); return; }
+  p.service = s;
+  renderServiceDetail();
+  saveState();
+}
+function toggleExtra(e) {
+  const ex = pet().extras;
+  const idx = ex.findIndex(x => x.v === e.v);
+  if (idx >= 0) ex.splice(idx, 1); else ex.push(e);
+  renderServiceDetail();
+  saveState();
+}
+
+/* ═════════════════════════ STEP 3 ═════════════════════════ */
+
+function renderPetInfo() {
+  const p = pet();
+  document.querySelectorAll('.pet-type-btn').forEach(b => b.classList.remove('selected'));
+  if (p.type) {
+    const btn = document.querySelector('.pet-type-btn[data-type="'+p.type+'"]');
+    if (btn) btn.classList.add('selected');
+    document.getElementById('breed-wrap').style.display = 'block';
+    document.getElementById('spay-field').style.display = p.type === 'dog' ? 'block' : 'none';
+    initBreedAutocomplete();
+  } else {
+    document.getElementById('breed-wrap').style.display = 'none';
+    document.getElementById('spay-field').style.display = 'none';
+  }
+  document.getElementById('pet-name').value = p.name || '';
+  document.getElementById('pet-breed').value = p.breed || '';
+  document.getElementById('pet-age').value = p.ageYears == null ? '' : p.ageYears;
+  document.getElementById('pet-age-months').value = p.ageMonths == null ? '' : p.ageMonths;
+  document.getElementById('age-months-field').style.display = (p.ageYears === 0 ? 'block' : 'none');
+  document.getElementById('pet-fixed').value = p.fixed || '';
+  document.getElementById('pet-notes').value = p.notes || '';
+  renderTemperament();
+}
+
+function setPetType(type, el) {
+  pet().type = type;
+  pet().breed = '';
+  document.getElementById('pet-breed').value = '';
+  document.querySelectorAll('.pet-type-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('breed-wrap').style.display = 'block';
+  document.getElementById('spay-field').style.display = (type === 'dog' ? 'block' : 'none');
+  initBreedAutocomplete();
+  refreshNextButtons();
+  updateStickyTotal();
+  saveState();
+}
+
+function initBreedAutocomplete() {
+  const input = document.getElementById('pet-breed');
+  const list  = document.getElementById('breed-list');
+  const breeds = pet().type === 'cat' ? CAT_BREEDS : DOG_BREEDS;
+  let active = -1;
+
+  function render(q) {
+    q = (q||'').toLowerCase().trim();
+    let matches;
+    if (!q) matches = breeds.slice(0, 12);
+    else {
+      const starts = breeds.filter(b => b.toLowerCase().startsWith(q));
+      const contains = breeds.filter(b => !b.toLowerCase().startsWith(q) && b.toLowerCase().includes(q));
+      matches = starts.concat(contains).slice(0, 12);
+    }
+    if (matches.length === 0) {
+      list.innerHTML = '<div class="breed-empty">No match — type your breed and we\'ll save it.</div>';
+    } else {
+      list.innerHTML = matches.map((b,i) => `<div class="breed-option ${i===active?'active':''}" data-i="${i}">${b}</div>`).join('');
+      if (!q) list.innerHTML += `<div class="breed-empty">+ ${breeds.length - matches.length} more — keep typing</div>`;
+    }
+    list.classList.add('open');
+    list.querySelectorAll('.breed-option').forEach(opt => {
+      opt.addEventListener('mousedown', (ev) => {
+        ev.preventDefault();
+        input.value = opt.textContent;
+        pet().breed = opt.textContent;
+        list.classList.remove('open');
+        refreshNextButtons();
+        updateStickyTotal();
+        saveState();
+      });
+    });
+  }
+  input.oninput = () => {
+    pet().breed = input.value;
+    render(input.value);
+    refreshNextButtons();
+    updateStickyTotal();
+    saveState();
+  };
+  input.onfocus = () => render(input.value);
+  input.onblur  = () => setTimeout(() => list.classList.remove('open'), 100);
+}
+
+document.getElementById('pet-name').oninput = (e) => { pet().name = e.target.value; refreshNextButtons(); renderPetTabs(); updateStickyTotal(); saveState(); };
+document.getElementById('pet-age').oninput = (e) => {
+  let v = parseInt(e.target.value, 10);
+  if (isNaN(v)) v = null;
+  if (v !== null) { v = Math.max(0, Math.min(25, v)); e.target.value = v; }
+  pet().ageYears = v;
+  document.getElementById('age-months-field').style.display = (v === 0 ? 'block' : 'none');
+  refreshNextButtons(); saveState();
+};
+document.getElementById('pet-age-months').oninput = (e) => {
+  let v = parseInt(e.target.value, 10);
+  if (isNaN(v)) v = null;
+  if (v !== null) { v = Math.max(0, Math.min(11, v)); e.target.value = v; }
+  pet().ageMonths = v;
+  saveState();
+};
+document.getElementById('pet-fixed').onchange = (e) => { pet().fixed = e.target.value; saveState(); };
+document.getElementById('pet-notes').oninput = (e) => { pet().notes = e.target.value; refreshNextButtons(); saveState(); };
+
+function renderTemperament() {
+  const wrap = document.getElementById('temperament-chips');
+  wrap.innerHTML = TEMPERAMENTS.map(t => {
+    const sel = pet().temperament.includes(t);
+    return `<div class="chip ${sel?'selected':''}" onclick="toggleTemperament('${t}')">${t}</div>`;
+  }).join('');
+}
+function toggleTemperament(t) {
+  const arr = pet().temperament;
+  const i = arr.indexOf(t);
+  if (i >= 0) arr.splice(i, 1); else arr.push(t);
+  renderTemperament();
+  saveState();
+}
+
+/* ═════════════════════════ STEP 4 — Calendar + Times ═════════════════════════ */
+
+// Fake availability for preview
+const FAKE_BOOKED = {
+  // 'yyyy-mm-dd': ['10:00 AM', '2:30 PM']
+};
+function fakeBookedFor(dateStr) {
+  // demo: pretend some random fixed bookings
+  const day = new Date(dateStr).getDay();
+  if (day === 0) return TIME_SLOTS.slice(); // closed Sundays = full
+  if (day === 6) return ['10:00 AM','11:00 AM','2:00 PM','3:00 PM']; // busy Saturdays
+  return ['10:00 AM','2:30 PM'];
+}
+function dayBusyLevel(dateStr) {
+  const booked = fakeBookedFor(dateStr).length;
+  if (booked >= TIME_SLOTS.length) return 'full';
+  if (booked >= 6) return 'busy';
+  return 'open';
+}
+
+function renderCalendar() {
+  const wrap = document.getElementById('cal-wrap');
+  const days = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(today); d.setDate(today.getDate()+i);
+    const iso = d.toISOString().slice(0,10);
+    const dow = d.toLocaleDateString('en-US',{weekday:'short'});
+    const dom = d.getDate();
+    const mon = d.toLocaleDateString('en-US',{month:'short'});
+    const busy = dayBusyLevel(iso);
+    days.push({iso, dow, dom, mon, busy});
+  }
+  wrap.innerHTML = days.map(d => {
+    const sel = state.appt.date === d.iso;
+    const cls = `cal-day ${sel?'selected':''} ${d.busy==='full'?'full':''} ${d.busy==='busy'?'busy':''}`;
+    return `<button type="button" class="${cls}" ${d.busy==='full'?'disabled':''} onclick="pickDate('${d.iso}')">
+      <div class="dow">${d.dow}</div>
+      <div class="dom">${d.dom}</div>
+      <div class="mon">${d.mon}</div>
+      <div class="dot"></div>
+    </button>`;
+  }).join('');
+}
+function pickDate(iso) {
+  state.appt.date = iso;
+  state.appt.time = '';
+  renderCalendar();
+  renderTimes();
+  refreshNextButtons();
+  saveState();
+}
+
+function renderTimes() {
+  const grid = document.getElementById('time-grid');
+  if (!state.appt.date) {
+    grid.innerHTML = '<div class="hint" style="grid-column:1/-1">Pick a date above first.</div>';
+    return;
+  }
+  const booked = fakeBookedFor(state.appt.date);
+  grid.innerHTML = TIME_SLOTS.map(t => {
+    const isBooked = booked.includes(t);
+    const sel = state.appt.time === t;
+    return `<button type="button" class="time-slot ${sel?'selected':''}" ${isBooked?'disabled':''} onclick="pickTime('${t}')">${isBooked?t+' (booked)':t}</button>`;
+  }).join('');
+}
+function pickTime(t) {
+  state.appt.time = t;
+  renderTimes();
+  refreshNextButtons();
+  updateStickyTotal();
+  saveState();
+}
+
+/* ═════════════════════════ STEP 5 ═════════════════════════ */
+
+['cust-fname','cust-lname','cust-email','cust-phone','cust-address'].forEach(id => {
+  document.getElementById(id).oninput = (e) => {
+    const key = id.replace('cust-','');
+    state.customer[key] = e.target.value;
+    refreshNextButtons();
+    saveState();
+  };
 });
 
-// Stripe.js is no longer loaded on this page — payment happens on Stripe's hosted Checkout.
-// (Embedded card UI is hidden; pay() POSTs to the Netlify function and redirects.)
-</script>
+function totalCents() {
+  let total = 0;
+  state.pets.forEach(p => {
+    if (p.service) total += p.service.p;
+    p.extras.forEach(e => total += e.p);
+  });
+  return total;
+}
 
+function renderFinalSummary() {
+  const el = document.getElementById('summary-final');
+  let html = '';
+  state.pets.forEach((p, i) => {
+    const ageStr = p.ageYears === 0 ? `${p.ageMonths || 0} mo` : `${p.ageYears} yr`;
+    const lines = [];
+    if (p.service) lines.push({label:p.service.v, price:p.service.p});
+    p.extras.forEach(e => lines.push({label:'+ ' + e.v, price:e.p}));
+    html += `<div class="pet-block">
+      <div class="pname">🐾 ${p.name || 'Pet '+(i+1)} · ${p.breed} · ${ageStr}${p.fixed?' · '+p.fixed:''}</div>
+      ${p.temperament.length?`<div style="font-size:11px;color:var(--muted);margin-bottom:4px">${p.temperament.join(' · ')}</div>`:''}
+      ${lines.map(l=>`<div class="srow-r"><span>${l.label}</span><span>$${l.price}</span></div>`).join('')}
+    </div>`;
+  });
+  html += `<div style="padding:8px 0"><b>When:</b> ${state.appt.date} at ${state.appt.time}</div>`;
+  html += `<div class="srow-r total"><span>Total</span><span>$${totalCents()}</span></div>`;
+  el.innerHTML = html;
+  document.getElementById('pay-text').textContent = `Confirm booking →`;
+  const amtEl = document.getElementById('pay-pickup-amt');
+  if (amtEl) amtEl.textContent = '$' + totalCents();
+}
+
+async function confirmBooking() {
+  const btn = document.getElementById('btn-pay');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Confirming…';
+
+  const bookingRef = 'SP-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  const total = totalCents();
+  const firstPet = state.pets[0] || {};
+  const petSummary = state.pets.map(p => p.name || 'Pet').join(', ');
+  const serviceSummary = state.pets.map(p => (p.service ? p.service.v : '')).filter(Boolean).join(' + ');
+
+  const PREVIEW = false;
+
+  if (PREVIEW) {
+    setTimeout(() => {
+      alert('PREVIEW MODE — Booking confirmed!\n\n✓ Ref: ' + bookingRef + '\n✓ Pay at pickup: $' + total + '\n✓ Pets: ' + state.pets.length + '\n✓ Date: ' + state.appt.date + ' ' + state.appt.time + '\n\nOn live: this will write to Firebase, email the customer a confirmation, and send you (admin) a notification.');
+      console.log('FINAL BOOKING:', JSON.stringify(state, null, 2));
+      btn.disabled = false;
+      btn.innerHTML = '<span id="pay-text">Confirm booking →</span>';
+    }, 700);
+    return;
+  }
+
+  // Live path (when PREVIEW flag flipped off):
+  try {
+    // 1) Write booking to Firebase
+    await fetch('https://shiny-paws-default-rtdb.firebaseio.com/appointments.json', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        bookingRef,
+        customerName:  state.customer.fname + ' ' + state.customer.lname,
+        customerEmail: state.customer.email,
+        customerPhone: state.customer.phone,
+        customerAddress: state.customer.address,
+        pets: state.pets,
+        service: serviceSummary,
+        petName: petSummary,
+        petBreed: firstPet.breed || '',
+        date: state.appt.date,
+        time: state.appt.time,
+        total,
+        status: 'confirmed',
+        paymentStatus: 'pay_at_pickup',
+        createdAt: new Date().toISOString(),
+        source: 'web_checkout_v2'
+      })
+    });
+
+    // 2) Email customer confirmation
+    await fetch('/.netlify/functions/send-confirmation-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerEmail: state.customer.email,
+        customerName:  state.customer.fname + ' ' + state.customer.lname,
+        petName:       petSummary,
+        service:       serviceSummary,
+        date:          state.appt.date,
+        time:          state.appt.time,
+        total,
+        bookingRef,
+        needsWaiver:   true
+      })
+    });
+
+    alert('✓ Booking confirmed! Check your email for the confirmation.');
+    location.href = '/?booked=' + bookingRef;
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong — please call us at (310) 290-4970 to confirm.');
+    btn.disabled = false;
+    btn.innerHTML = '<span id="pay-text">Confirm booking →</span>';
+  }
+}
+
+/* ═════════════════════════ STICKY TOTAL ═════════════════════════ */
+
+function updateStickyTotal() {
+  const bar = document.getElementById('sticky-total');
+  const total = totalCents();
+  const parts = [];
+  state.pets.forEach((p, i) => {
+    if (!p.service && p.extras.length === 0) return;
+    const name = p.name || 'Pet ' + (i+1);
+    const svc = p.service ? p.service.v : '';
+    const extras = p.extras.length ? ' +' + p.extras.length + ' extra' + (p.extras.length>1?'s':'') : '';
+    parts.push(`${name}: ${svc}${extras}`);
+  });
+  if (parts.length === 0) {
+    bar.style.display = 'none';
+    return;
+  }
+  bar.style.display = 'flex';
+  document.getElementById('sticky-body').textContent = parts.join(' · ');
+  document.getElementById('sticky-amt').textContent = '$' + total;
+}
+
+/* ═════════════════════════ Shiny mascot dialogue ═════════════════════════ */
+
+function toggleMascot() {
+  document.getElementById('mascot').classList.toggle('open');
+}
+
+function shinySays(stepNum) {
+  const p = pet();
+  const name = p.name || 'your pup';
+  const breed = p.breed || '';
+  const lines = {
+    1: [
+      "Hi! I'm Shiny 🐾 What's your furry friend getting today?",
+      "Pick a service to start — Grooming, Bath, Day Care, or Quick services!",
+      "Not sure what to pick? Grooming is our most popular 💇"
+    ],
+    2: [
+      `Tell me about ${name}! The more I know, the better we'll spoil them.`,
+      `If ${name} has any quirks, drop a note — our groomers love a heads-up!`,
+      "Pro tip: pick the breed and I'll auto-suggest the right size next 🪄"
+    ],
+    3: [
+      breed ? `Ooh, a ${breed}! I picked the size I think fits — change it if I got it wrong 😊` : "Pick the size that matches your pup's weight.",
+      "Wanna add a nail trim or eye cleaning? Just tap the extras below!",
+      "Mixing services? Add another pet anytime — even if they're different sizes 🐕🐈"
+    ],
+    4: [
+      "Pick a day! 🟢 Open · 🟠 Filling up · 🔴 Full. Sundays we're closed 💤",
+      "Booked times are crossed out — pick any open slot!",
+      "Most popular times: late morning. Get in early!"
+    ],
+    5: [
+      `Almost done! Just your contact info and we'll see ${name} soon 🥰`,
+      "You'll pay in-store after the service — no card needed today!",
+      "We'll send you a confirmation email + a reminder text 💌"
+    ]
+  };
+  const set = lines[stepNum] || lines[1];
+  const idx = Math.floor(Math.random() * set.length);
+  const txt = document.getElementById('mascot-text');
+  if (txt) {
+    txt.textContent = set[idx];
+    // Re-trigger pop animation
+    const bubble = document.getElementById('mascot-bubble');
+    bubble.style.animation = 'none';
+    void bubble.offsetWidth;
+    bubble.style.animation = '';
+  }
+}
+
+/* ═════════════════════════ Returning customer (preview stub) ═════════════════════════ */
+
+function toggleReturning() {
+  document.getElementById('rc-panel').classList.toggle('open');
+}
+function lookupCustomer() {
+  document.getElementById('rc-status').textContent = 'PREVIEW MODE — not wired to Firebase yet. In live version this fills your details from your last booking.';
+}
+
+/* ═════════════════════════ INIT ═════════════════════════ */
+
+renderTemperament();
+
+// Check for saved state and offer restore
+(function checkRestore() {
+  const saved = loadSavedState();
+  if (saved && (saved.pets[0].name || saved.pets[0].category || saved.customer.email)) {
+    document.getElementById('restore-prompt').classList.add('open');
+  }
+})();
+
+gotoStep(1);
+</script>
 </body>
 </html>
