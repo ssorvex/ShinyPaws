@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Service Agreement & Liability Release — Shiny Paws</title>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<style>
+  :root{
+    --purple:#5b3a87;
+    --purple-soft:#7B5EA7;
+    --lilac:#b9a4dc;
+    --pink-light:#fff5f5;
+    --pink-warm:#fbeaea;
+    --border:#e8d5e8;
+    --border-mid:#cfb6cf;
+    --text:#3a2d4d;
+    --muted:#8a7a99;
+    --accent:#e89cae;
+    --green:#2e9b5a;
+    --red:#c54545;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:'DM Sans',-apple-system,sans-serif;
+    background:linear-gradient(135deg,#fdf6f6 0%,#f6effd 100%);
+    color:var(--text);min-height:100vh;padding:20px
+  }
+  .wrap{max-width:780px;margin:0 auto}
+  .preview-banner{
+    background:#fff3cd;border:1px solid #ffd966;color:#664d00;
+    padding:10px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;text-align:center
+  }
+  .header{
+    background:#fff;border-radius:14px;padding:18px 22px;margin-bottom:16px;
+    box-shadow:0 2px 12px rgba(91,58,135,.05);text-align:center
+  }
+  .header h1{margin:0;color:var(--purple);font-size:22px}
+  .header p{margin:6px 0 0;color:var(--muted);font-size:13px}
+  .panel{
+    background:#fff;border-radius:16px;padding:26px;
+    box-shadow:0 4px 20px rgba(91,58,135,.06);margin-bottom:16px
+  }
+  @media (max-width:560px){.panel{padding:18px}}
+  .panel h2{margin:0 0 14px;font-size:18px;color:var(--purple)}
+
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em}
+  .field input,.field textarea{
+    width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;
+    font-size:14px;font-family:inherit;background:#fff
+  }
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--lilac)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  @media (max-width:560px){.row2,.row3{grid-template-columns:1fr}}
+
+  /* Auto-fill banner (when phone matches existing customer) */
+  .lookup-banner{
+    background:#f3efff;border:1px solid var(--lilac);border-radius:10px;
+    padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--purple);display:none
+  }
+  .lookup-banner.show{display:block}
+
+  /* Waiver text body */
+  .waiver-body{
+    background:#faf7fd;border:1px solid var(--border);border-radius:12px;
+    padding:18px 20px;font-size:13px;line-height:1.65;color:var(--text);
+    max-height:340px;overflow-y:auto;margin-bottom:14px
+  }
+  .waiver-body h3{margin:14px 0 6px;font-size:14px;color:var(--purple)}
+  .waiver-body h3:first-child{margin-top:0}
+  .waiver-body p{margin:6px 0}
+  .scroll-hint{font-size:11px;color:var(--muted);text-align:center;margin-bottom:10px}
+
+  /* Checkboxes */
+  .check-row{
+    display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+    background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;
+    cursor:pointer;transition:all .12s
+  }
+  .check-row:hover{border-color:var(--lilac)}
+  .check-row.checked{border-color:var(--purple);background:#f3efff}
+  .check-row input{width:22px;height:22px;accent-color:var(--purple);cursor:pointer;flex-shrink:0;margin:0}
+  .check-row label{font-size:13px;line-height:1.5;cursor:pointer;flex:1}
+
+  /* Signature pad */
+  .sig-wrap{
+    border:2px dashed var(--border-mid);border-radius:12px;padding:8px;
+    background:#fff;position:relative
+  }
+  .sig-wrap.signed{border-color:var(--green);border-style:solid}
+  .sig-pad{
+    width:100%;height:200px;background:#fff;border-radius:8px;
+    touch-action:none;cursor:crosshair;display:block;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none
+  }
+  /* Type-to-sign fallback row */
+  .sig-mode-row{display:flex;gap:6px;margin-bottom:8px}
+  .sig-mode-btn{
+    flex:1;padding:7px 10px;font-size:12px;border:1px solid var(--border-mid);
+    background:#fff;color:var(--purple);border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600
+  }
+  .sig-mode-btn.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .sig-typed{
+    width:100%;padding:14px;font-size:32px;font-family:'Brush Script MT','Lucida Handwriting',cursive;
+    color:var(--text);border:2px dashed var(--border-mid);border-radius:8px;background:#fff;
+    text-align:center;outline:none
+  }
+  .sig-typed:focus{border-color:var(--purple);border-style:solid}
+  .sig-controls{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:6px 8px;font-size:12px;color:var(--muted)
+  }
+  .sig-clear{
+    background:transparent;border:none;color:var(--purple);cursor:pointer;
+    font-family:inherit;font-size:12px;font-weight:600;text-decoration:underline
+  }
+  .sig-placeholder{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-style:italic;pointer-events:none;font-size:14px
+  }
+  .sig-wrap.has-content .sig-placeholder{display:none}
+
+  /* Submit button */
+  .btn{
+    padding:14px 28px;border-radius:10px;font-size:15px;font-weight:600;
+    cursor:pointer;font-family:inherit;border:none;transition:all .15s;
+    display:inline-flex;align-items:center;gap:8px;justify-content:center
+  }
+  .btn-primary{background:var(--purple);color:#fff;width:100%}
+  .btn-primary:hover{background:#4a2e6e}
+  .btn-primary:disabled{background:#bca6c9;cursor:not-allowed}
+  .spinner{width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Success state */
+  .success-screen{display:none;text-align:center;padding:40px 20px}
+  .success-screen.show{display:block}
+  .success-screen .check{
+    width:80px;height:80px;border-radius:50%;background:var(--green);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:42px;margin:0 auto 18px
+  }
+  .success-screen h2{color:var(--green);margin:0 0 8px}
+
+  .hint{font-size:12px;color:var(--muted);margin-top:6px}
+  .req{color:var(--accent);font-weight:bold}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="preview-banner">
+    🚧 PREVIEW MODE — Tablet-friendly liability release. Signature data not yet sending to Firebase.
+  </div>
+
+  <div class="header">
+    <h1>🐾 Shiny Paws Service Agreement</h1>
+    <p>Please read, fill in, and sign below — takes about 60 seconds.</p>
+  </div>
+
+  <!-- ═══════ Main form ═══════ -->
+  <div id="form-screen">
+
+    <div class="panel">
+      <h2>Your information</h2>
+      <div class="lookup-banner" id="lookup-banner">
+        ✅ Welcome back! We found your previous info — feel free to update anything that's changed.
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label>First name <span class="req">*</span></label>
+          <input type="text" id="f-fname" autocomplete="given-name" />
+        </div>
+        <div class="field">
+          <label>Last name <span class="req">*</span></label>
+          <input type="text" id="f-lname" autocomplete="family-name" />
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Phone <span class="req">*</span></label>
+          <input type="tel" id="f-phone" autocomplete="tel" placeholder="(310) 555-0123" />
+          <div class="hint">We use this to look up returning customers.</div>
+        </div>
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="f-email" autocomplete="email" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Address (optional)</label>
+        <input type="text" id="f-address" autocomplete="street-address" />
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Pet & emergency info</h2>
+      <div class="row2">
+        <div class="field">
+          <label>Pet name(s) <span class="req">*</span></label>
+          <input type="text" id="f-petnames" placeholder="e.g. Buddy, Luna" />
+        </div>
+        <div class="field">
+          <label>Breed(s) / approx. weight</label>
+          <input type="text" id="f-petbreed" placeholder="e.g. Cocker Spaniel, 25 lbs" />
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Veterinarian name + phone</label>
+          <input type="text" id="f-vet" placeholder="Dr. Smith — (310) 555-0199" />
+        </div>
+        <div class="field">
+          <label>Emergency contact</label>
+          <input type="text" id="f-emergency" placeholder="Name + phone" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Known allergies, sensitivities, conditions, or behavioral notes</label>
+        <textarea id="f-medical" rows="3" placeholder="Type 'none' if nothing to disclose."></textarea>
+        <div class="hint">Required — type "none" if you have nothing to disclose.</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Service Agreement & Liability Release</h2>
+      <div class="scroll-hint">↓ Scroll to read full agreement ↓</div>
+      <div class="waiver-body" id="waiver-body">
+        <h3>1. Vaccinations</h3>
+        <p>I confirm my pet is current on all required vaccinations including Rabies, DHPP/DA2PP (dogs), and FVRCP (cats). I understand Shiny Paws may request proof at any time and may refuse service if records cannot be provided.</p>
+
+        <h3>2. Health & Disclosure</h3>
+        <p>I have disclosed all known medical conditions, allergies, sensitivities, behavioral issues, prior matting, skin conditions, and any history of biting or aggression. I understand that withholding information may result in injury to my pet, staff, or other animals — for which I accept full responsibility.</p>
+
+        <h3>3. Matted Coat / Skin Conditions</h3>
+        <p>I understand that severely matted pets may require shave-down rather than scissor work, that this is done humanely for the pet's welfare, and that nicks, cuts, irritation, or pre-existing skin issues may be revealed during the process. I release Shiny Paws from liability for cosmetic outcomes related to matting or pre-existing conditions.</p>
+
+        <h3>4. Senior Pets / Pre-Existing Conditions</h3>
+        <p>I understand that grooming carries elevated risk for senior, ill, or anxious pets, including but not limited to stress, cardiac events, or aggravation of existing conditions. I accept this risk and release Shiny Paws from liability arising from such conditions.</p>
+
+        <h3>5. Accidents</h3>
+        <p>While Shiny Paws exercises every reasonable care, I understand that minor accidents (small nicks, brush burn, clipper irritation) can occur. I agree to notify Shiny Paws immediately of any injury observed, and acknowledge that Shiny Paws' liability is limited to the cost of veterinary treatment directly caused by groomer negligence, capped at the cost of services rendered.</p>
+
+        <h3>6. Photographs</h3>
+        <p>I grant Shiny Paws permission to photograph my pet for use on their website, social media, and marketing materials. (Use the opt-out checkbox below to decline.)</p>
+
+        <h3>7. Aggressive or Unmanageable Pets</h3>
+        <p>I understand Shiny Paws reserves the right to discontinue service if my pet displays aggression that endangers staff or other pets. The full service fee may still apply.</p>
+
+        <h3>8. Pickup</h3>
+        <p>I agree to pick up my pet at the agreed time. Pets not picked up within 24 hours of the agreed time may be considered abandoned per California Civil Code § 1834.</p>
+
+        <h3>9. Payment</h3>
+        <p>Payment is due in full upon completion of service, payable by card or cash at the store. No-show appointments without 24-hour notice may be charged a $25 fee against future bookings.</p>
+
+        <h3>10. Emergency Veterinary Care</h3>
+        <p>In the event of a medical emergency where I cannot be reached, I authorize Shiny Paws to seek emergency veterinary care for my pet at the nearest available clinic, and I agree to be financially responsible for all such costs.</p>
+
+        <h3>11. Severability & Governing Law</h3>
+        <p>This agreement is governed by the laws of the State of California, County of Los Angeles. If any provision is found unenforceable, the remainder shall remain in full effect.</p>
+      </div>
+
+      <div class="check-row" id="cr-agree">
+        <input type="checkbox" id="c-agree" />
+        <label for="c-agree"><b>I have read, understand, and agree</b> to all terms above. I am the lawful owner of the pet(s) listed and have authority to enter this agreement. <span class="req">*</span></label>
+      </div>
+      <div class="check-row" id="cr-vax">
+        <input type="checkbox" id="c-vax" />
+        <label for="c-vax">I confirm my pet's vaccinations are <b>current</b> and I can provide proof if asked. <span class="req">*</span></label>
+      </div>
+      <div class="check-row" id="cr-photo">
+        <input type="checkbox" id="c-photo" />
+        <label for="c-photo">📸 <b>Opt out of photos</b></label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Sign here</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 10px">Sign with your finger, stylus, or <b>click-and-drag with your mouse</b>. No touchscreen? Use "Type to sign" instead.</p>
+
+      <div class="sig-mode-row">
+        <button type="button" class="sig-mode-btn active" id="mode-draw" onclick="setSigMode('draw')">✍️ Draw signature</button>
+        <button type="button" class="sig-mode-btn"        id="mode-type" onclick="setSigMode('type')">⌨️ Type to sign</button>
+      </div>
+
+      <div id="sig-draw-area">
+        <div class="sig-wrap" id="sig-wrap">
+          <canvas id="sig-pad" class="sig-pad"></canvas>
+          <div class="sig-placeholder" id="sig-placeholder">✍️ Click-and-drag here to sign</div>
+        </div>
+        <div class="sig-controls">
+          <span id="sig-status">Not signed yet</span>
+          <button class="sig-clear" type="button" onclick="clearSignature()">Clear</button>
+        </div>
+      </div>
+
+      <div id="sig-type-area" style="display:none">
+        <input type="text" id="sig-typed-input" class="sig-typed" placeholder="Type your full name" oninput="onTypedSig()" />
+        <div class="sig-controls">
+          <span id="sig-typed-status">Not signed yet</span>
+          <span style="font-size:11px;color:var(--muted)">By typing your name, you agree this is your legal electronic signature.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="text-align:center">
+      <button class="btn btn-primary" id="submit-btn" onclick="submitWaiver()" disabled>
+        <span id="submit-text">Submit & complete</span>
+      </button>
+      <div class="hint" style="margin-top:10px">By submitting, you agree to the terms above. A copy will be emailed to you.</div>
+    </div>
+  </div>
+
+  <!-- ═══════ Success screen ═══════ -->
+  <div class="panel success-screen" id="success-screen">
+    <div class="check">✓</div>
+    <h2>All set!</h2>
+    <p style="color:var(--text);font-size:15px;margin:0 0 6px"><b id="s-name">Customer</b>, your waiver is on file.</p>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 18px">A copy has been emailed to <span id="s-email">you</span>. You won't need to sign again on future visits.</p>
+    <div style="background:#f3efff;padding:14px;border-radius:10px;font-size:13px;color:var(--purple)">
+      💜 Thank you for trusting us with your pet. Now please hand the tablet back to our staff!
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════ STATE ═══════════════════════ */
+
+const FIREBASE_DB = 'https://shiny-paws-default-rtdb.firebaseio.com';
+
+let signaturePad = null;
+let isSubmitting = false;
+let sigMode = 'draw'; // 'draw' or 'type'
+
+/* ═══════════════════════ INIT ═══════════════════════ */
+
+window.addEventListener('load', () => {
+  const canvas = document.getElementById('sig-pad');
+
+  // Init SignaturePad first — it stores a reference to the canvas, then we size it.
+  // Order matters: if we resize before init, the constructor reads the oversized
+  // backing-store dimensions and mouse coords end up offset on some browsers.
+  signaturePad = new SignaturePad(canvas, {
+    backgroundColor: 'rgba(255,255,255,1)', // solid white so toDataURL produces a clean PNG
+    penColor: '#1a1a2e',
+    minWidth: 1.4,
+    maxWidth: 3.0,
+    throttle: 0
+  });
+  resizeCanvas(canvas);
+
+  signaturePad.addEventListener('beginStroke', () => {
+    document.getElementById('sig-wrap').classList.add('has-content','signed');
+    document.getElementById('sig-status').textContent = '✅ Signed';
+    refreshSubmit();
+  });
+
+  // Resize handler — debounced so rapid resizes don't blow away the signature
+  let rt = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => resizeCanvas(canvas), 150);
+  });
+
+  // Wire up validators
+  ['f-fname','f-lname','f-phone','f-email','f-petnames','f-medical'].forEach(id => {
+    document.getElementById(id).addEventListener('input', refreshSubmit);
+  });
+  wireCheckRow('cr-agree', 'c-agree');
+  wireCheckRow('cr-vax',   'c-vax');
+  wireCheckRow('cr-photo', 'c-photo');
+
+  // Phone lookup → autofill returning customer
+  document.getElementById('f-phone').addEventListener('blur', lookupReturning);
+
+  // Pre-fill from URL params (admin can hand the iPad with phone+name baked in)
+  const params = new URLSearchParams(window.location.search);
+  const presetPhone = params.get('phone');
+  const presetName  = params.get('name');
+  if (presetPhone) {
+    document.getElementById('f-phone').value = presetPhone;
+    // Trigger the returning-customer lookup once the phone is filled
+    lookupReturning();
+  }
+  if (presetName) {
+    const parts = presetName.trim().split(/\s+/);
+    document.getElementById('f-fname').value = parts[0] || '';
+    document.getElementById('f-lname').value = parts.slice(1).join(' ');
+  }
+  refreshSubmit();
+});
+
+function resizeCanvas(canvas) {
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  // Don't resize if hidden (offsetWidth=0) — would lock canvas to 0×0
+  if (!canvas.offsetWidth) return;
+  // Preserve the existing signature across resize
+  const data = (signaturePad && !signaturePad.isEmpty()) ? signaturePad.toData() : null;
+  canvas.width  = canvas.offsetWidth  * ratio;
+  canvas.height = canvas.offsetHeight * ratio;
+  canvas.getContext('2d').scale(ratio, ratio);
+  if (signaturePad) {
+    signaturePad.clear();
+    if (data) signaturePad.fromData(data);
+  }
+}
+
+/* ═══════════════════════ SIGNATURE MODE TOGGLE ═══════════════════════ */
+
+function setSigMode(mode) {
+  sigMode = mode;
+  document.getElementById('mode-draw').classList.toggle('active', mode === 'draw');
+  document.getElementById('mode-type').classList.toggle('active', mode === 'type');
+  document.getElementById('sig-draw-area').style.display = mode === 'draw' ? 'block' : 'none';
+  document.getElementById('sig-type-area').style.display = mode === 'type' ? 'block' : 'none';
+  // Re-size canvas now that it's visible (in case it was previously hidden at 0px)
+  if (mode === 'draw') {
+    setTimeout(() => resizeCanvas(document.getElementById('sig-pad')), 0);
+  }
+  refreshSubmit();
+}
+
+function onTypedSig() {
+  const v = document.getElementById('sig-typed-input').value.trim();
+  document.getElementById('sig-typed-status').textContent = v ? '✅ Signed as "' + v + '"' : 'Not signed yet';
+  refreshSubmit();
+}
+
+// Render typed signature to a canvas → PNG dataURL (so storage format matches drawn sigs)
+function typedSignatureToDataURL(name) {
+  const c = document.createElement('canvas');
+  c.width = 600; c.height = 160;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = "italic 64px 'Brush Script MT','Lucida Handwriting',cursive";
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(name, c.width / 2, c.height / 2);
+  return c.toDataURL('image/png');
+}
+
+/* ═══════════════════════ INTERACTIONS ═══════════════════════ */
+
+// Mirror the native checkbox state onto the wrapper div for styling.
+// Each check-row div has only one checkbox child — we listen for the
+// native `change` event, which fires whether the user clicks the box,
+// the label, or hits space/enter. No manual toggle = no double-fire bug.
+function wireCheckRow(rowId, cbId) {
+  const cb  = document.getElementById(cbId);
+  const row = document.getElementById(rowId);
+  if (!cb || !row) return;
+  const sync = () => {
+    row.classList.toggle('checked', cb.checked);
+    refreshSubmit();
+  };
+  cb.addEventListener('change', sync);
+  sync();
+}
+
+function clearSignature() {
+  if (!signaturePad) return;
+  signaturePad.clear();
+  document.getElementById('sig-wrap').classList.remove('has-content','signed');
+  document.getElementById('sig-status').textContent = 'Not signed yet';
+  refreshSubmit();
+}
+
+function refreshSubmit() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = !isFormValid();
+}
+
+function isFormValid() {
+  const fields = ['f-fname','f-lname','f-phone','f-email','f-petnames','f-medical'];
+  for (const id of fields) {
+    if (!document.getElementById(id).value.trim()) return false;
+  }
+  if (!document.getElementById('c-agree').checked) return false;
+  if (!document.getElementById('c-vax').checked) return false;
+  if (sigMode === 'draw') {
+    if (!signaturePad || signaturePad.isEmpty()) return false;
+  } else {
+    if (!document.getElementById('sig-typed-input').value.trim()) return false;
+  }
+  return true;
+}
+
+// Returns the signature as a PNG data-URL regardless of input mode.
+function getSignatureDataURL() {
+  if (sigMode === 'type') {
+    const name = document.getElementById('sig-typed-input').value.trim();
+    return typedSignatureToDataURL(name);
+  }
+  return signaturePad.toDataURL('image/png');
+}
+
+/* ═══════════════════════ RETURNING CUSTOMER LOOKUP ═══════════════════════ */
+
+function normalizePhone(p) {
+  return (p || '').replace(/\D+/g,'');
+}
+async function lookupReturning() {
+  const phone = normalizePhone(document.getElementById('f-phone').value);
+  if (phone.length < 10) return;
+  try {
+    const url = FIREBASE_DB + '/customers/' + phone + '.json';
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data) return;
+    // Autofill
+    if (data.fname && !document.getElementById('f-fname').value) document.getElementById('f-fname').value = data.fname;
+    if (data.lname && !document.getElementById('f-lname').value) document.getElementById('f-lname').value = data.lname;
+    if (data.email && !document.getElementById('f-email').value) document.getElementById('f-email').value = data.email;
+    if (data.address && !document.getElementById('f-address').value) document.getElementById('f-address').value = data.address;
+    document.getElementById('lookup-banner').classList.add('show');
+    refreshSubmit();
+  } catch(e){ console.warn('Lookup failed:', e); }
+}
+
+/* ═══════════════════════ SUBMIT ═══════════════════════ */
+
+async function submitWaiver() {
+  if (isSubmitting || !isFormValid()) return;
+  isSubmitting = true;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving…';
+
+  // Build the record
+  const phone = normalizePhone(document.getElementById('f-phone').value);
+  const sigDataUrl = getSignatureDataURL();
+  const record = {
+    fname: document.getElementById('f-fname').value.trim(),
+    lname: document.getElementById('f-lname').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    phoneNormalized: phone,
+    email: document.getElementById('f-email').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
+    petNames: document.getElementById('f-petnames').value.trim(),
+    petBreed: document.getElementById('f-petbreed').value.trim(),
+    vet: document.getElementById('f-vet').value.trim(),
+    emergencyContact: document.getElementById('f-emergency').value.trim(),
+    medicalDisclosure: document.getElementById('f-medical').value.trim(),
+    agreedToTerms: true,
+    confirmedVaccinated: true,
+    optedOutOfPhotos: document.getElementById('c-photo').checked,
+    signatureDataUrl: sigDataUrl,
+    waiverVersion: 'v1-2026-04',
+    waiverSignedAt: new Date().toISOString(),
+    userAgent: navigator.userAgent,
+    locale: navigator.language || ''
+  };
+
+  console.log('PREVIEW MODE — would submit waiver:', record);
+
+  // ─── PREVIEW MODE: don't actually write to Firebase yet ───
+  // When going live, uncomment:
+  // try {
+  //   await fetch(FIREBASE_DB + '/waivers/' + phone + '.json', {
+  //     method: 'PUT',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify(record)
+  //   });
+  //   await fetch(FIREBASE_DB + '/customers/' + phone + '.json', {
+  //     method: 'PATCH',
+  //     headers: { 'Content-Type': 'application/json' },
+  //     body: JSON.stringify({
+  //       fname: record.fname, lname: record.lname, email: record.email,
+  //       address: record.address, waiverSignedAt: record.waiverSignedAt
+  //     })
+  //   });
+  // } catch (e) { alert('Save failed — please try again or ask staff for help.'); console.error(e); btn.disabled = false; btn.innerHTML = '<span>Submit & complete</span>'; isSubmitting = false; return; }
+
+  // Simulate network delay
+  await new Promise(r => setTimeout(r, 800));
+
+  // Show success
+  document.getElementById('s-name').textContent = record.fname;
+  document.getElementById('s-email').textContent = record.email;
+  document.getElementById('form-screen').style.display = 'none';
+  document.getElementById('success-screen').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

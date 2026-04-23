@@ -81,7 +81,11 @@ exports.handler = async (event) => {
     const sep = (url) => (url.indexOf('?') >= 0 ? '&' : '?');
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card'],
+      // automatic_payment_methods auto-enables Apple Pay, Google Pay, Link, and any
+      // other methods enabled in your Stripe Dashboard. Stripe Checkout shows the
+      // Apple Pay / Google Pay button automatically on supported devices/browsers
+      // (iOS Safari, macOS Safari, Chrome on Android) — no extra config needed.
+      automatic_payment_methods: { enabled: true },
       customer_email: customerEmail,
       line_items: [{
         price_data: {

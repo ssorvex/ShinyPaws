@@ -397,6 +397,78 @@
             color: #721C24;
         }
 
+        /* Waiver badges + actions */
+        .waiver-badge {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 8px;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+        }
+        .waiver-needs {
+            background: #ffe5e5;
+            color: #b8002b;
+            border: 1px solid #f5b3b3;
+            animation: waiverPulse 2s ease-in-out infinite;
+        }
+        .waiver-ok {
+            background: #e6f5ec;
+            color: #1f7a40;
+            border: 1px solid #b6dcc4;
+        }
+        @keyframes waiverPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(184,0,43,.25); }
+            50%      { box-shadow: 0 0 0 6px rgba(184,0,43,0); }
+        }
+        .btn-waiver {
+            background: #fff;
+            border: 2px solid #b8002b;
+            color: #b8002b;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+        .btn-waiver:hover { background: #b8002b; color: #fff; }
+        .btn-waiver-ok {
+            background: transparent;
+            border: 1px solid #b6dcc4;
+            color: #1f7a40;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+        .nav-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: #ffe5e5;
+            color: #b8002b;
+            border: 1px solid #f5b3b3;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .nav-pill .num {
+            background: #b8002b;
+            color: #fff;
+            border-radius: 10px;
+            padding: 1px 7px;
+            font-size: 11px;
+        }
+        .nav-pill.empty { display: none; }
+
         .success-message {
             background: #D4EDDA;
             color: #155724;
@@ -489,6 +561,8 @@
             <!-- Tabs -->
             <div style="display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;">
                 <button class="tab-btn active" onclick="switchTab('bookings')"   style="padding:10px 18px;border:none;border-radius:10px;background:#3D2060;color:#fff;font-weight:700;font-size:13px;cursor:pointer;">📅 Bookings</button>
+                <span class="nav-pill empty" id="waiverPendingPill" title="Bookings whose customer hasn't signed the waiver yet" onclick="switchTab('bookings')">📄 Waivers needed <span class="num" id="waiverPendingCount">0</span></span>
+                <button class="tab-btn"        onclick="switchTab('waivers')"    style="padding:10px 18px;border:none;border-radius:10px;background:#E8D5FF;color:#3D2060;font-weight:700;font-size:13px;cursor:pointer;">📄 Waivers</button>
                 <button class="tab-btn"        onclick="switchTab('analytics')"  style="padding:10px 18px;border:none;border-radius:10px;background:#E8D5FF;color:#3D2060;font-weight:700;font-size:13px;cursor:pointer;">📊 Analytics</button>
                 <button class="tab-btn" data-admin-only onclick="switchTab('images')"   style="padding:10px 18px;border:none;border-radius:10px;background:#E8D5FF;color:#3D2060;font-weight:700;font-size:13px;cursor:pointer;">🖼️ Images</button>
                 <button class="tab-btn" data-admin-only onclick="switchTab('content')"  style="padding:10px 18px;border:none;border-radius:10px;background:#E8D5FF;color:#3D2060;font-weight:700;font-size:13px;cursor:pointer;">✏️ Content</button>
@@ -582,6 +656,60 @@
                 </div>
             </div>
             </div><!-- end bookings tab -->
+
+            <!-- ===== WAIVERS TAB ===== -->
+            <div id="waivers" class="tab-content">
+                <div class="card">
+                    <h2 style="margin-bottom:4px">📄 Waiver Directory</h2>
+                    <p style="color:#7B5EA7;font-size:13px;margin-bottom:16px">Every customer in the database with their waiver status. Use this to see at a glance who still needs to sign.</p>
+
+                    <!-- Summary counts -->
+                    <div id="waiverSummary" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+                        <div style="flex:1;min-width:140px;background:#e6f5ec;border:1px solid #b6dcc4;padding:12px 14px;border-radius:10px">
+                            <div style="font-size:11px;color:#1f7a40;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Signed</div>
+                            <div id="waiverCountSigned" style="font-size:24px;font-weight:800;color:#1f7a40">0</div>
+                        </div>
+                        <div style="flex:1;min-width:140px;background:#ffe5e5;border:1px solid #f5b3b3;padding:12px 14px;border-radius:10px">
+                            <div style="font-size:11px;color:#b8002b;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Not signed</div>
+                            <div id="waiverCountUnsigned" style="font-size:24px;font-weight:800;color:#b8002b">0</div>
+                        </div>
+                        <div style="flex:1;min-width:140px;background:#f3efff;border:1px solid #cfb6cf;padding:12px 14px;border-radius:10px">
+                            <div style="font-size:11px;color:#3D2060;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Total customers</div>
+                            <div id="waiverCountTotal" style="font-size:24px;font-weight:800;color:#3D2060">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Search + filter -->
+                    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+                        <input type="text" id="waiverSearch" placeholder="Search name or phone…" oninput="renderWaiverList()" style="flex:1;min-width:220px;padding:9px 12px;border:1px solid #cfb6cf;border-radius:8px;font-size:13px" />
+                        <select id="waiverFilter" onchange="renderWaiverList()" style="padding:9px 12px;border:1px solid #cfb6cf;border-radius:8px;font-size:13px;background:#fff;cursor:pointer">
+                            <option value="all">All customers</option>
+                            <option value="unsigned">🔴 Not signed</option>
+                            <option value="signed">✓ Signed</option>
+                        </select>
+                        <button onclick="exportWaiverCSV()" style="padding:9px 14px;background:#fff;border:1px solid #cfb6cf;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;color:#3D2060">📥 Export CSV</button>
+                    </div>
+
+                    <!-- Table -->
+                    <div style="overflow-x:auto">
+                        <table id="waiverTable" style="width:100%;border-collapse:collapse;font-size:13px">
+                            <thead>
+                                <tr style="background:#f5f0ff;text-align:left">
+                                    <th style="padding:10px;color:#3D2060">Customer</th>
+                                    <th style="padding:10px;color:#3D2060">Phone</th>
+                                    <th style="padding:10px;color:#3D2060">Email</th>
+                                    <th style="padding:10px;color:#3D2060">Signed on</th>
+                                    <th style="padding:10px;color:#3D2060">Status</th>
+                                    <th style="padding:10px;color:#3D2060">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="waiverTableBody">
+                                <tr><td colspan="6" style="padding:30px;text-align:center;color:#7B5EA7">Loading customers…</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== ANALYTICS TAB ===== -->
             <div id="analytics" class="tab-content">
