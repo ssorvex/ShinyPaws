@@ -24,7 +24,7 @@ const { Resend } = require('resend');
 
 const BUSINESS_NAME    = 'Shiny Paws';
 const BUSINESS_PHONE   = '(310) 290-4970';
-const BUSINESS_ADDRESS = '16610 S Western Ave, Gardena, CA 90247';
+const BUSINESS_ADDRESS = '15718 S Manhattan Pl, Gardena, CA 90247';
 const BUSINESS_SITE    = 'https://shinypawsla.com';
 
 exports.handler = async (event) => {
