@@ -1472,6 +1472,17 @@ handleStripeReturn();
 // Refresh booked slots whenever date changes (covers both picker and manual edits)
 document.getElementById('appt-date').addEventListener('change', refreshBookedSlots);
 document.getElementById('appt-date').addEventListener('input',  refreshBookedSlots);
+document.getElementById('appt-date').addEventListener('blur',   refreshBookedSlots);
+
+// Belt + suspenders: refresh every time the user opens the time dropdown.
+// Date-change events are unreliable across browsers/pickers, but the user
+// HAS to click the time field to pick a slot — so this guarantees they see
+// current booked state at the moment of selection.
+const timeSelectEl = document.getElementById('appt-time-select');
+if (timeSelectEl) {
+  timeSelectEl.addEventListener('mousedown', refreshBookedSlots);
+  timeSelectEl.addEventListener('focus',     refreshBookedSlots);
+}
 
 // Re-run after Firebase finishes loading, in case the initial call fired before
 // window.db was ready. Cheap and idempotent.
