@@ -33,6 +33,7 @@ function login() {
         document.getElementById("loginScreen").classList.add("hidden");
         document.getElementById("dashboard").classList.add("active");
         applyRolePermissions(role);
+        subscribeWaivers();
         loadAppointments();
         document.getElementById("dateFilter").valueAsDate = new Date();
         document.getElementById("appointmentDate").valueAsDate = new Date();
@@ -69,6 +70,182 @@ function logout() {
     }
 }
 
+// ==================== WAIVERS ====================
+// In-memory map: normalized phone -> ISO timestamp of when the waiver was signed.
+// Populated from Firebase /customers/{phone}.waiverSignedAt. Each appointment row
+// looks itself up in this map to decide whether to show "NEEDS WAIVER" or "✓ Signed".
+const waiverByPhone = {};
+let lastAppointmentSnapshot = {};
+
+function normalizePhone(p) {
+    return String(p || '').replace(/\D/g, '');
+}
+
+// Full customer snapshot for the Waivers directory tab
+let customersSnapshot = {};
+
+function subscribeWaivers() {
+    db.ref("customers").on("value", (snap) => {
+        const data = snap.val() || {};
+        customersSnapshot = data;
+        // Reset and rebuild fast-lookup map
+        for (const k in waiverByPhone) delete waiverByPhone[k];
+        Object.entries(data).forEach(([phone, c]) => {
+            if (c && c.waiverSignedAt) {
+                waiverByPhone[normalizePhone(phone)] = c.waiverSignedAt;
+            }
+        });
+        // Re-render the currently visible appointments so badges flip live
+        if (lastAppointmentSnapshot && Object.keys(lastAppointmentSnapshot).length) {
+            displayAppointments(lastAppointmentSnapshot);
+        }
+        // Re-render the waivers directory too
+        renderWaiverList();
+    });
+}
+
+// ============ WAIVERS DIRECTORY TAB ============
+function waiverCustomerList() {
+    // Normalize the /customers/ snapshot into a sorted array
+    return Object.entries(customersSnapshot).map(([phoneKey, c]) => {
+        c = c || {};
+        const fname = c.fname || c.firstName || '';
+        const lname = c.lname || c.lastName  || '';
+        const name  = (fname + ' ' + lname).trim() || c.name || '(no name)';
+        return {
+            phoneKey,
+            phone: c.phone || phoneKey,
+            name,
+            email: c.email || '',
+            signedAt: c.waiverSignedAt || null,
+            waiverVersion: c.waiverVersion || '',
+            raw: c
+        };
+    }).sort((a, b) => {
+        // Unsigned first (so staff see who to chase), then by name
+        if (!!a.signedAt !== !!b.signedAt) return a.signedAt ? 1 : -1;
+        return a.name.localeCompare(b.name);
+    });
+}
+
+function renderWaiverList() {
+    const body   = document.getElementById('waiverTableBody');
+    if (!body) return;
+    const search = (document.getElementById('waiverSearch').value || '').toLowerCase().trim();
+    const filter = document.getElementById('waiverFilter').value;
+
+    let all = waiverCustomerList();
+    const total = all.length;
+    const totalSigned   = all.filter(c => !!c.signedAt).length;
+    const totalUnsigned = total - totalSigned;
+
+    document.getElementById('waiverCountTotal').textContent    = total;
+    document.getElementById('waiverCountSigned').textContent   = totalSigned;
+    document.getElementById('waiverCountUnsigned').textContent = totalUnsigned;
+
+    let rows = all;
+    if (filter === 'signed')   rows = rows.filter(c => !!c.signedAt);
+    if (filter === 'unsigned') rows = rows.filter(c => !c.signedAt);
+    if (search) {
+        rows = rows.filter(c =>
+            c.name.toLowerCase().includes(search) ||
+            normalizePhone(c.phone).includes(normalizePhone(search)) ||
+            (c.email || '').toLowerCase().includes(search)
+        );
+    }
+
+    if (rows.length === 0) {
+        body.innerHTML = `<tr><td colspan="6" style="padding:30px;text-align:center;color:#7B5EA7">
+            ${total === 0 ? 'No customers in the database yet.' : 'No customers match those filters.'}
+        </td></tr>`;
+        return;
+    }
+
+    body.innerHTML = rows.map(c => {
+        const escName  = (c.name  || '').replace(/'/g, "\\'");
+        const escPhone = (c.phone || '').replace(/'/g, "\\'");
+        const signedDate = c.signedAt
+            ? new Date(c.signedAt).toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'})
+            : '—';
+        const status = c.signedAt
+            ? `<span class="waiver-badge waiver-ok">✓ Signed</span>`
+            : `<span class="waiver-badge waiver-needs">🔴 Not signed</span>`;
+        const actions = c.signedAt
+            ? `<button class="btn-waiver-ok" onclick="openWaiverFor('${escPhone}','${escName}')">📄 View</button>
+               <button class="btn-waiver-ok" onclick="copyWaiverLink('${escPhone}','${escName}')">🔗 Copy link</button>`
+            : `<button class="btn-waiver" onclick="openWaiverFor('${escPhone}','${escName}')">📄 Open waiver</button>
+               <button class="btn-waiver-ok" onclick="copyWaiverLink('${escPhone}','${escName}')">🔗 Text link</button>`;
+        return `<tr style="border-bottom:1px solid #eee4f3">
+            <td style="padding:10px;font-weight:600;color:#3D2060">${c.name}</td>
+            <td style="padding:10px">${c.phone}</td>
+            <td style="padding:10px;color:#7B5EA7">${c.email || '—'}</td>
+            <td style="padding:10px;color:#7B5EA7">${signedDate}</td>
+            <td style="padding:10px">${status}</td>
+            <td style="padding:10px;white-space:nowrap">${actions}</td>
+        </tr>`;
+    }).join('');
+}
+
+// CSV export — handy for texting campaigns or spreadsheets
+function exportWaiverCSV() {
+    const rows = waiverCustomerList();
+    const header = ['Name','Phone','Email','Signed At','Status'];
+    const csv = [header.join(',')].concat(
+        rows.map(c => [
+            '"' + (c.name || '').replace(/"/g,'""') + '"',
+            '"' + (c.phone || '').replace(/"/g,'""') + '"',
+            '"' + (c.email || '').replace(/"/g,'""') + '"',
+            c.signedAt || '',
+            c.signedAt ? 'signed' : 'not_signed'
+        ].join(','))
+    ).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'shinypaws-waivers-' + new Date().toISOString().slice(0,10) + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+}
+
+function hasWaiver(phone) {
+    return !!waiverByPhone[normalizePhone(phone)];
+}
+
+function openWaiverFor(phone, name) {
+    const params = new URLSearchParams();
+    if (phone) params.set('phone', phone);
+    if (name)  params.set('name',  name);
+    window.open('waiver.html?' + params.toString(), '_blank', 'noopener');
+}
+
+// Copy a tap-to-sign link to the clipboard so admin can text it to the customer.
+function copyWaiverLink(phone, name) {
+    const base = window.location.origin + window.location.pathname.replace(/admin\.html$/, '');
+    const params = new URLSearchParams();
+    if (phone) params.set('phone', phone);
+    if (name)  params.set('name',  name);
+    const url = base + 'waiver.html?' + params.toString();
+    navigator.clipboard.writeText(url).then(() => {
+        showSuccess('Waiver link copied — paste into a text to ' + (name || 'the customer') + '.');
+    }).catch(() => {
+        prompt('Copy this waiver link and text it to the customer:', url);
+    });
+}
+
+function updateWaiverPendingPill(appts) {
+    const pill = document.getElementById('waiverPendingPill');
+    const count = document.getElementById('waiverPendingCount');
+    if (!pill || !count) return;
+    let pending = 0;
+    Object.values(appts || {}).forEach(a => {
+        if (a.status === 'cancelled') return;
+        if (!hasWaiver(a.customerPhone)) pending++;
+    });
+    count.textContent = pending;
+    pill.classList.toggle('empty', pending === 0);
+}
+
 // ==================== APPOINTMENTS ====================
 function loadAppointments() {
     const dateFilter = document.getElementById("dateFilter").value;
@@ -82,19 +259,37 @@ function loadAppointments() {
 }
 
 function displayAppointments(appointments) {
+    lastAppointmentSnapshot = appointments || {};
     const list = document.getElementById("appointmentsList");
     const items = Object.entries(appointments);
+
+    updateWaiverPendingPill(appointments);
 
     if (items.length === 0) {
         list.innerHTML = '<div class="empty-state"><p>No appointments for this date</p></div>';
         return;
     }
 
-    list.innerHTML = items.map(([id, apt]) => `
+    list.innerHTML = items.map(([id, apt]) => {
+        const signed = hasWaiver(apt.customerPhone);
+        const waiverBadge = signed
+            ? `<span class="waiver-badge waiver-ok" title="Signed ${waiverByPhone[normalizePhone(apt.customerPhone)]}">✓ Waiver on file</span>`
+            : `<span class="waiver-badge waiver-needs" title="No waiver yet for this phone number">📄 Needs waiver</span>`;
+
+        const escName = (apt.customerName || '').replace(/'/g, "\\'");
+        const escPhone = (apt.customerPhone || '').replace(/'/g, "\\'");
+
+        const waiverActions = signed
+            ? `<button class="btn-waiver-ok" onclick="openWaiverFor('${escPhone}','${escName}')" title="View / re-sign">📄 View waiver</button>`
+            : `<button class="btn-waiver" onclick="openWaiverFor('${escPhone}','${escName}')" title="Open the waiver — hand the iPad to the customer at checkin">📄 Open waiver</button>
+               <button class="btn-waiver-ok" onclick="copyWaiverLink('${escPhone}','${escName}')" title="Copy a link to text the customer">🔗 Copy link</button>`;
+
+        return `
         <div class="appointment-item ${apt.status || 'pending'}">
             <div class="appointment-time">
                 ${apt.time}
                 <span class="status-badge status-${apt.status || 'pending'}">${apt.status || 'Pending'}</span>
+                ${waiverBadge}
             </div>
             <div class="appointment-details">
                 <strong>${apt.customerName}</strong> - ${apt.petName} (${apt.petBreed || 'N/A'})
@@ -104,13 +299,14 @@ function displayAppointments(appointments) {
                 ${apt.notes ? `<br />Notes: ${apt.notes}` : ''}
             </div>
             <div class="appointment-actions">
+                ${waiverActions}
                 ${apt.status !== 'completed' ? `<button class="btn-complete" onclick="updateStatus('${id}', 'completed')">✓ Complete</button>` : ''}
                 ${apt.status !== 'cancelled' ? `<button class="btn-cancel" onclick="updateStatus('${id}', 'cancelled')">✗ Cancel</button>` : ''}
                 ${!apt.reminderSent && apt.status !== 'cancelled' ? `<button class="btn-reminder" onclick="sendManualReminder('${id}')">📧 Send Reminder</button>` : ''}
                 <button class="btn-delete" onclick="deleteAppointment('${id}')">🗑️ Delete</button>
             </div>
-        </div>
-    `).join("");
+        </div>`;
+    }).join("");
 }
 
 function filterByDate() {
@@ -455,6 +651,67 @@ async function sendMultiChannelReminder(appointment, appointmentId) {
     }
     return false;
 }
+
+// ==================== SCHEDULE CONTROLS (closed days + clear future) ====================
+function todayIso() {
+    const d = new Date(); d.setHours(0,0,0,0);
+    return d.toISOString().slice(0,10);
+}
+
+function renderClosedDays(map) {
+    const el = document.getElementById('closedDaysList');
+    if (!el) return;
+    const entries = Object.entries(map || {}).filter(function(e){ return e[1] }).map(function(e){ return e[0] }).sort();
+    if (!entries.length) { el.innerHTML = '<span style="color:#7B5EA7">No days blocked.</span>'; return; }
+    el.innerHTML = entries.map(function(d){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f3efff;border-radius:8px;margin-bottom:6px">' +
+                 '<span>' + d + '</span>' +
+                 '<button type="button" class="btn-delete" style="padding:4px 10px;font-size:12px" onclick="removeClosedDay(\'' + d + '\')">Unblock</button>' +
+               '</div>';
+    }).join('');
+}
+
+function watchClosedDays() {
+    db.ref('closedDays').on('value', function(snap){ renderClosedDays(snap.val() || {}); });
+}
+
+function addClosedDay() {
+    const input = document.getElementById('closeDayInput');
+    const date = input.value;
+    if (!date) { alert('Pick a date first.'); return; }
+    db.ref('closedDays/' + date).set(true).then(function(){
+        showNotification && showNotification('Day blocked: ' + date, 'success');
+        input.value = '';
+    }).catch(function(err){ alert('Failed to block day: ' + err.message); });
+}
+
+function removeClosedDay(date) {
+    if (!confirm('Unblock ' + date + '? Customers will be able to book again.')) return;
+    db.ref('closedDays/' + date).remove().catch(function(err){ alert('Failed to unblock: ' + err.message); });
+}
+
+async function clearFutureAppointments() {
+    const cutoff = todayIso();
+    if (!confirm('Delete ALL appointments dated ' + cutoff + ' or later?\n\nThis cannot be undone.')) return;
+    if (!confirm('Last chance. Really delete all future appointments?')) return;
+    try {
+        const snap = await db.ref('appointments').once('value');
+        const all = snap.val() || {};
+        const toDelete = Object.entries(all).filter(function(e){
+            const d = (e[1] && e[1].date) || '';
+            return d >= cutoff;
+        });
+        if (!toDelete.length) { alert('No future appointments to delete.'); return; }
+        const updates = {};
+        toDelete.forEach(function(e){ updates['appointments/' + e[0]] = null; });
+        await db.ref().update(updates);
+        alert('Deleted ' + toDelete.length + ' future appointment(s).');
+    } catch (err) {
+        alert('Delete failed: ' + err.message);
+    }
+}
+
+watchClosedDays();
 
 // ==================== EVENT LISTENERS ====================
 document.getElementById("appointmentDate").addEventListener("change", updateTimeSlots);

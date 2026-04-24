@@ -1,6 +1,12 @@
 [build]
   functions = "netlify/functions"
 
+# SMS reminders — runs every 15 minutes, checks Firebase for appointments
+# that need a 24h or 3h reminder text. See netlify/functions/sms-reminders.js.
+# Twilio env vars required: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE
+[functions."sms-reminders"]
+  schedule = "*/15 * * * *"
+
 [[headers]]
   for = "/*.html"
   [headers.values]
