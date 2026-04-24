@@ -28,8 +28,8 @@ function login() {
     else if (password === VIEWER_PASSWORD) role = 'viewer';
 
     if (role) {
-        sessionStorage.setItem('adminPassword', password);
-        sessionStorage.setItem('adminRole', role);
+        localStorage.setItem('adminPassword', password);
+        localStorage.setItem('adminRole', role);
         document.getElementById("loginScreen").classList.add("hidden");
         document.getElementById("dashboard").classList.add("active");
         applyRolePermissions(role);
@@ -61,8 +61,8 @@ function applyRolePermissions(role) {
 
 function logout() {
     if (confirm("Are you sure you want to logout?")) {
-        sessionStorage.removeItem('adminPassword');
-        sessionStorage.removeItem('adminRole');
+        localStorage.removeItem('adminPassword');
+        localStorage.removeItem('adminRole');
         document.getElementById("loginScreen").classList.remove("hidden");
         document.getElementById("dashboard").classList.remove("active");
         document.getElementById("passwordInput").value = "";
@@ -78,7 +78,11 @@ const waiverByPhone = {};
 let lastAppointmentSnapshot = {};
 
 function normalizePhone(p) {
-    return String(p || '').replace(/\D/g, '');
+    // Return last 10 digits so "+1 310 555 1234", "13105551234", and "310-555-1234"
+    // all collapse to the same key. Handles country-code inconsistency between
+    // booking form and waiver form.
+    const digits = String(p || '').replace(/\D/g, '');
+    return digits.length > 10 ? digits.slice(-10) : digits;
 }
 
 // Full customer snapshot for the Waivers directory tab
@@ -721,3 +725,33 @@ document.getElementById("service").addEventListener("change", updateTimeSlots);
 document.getElementById("passwordInput")?.addEventListener("keypress", (e) => {
     if (e.key === "Enter") login();
 });
+
+// ==================== AUTO-LOGIN (persist across F5 and browser restarts) ====================
+// Uses localStorage so session survives tab close and hard refresh. Logout clears it.
+(function autoLogin() {
+    try {
+        const password = localStorage.getItem('adminPassword');
+        const role = localStorage.getItem('adminRole');
+        if (!password || !role) return;
+        if (password !== ADMIN_PASSWORD && password !== VIEWER_PASSWORD) {
+            // Password changed — clear stale creds
+            localStorage.removeItem('adminPassword');
+            localStorage.removeItem('adminRole');
+            return;
+        }
+        const loginEl = document.getElementById("loginScreen");
+        const dashEl  = document.getElementById("dashboard");
+        if (loginEl) loginEl.classList.add("hidden");
+        if (dashEl)  dashEl.classList.add("active");
+        applyRolePermissions(role);
+        subscribeWaivers();
+        loadAppointments();
+        const df = document.getElementById("dateFilter");
+        if (df) df.valueAsDate = new Date();
+        const ad = document.getElementById("appointmentDate");
+        if (ad) ad.valueAsDate = new Date();
+        if (typeof updateTimeSlots === 'function') updateTimeSlots();
+    } catch (e) {
+        console.warn('Auto-login failed:', e);
+    }
+})();

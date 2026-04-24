@@ -4,7 +4,7 @@
 
 // SESSION PASSWORD
 function getAdminPassword() {
-    var pw = sessionStorage.getItem('adminPassword');
+    var pw = localStorage.getItem('adminPassword') || sessionStorage.getItem('adminPassword');
     if (!pw) { showNotification('Session expired — please log in again.', 'error'); throw new Error('No session'); }
     return pw;
 }

@@ -677,7 +677,10 @@ function getSignatureDataURL() {
 /* ═══════════════════════ RETURNING CUSTOMER LOOKUP ═══════════════════════ */
 
 function normalizePhone(p) {
-  return (p || '').replace(/\D+/g,'');
+  // Last 10 digits — "+1 310 555 1234", "13105551234", "310-555-1234" all collapse
+  // to "3105551234". Keeps waiver key in sync with admin's lookup and with booking.
+  const digits = (p || '').replace(/\D+/g,'');
+  return digits.length > 10 ? digits.slice(-10) : digits;
 }
 async function lookupReturning() {
   const phone = normalizePhone(document.getElementById('f-phone').value);
