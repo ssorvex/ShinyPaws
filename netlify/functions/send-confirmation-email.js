@@ -73,7 +73,6 @@ function renderHtml(p, total) {
   const service    = p.service      || '';
   const date       = p.date         || '';
   const time       = p.time         || '';
-  const ref        = p.bookingRef   || '';
   const waiverLine = p.needsWaiver
     ? `<p style="margin:18px 0 0;padding:14px;background:#fff8e6;border:1px solid #f5c969;border-radius:8px;color:#704a00;font-size:14px">
          📄 <b>First visit?</b> Please sign our quick liability waiver before your appointment.
@@ -99,7 +98,6 @@ function renderHtml(p, total) {
       <tr><td style="padding:12px 14px;font-weight:700;color:#3D2060;border-top:1px solid #e8d5e8">Date</td><td style="padding:12px 14px;border-top:1px solid #e8d5e8">${escapeHtml(date)}</td></tr>
       <tr><td style="padding:12px 14px;font-weight:700;color:#3D2060;border-top:1px solid #e8d5e8">Time</td><td style="padding:12px 14px;border-top:1px solid #e8d5e8">${escapeHtml(time)}</td></tr>
       <tr><td style="padding:12px 14px;font-weight:700;color:#3D2060;border-top:1px solid #e8d5e8">Total</td><td style="padding:12px 14px;border-top:1px solid #e8d5e8;font-weight:700">${escapeHtml(total)}</td></tr>
-      ${ref ? `<tr><td style="padding:12px 14px;font-weight:700;color:#3D2060;border-top:1px solid #e8d5e8">Reference</td><td style="padding:12px 14px;border-top:1px solid #e8d5e8;font-family:ui-monospace,monospace">${escapeHtml(ref)}</td></tr>` : ''}
     </table>
 
     <p style="margin:0;padding:14px;background:#e6f5ec;border:1px solid #b6dcc4;border-radius:8px;color:#1f7a40;font-size:14px">
@@ -138,7 +136,7 @@ Service:   ${p.service || ''}
 Date:      ${p.date || ''}
 Time:      ${p.time || ''}
 Total:     ${total}
-${p.bookingRef ? 'Reference: ' + p.bookingRef + '\n' : ''}
+
 💳 Pay at pickup. No charge today.
 
 ${waiver}Need to reschedule? Call ${BUSINESS_PHONE} at least 2 hours ahead. No-shows or late cancels will be charged a one-time $25 fee on your next visit.

@@ -317,6 +317,53 @@ function filterByDate() {
     loadAppointments();
 }
 
+// ==================== REF SEARCH ====================
+// Finds a booking across ALL dates by its bookingRef (e.g. SP-A7K2M9) or the
+// last 6 characters if the customer only remembers the suffix. Match is case-
+// insensitive and tolerates leading/trailing spaces. Also falls back to phone
+// last-4 or last-10 digits so front desk can search by any identifier.
+async function searchByRef() {
+    const raw = (document.getElementById('refSearchInput').value || '').trim();
+    if (!raw) return;
+    const q = raw.toUpperCase().replace(/\s+/g, '');
+    const list = document.getElementById('appointmentsList');
+    list.innerHTML = '<div class="empty-state"><p>Searching…</p></div>';
+
+    // Detach the date-scoped listener so results aren't overwritten.
+    db.ref('appointments').off();
+
+    try {
+        const snap = await db.ref('appointments').once('value');
+        const all = snap.val() || {};
+        const matches = {};
+        const qDigits = q.replace(/\D/g, '');
+        Object.entries(all).forEach(([id, apt]) => {
+            if (!apt) return;
+            const ref = String(apt.bookingRef || '').toUpperCase();
+            const phone = String(apt.customerPhone || '').replace(/\D/g, '');
+            const name = String(apt.customerName || '').toUpperCase();
+            const matchRef   = ref && (ref === q || ref.endsWith(q) || ref.includes(q));
+            const matchPhone = qDigits.length >= 4 && phone.endsWith(qDigits);
+            const matchName  = name && name.includes(q);
+            if (matchRef || matchPhone || matchName) matches[id] = apt;
+        });
+        if (!Object.keys(matches).length) {
+            list.innerHTML = '<div class="empty-state"><p>No bookings match "' + raw + '"</p></div>';
+            return;
+        }
+        displayAppointments(matches);
+    } catch (e) {
+        console.error(e);
+        list.innerHTML = '<div class="empty-state"><p>Search failed. Try again.</p></div>';
+    }
+}
+
+function clearRefSearch() {
+    document.getElementById('refSearchInput').value = '';
+    db.ref('appointments').off();
+    loadAppointments();
+}
+
 // ==================== ADD BOOKING ====================
 function addBooking(e) {
     e.preventDefault();
@@ -724,6 +771,9 @@ document.getElementById("service").addEventListener("change", updateTimeSlots);
 // Allow Enter key to login
 document.getElementById("passwordInput")?.addEventListener("keypress", (e) => {
     if (e.key === "Enter") login();
+});
+document.getElementById("refSearchInput")?.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") searchByRef();
 });
 
 // ==================== AUTO-LOGIN (persist across F5 and browser restarts) ====================

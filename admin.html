@@ -586,6 +586,11 @@
                         <input type="date" id="dateFilter" />
                         <button onclick="filterByDate()">Filter</button>
                     </div>
+                    <div class="date-picker" style="margin-top:8px">
+                        <input type="text" id="refSearchInput" placeholder="Find booking ref (e.g. SP-A7K2M9)" style="flex:1;min-width:0" />
+                        <button onclick="searchByRef()">Find</button>
+                        <button onclick="clearRefSearch()" type="button" style="background:#e8dff5;color:#3D2060">Clear</button>
+                    </div>
                     <div class="success-message" id="successMessage"></div>
                     <div class="error-message" id="errorMessage"></div>
                     <div class="appointments-list" id="appointmentsList">
