@@ -274,7 +274,7 @@ var CONTENT_SECTIONS = [
     {
         id: 'services', title: '✂️ Services (6 Cards)',
         fields: (function() {
-            var names = ['Hand Scissor Haircuts','Full Grooming Package','Bath & Brush','Nail Trimming','Daycare & Boarding','Groomer Training'];
+            var names = ['Hand Scissor Haircuts','Full Grooming Package','Bath & Brush','Nail Trimming','Daycare','Groomer Training'];
             var out = [];
             for (var i = 0; i < 6; i++) {
                 (function(n) {
@@ -515,7 +515,7 @@ var SERVICE_PRICES = {
     'Bath & Brush': 60, 'Bath & Trim': 85,
     'Full Grooming': 100, 'Full Grooming Package': 100,
     'Hand Scissor Haircuts': 80, 'Nail Trimming': 20,
-    'Daycare': 45, 'Daycare & Boarding': 45, 'Groomer Training': 0
+    'Daycare': 45, 'Groomer Training': 0
 };
 
 function estimatePrice(service) {
@@ -647,6 +647,25 @@ async function loadAnalyticsTab() {
                         '</div>';
                 }).join(''),
             '</div>'
-        ].join('') : ''
+        ].join('') : '',
+
+        // RESET ANALYTICS (danger zone)
+        '<div style="margin-top:32px;padding:18px;border:2px dashed #ffb3b3;border-radius:14px;background:#fff5f5">',
+            '<h3 style="color:#a31515;margin:0 0 6px;font-size:14px;text-transform:uppercase;letter-spacing:.06em">⚠️ Reset analytics</h3>',
+            '<p style="color:#7B5EA7;font-size:12px;margin:0 0 10px">Clears all appointments and resets every counter to zero. Cannot be undone.</p>',
+            '<button type="button" onclick="resetAnalytics()" style="background:#c62828;color:#fff;border:none;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ Reset all analytics</button>',
+        '</div>'
     ].join('');
+}
+
+async function resetAnalytics() {
+    if (!confirm('Reset ALL analytics?\n\nThis deletes every appointment in Firebase. All dashboards drop to zero. Customers and waivers are kept.\n\nContinue?')) return;
+    if (!confirm('Final confirmation. Really wipe all appointments? There is no undo.')) return;
+    try {
+        await db.ref('appointments').remove();
+        if (typeof showNotification === 'function') showNotification('Analytics reset. All appointments deleted.', 'success');
+        loadAnalyticsTab();
+    } catch (e) {
+        alert('Reset failed: ' + e.message);
+    }
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Service Agreement & Liability Release — Shiny Paws</title>
+<title>Service Agreement & Liability Release · Shiny Paws</title>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <style>
   :root{
@@ -27,10 +27,6 @@
     color:var(--text);min-height:100vh;padding:20px
   }
   .wrap{max-width:780px;margin:0 auto}
-  .preview-banner{
-    background:#fff3cd;border:1px solid #ffd966;color:#664d00;
-    padding:10px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;text-align:center
-  }
   .header{
     background:#fff;border-radius:14px;padding:18px 22px;margin-bottom:16px;
     box-shadow:0 2px 12px rgba(91,58,135,.05);text-align:center
@@ -146,94 +142,111 @@
 
   .hint{font-size:12px;color:var(--muted);margin-top:6px}
   .req{color:var(--accent);font-weight:bold}
+
+  /* Language picker */
+  .lang-bar{
+    display:flex;justify-content:center;gap:6px;margin-bottom:14px;flex-wrap:wrap
+  }
+  .lang-btn{
+    background:#fff;border:1.5px solid var(--border);color:var(--purple);
+    padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;
+    cursor:pointer;font-family:inherit;transition:all .12s
+  }
+  .lang-btn:hover{border-color:var(--lilac)}
+  .lang-btn.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+  .legal-note{
+    font-size:11px;color:var(--muted);text-align:center;margin-top:10px;font-style:italic
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="preview-banner">
-    🚧 PREVIEW MODE — Tablet-friendly liability release. Signature data not yet sending to Firebase.
+  <div class="lang-bar" id="lang-bar">
+    <button type="button" class="lang-btn active" data-lang="en" onclick="setLang('en')">English</button>
+    <button type="button" class="lang-btn" data-lang="es" onclick="setLang('es')">Español</button>
+    <button type="button" class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
   </div>
 
   <div class="header">
-    <h1>🐾 Shiny Paws Service Agreement</h1>
-    <p>Please read, fill in, and sign below — takes about 60 seconds.</p>
+    <h1 data-i18n="title">🐾 Shiny Paws Service Agreement</h1>
+    <p data-i18n="subtitle">Please read, fill in, and sign below. Takes about 60 seconds.</p>
   </div>
 
   <!-- ═══════ Main form ═══════ -->
   <div id="form-screen">
 
     <div class="panel">
-      <h2>Your information</h2>
-      <div class="lookup-banner" id="lookup-banner">
-        ✅ Welcome back! We found your previous info — feel free to update anything that's changed.
+      <h2 data-i18n="info_h2">Your information</h2>
+      <div class="lookup-banner" id="lookup-banner" data-i18n="lookup_banner">
+        ✅ Welcome back! We found your previous info. Feel free to update anything that's changed.
       </div>
 
       <div class="row2">
         <div class="field">
-          <label>First name <span class="req">*</span></label>
+          <label><span data-i18n="l_fname">First name</span> <span class="req">*</span></label>
           <input type="text" id="f-fname" autocomplete="given-name" />
         </div>
         <div class="field">
-          <label>Last name <span class="req">*</span></label>
+          <label><span data-i18n="l_lname">Last name</span> <span class="req">*</span></label>
           <input type="text" id="f-lname" autocomplete="family-name" />
         </div>
       </div>
       <div class="row2">
         <div class="field">
-          <label>Phone <span class="req">*</span></label>
+          <label><span data-i18n="l_phone">Phone</span> <span class="req">*</span></label>
           <input type="tel" id="f-phone" autocomplete="tel" placeholder="(310) 555-0123" />
-          <div class="hint">We use this to look up returning customers.</div>
+          <div class="hint" data-i18n="hint_phone">We use this to look up returning customers.</div>
         </div>
         <div class="field">
-          <label>Email <span class="req">*</span></label>
+          <label><span data-i18n="l_email">Email</span> <span class="req">*</span></label>
           <input type="email" id="f-email" autocomplete="email" />
         </div>
       </div>
       <div class="field">
-        <label>Address (optional)</label>
+        <label data-i18n="l_address">Address (optional)</label>
         <input type="text" id="f-address" autocomplete="street-address" />
       </div>
     </div>
 
     <div class="panel">
-      <h2>Pet & emergency info</h2>
+      <h2 data-i18n="pet_h2">Pet & emergency info</h2>
       <div class="row2">
         <div class="field">
-          <label>Pet name(s) <span class="req">*</span></label>
-          <input type="text" id="f-petnames" placeholder="e.g. Buddy, Luna" />
+          <label><span data-i18n="l_petnames">Pet name(s)</span> <span class="req">*</span></label>
+          <input type="text" id="f-petnames" data-i18n-ph="ph_petnames" placeholder="e.g. Buddy, Luna" />
         </div>
         <div class="field">
-          <label>Breed(s) / approx. weight</label>
-          <input type="text" id="f-petbreed" placeholder="e.g. Cocker Spaniel, 25 lbs" />
+          <label data-i18n="l_petbreed">Breed(s) / approx. weight</label>
+          <input type="text" id="f-petbreed" data-i18n-ph="ph_petbreed" placeholder="e.g. Cocker Spaniel, 25 lbs" />
         </div>
       </div>
       <div class="row2">
         <div class="field">
-          <label>Veterinarian name + phone</label>
-          <input type="text" id="f-vet" placeholder="Dr. Smith — (310) 555-0199" />
+          <label data-i18n="l_vet">Veterinarian name + phone</label>
+          <input type="text" id="f-vet" data-i18n-ph="ph_vet" placeholder="Dr. Smith, (310) 555-0199" />
         </div>
         <div class="field">
-          <label>Emergency contact</label>
-          <input type="text" id="f-emergency" placeholder="Name + phone" />
+          <label data-i18n="l_emergency">Emergency contact</label>
+          <input type="text" id="f-emergency" data-i18n-ph="ph_emergency" placeholder="Name + phone" />
         </div>
       </div>
       <div class="field">
-        <label>Known allergies, sensitivities, conditions, or behavioral notes</label>
-        <textarea id="f-medical" rows="3" placeholder="Type 'none' if nothing to disclose."></textarea>
-        <div class="hint">Required — type "none" if you have nothing to disclose.</div>
+        <label data-i18n="l_medical">Known allergies, sensitivities, conditions, or behavioral notes</label>
+        <textarea id="f-medical" rows="3" data-i18n-ph="ph_medical" placeholder="Type 'none' if nothing to disclose."></textarea>
+        <div class="hint" data-i18n="hint_medical">Required. Type "none" if you have nothing to disclose.</div>
       </div>
     </div>
 
     <div class="panel">
-      <h2>Service Agreement & Liability Release</h2>
-      <div class="scroll-hint">↓ Scroll to read full agreement ↓</div>
-      <div class="waiver-body" id="waiver-body">
+      <h2 data-i18n="agree_h2">Service Agreement & Liability Release</h2>
+      <div class="scroll-hint" data-i18n="scroll_hint">↓ Scroll to read full agreement ↓</div>
+      <div class="waiver-body" id="waiver-body" data-i18n-html="waiver_body">
         <h3>1. Vaccinations</h3>
         <p>I confirm my pet is current on all required vaccinations including Rabies, DHPP/DA2PP (dogs), and FVRCP (cats). I understand Shiny Paws may request proof at any time and may refuse service if records cannot be provided.</p>
 
         <h3>2. Health & Disclosure</h3>
-        <p>I have disclosed all known medical conditions, allergies, sensitivities, behavioral issues, prior matting, skin conditions, and any history of biting or aggression. I understand that withholding information may result in injury to my pet, staff, or other animals — for which I accept full responsibility.</p>
+        <p>I have disclosed all known medical conditions, allergies, sensitivities, behavioral issues, prior matting, skin conditions, and any history of biting or aggression. I understand that withholding information may result in injury to my pet, staff, or other animals, for which I accept full responsibility.</p>
 
         <h3>3. Matted Coat / Skin Conditions</h3>
         <p>I understand that severely matted pets may require shave-down rather than scissor work, that this is done humanely for the pet's welfare, and that nicks, cuts, irritation, or pre-existing skin issues may be revealed during the process. I release Shiny Paws from liability for cosmetic outcomes related to matting or pre-existing conditions.</p>
@@ -262,65 +275,66 @@
         <h3>11. Severability & Governing Law</h3>
         <p>This agreement is governed by the laws of the State of California, County of Los Angeles. If any provision is found unenforceable, the remainder shall remain in full effect.</p>
       </div>
+      <div class="legal-note" id="legal-note" data-i18n="legal_note" style="display:none">Translations are for convenience. The English version above is the legally binding agreement.</div>
 
       <div class="check-row" id="cr-agree">
         <input type="checkbox" id="c-agree" />
-        <label for="c-agree"><b>I have read, understand, and agree</b> to all terms above. I am the lawful owner of the pet(s) listed and have authority to enter this agreement. <span class="req">*</span></label>
+        <label for="c-agree" data-i18n-html="check_agree"><b>I have read, understand, and agree</b> to all terms above. I am the lawful owner of the pet(s) listed and have authority to enter this agreement. <span class="req">*</span></label>
       </div>
       <div class="check-row" id="cr-vax">
         <input type="checkbox" id="c-vax" />
-        <label for="c-vax">I confirm my pet's vaccinations are <b>current</b> and I can provide proof if asked. <span class="req">*</span></label>
+        <label for="c-vax" data-i18n-html="check_vax">I confirm my pet's vaccinations are <b>current</b> and I can provide proof if asked. <span class="req">*</span></label>
       </div>
       <div class="check-row" id="cr-photo">
         <input type="checkbox" id="c-photo" />
-        <label for="c-photo">📸 <b>Opt out of photos</b></label>
+        <label for="c-photo" data-i18n-html="check_photo">📸 <b>Opt out of photos</b></label>
       </div>
     </div>
 
     <div class="panel">
-      <h2>Sign here</h2>
-      <p style="font-size:13px;color:var(--muted);margin:0 0 10px">Sign with your finger, stylus, or <b>click-and-drag with your mouse</b>. No touchscreen? Use "Type to sign" instead.</p>
+      <h2 data-i18n="sign_h2">Sign here</h2>
+      <p style="font-size:13px;color:var(--muted);margin:0 0 10px" data-i18n-html="sign_subtitle">Sign with your finger, stylus, or <b>click-and-drag with your mouse</b>. No touchscreen? Use "Type to sign" instead.</p>
 
       <div class="sig-mode-row">
-        <button type="button" class="sig-mode-btn active" id="mode-draw" onclick="setSigMode('draw')">✍️ Draw signature</button>
-        <button type="button" class="sig-mode-btn"        id="mode-type" onclick="setSigMode('type')">⌨️ Type to sign</button>
+        <button type="button" class="sig-mode-btn active" id="mode-draw" onclick="setSigMode('draw')" data-i18n="mode_draw">✍️ Draw signature</button>
+        <button type="button" class="sig-mode-btn"        id="mode-type" onclick="setSigMode('type')" data-i18n="mode_type">⌨️ Type to sign</button>
       </div>
 
       <div id="sig-draw-area">
         <div class="sig-wrap" id="sig-wrap">
           <canvas id="sig-pad" class="sig-pad"></canvas>
-          <div class="sig-placeholder" id="sig-placeholder">✍️ Click-and-drag here to sign</div>
+          <div class="sig-placeholder" id="sig-placeholder" data-i18n="sig_placeholder">✍️ Click-and-drag here to sign</div>
         </div>
         <div class="sig-controls">
-          <span id="sig-status">Not signed yet</span>
-          <button class="sig-clear" type="button" onclick="clearSignature()">Clear</button>
+          <span id="sig-status" data-i18n="sig_unsigned">Not signed yet</span>
+          <button class="sig-clear" type="button" onclick="clearSignature()" data-i18n="sig_clear">Clear</button>
         </div>
       </div>
 
       <div id="sig-type-area" style="display:none">
-        <input type="text" id="sig-typed-input" class="sig-typed" placeholder="Type your full name" oninput="onTypedSig()" />
+        <input type="text" id="sig-typed-input" class="sig-typed" data-i18n-ph="ph_sig_typed" placeholder="Type your full name" oninput="onTypedSig()" />
         <div class="sig-controls">
-          <span id="sig-typed-status">Not signed yet</span>
-          <span style="font-size:11px;color:var(--muted)">By typing your name, you agree this is your legal electronic signature.</span>
+          <span id="sig-typed-status" data-i18n="sig_unsigned">Not signed yet</span>
+          <span style="font-size:11px;color:var(--muted)" data-i18n="sig_typed_disclaimer">By typing your name, you agree this is your legal electronic signature.</span>
         </div>
       </div>
     </div>
 
     <div class="panel" style="text-align:center">
       <button class="btn btn-primary" id="submit-btn" onclick="submitWaiver()" disabled>
-        <span id="submit-text">Submit & complete</span>
+        <span id="submit-text" data-i18n="submit_text">Submit & complete</span>
       </button>
-      <div class="hint" style="margin-top:10px">By submitting, you agree to the terms above. A copy will be emailed to you.</div>
+      <div class="hint" style="margin-top:10px" data-i18n="submit_hint">By submitting, you agree to the terms above. A copy will be emailed to you.</div>
     </div>
   </div>
 
   <!-- ═══════ Success screen ═══════ -->
   <div class="panel success-screen" id="success-screen">
     <div class="check">✓</div>
-    <h2>All set!</h2>
-    <p style="color:var(--text);font-size:15px;margin:0 0 6px"><b id="s-name">Customer</b>, your waiver is on file.</p>
-    <p style="color:var(--muted);font-size:13px;margin:0 0 18px">A copy has been emailed to <span id="s-email">you</span>. You won't need to sign again on future visits.</p>
-    <div style="background:#f3efff;padding:14px;border-radius:10px;font-size:13px;color:var(--purple)">
+    <h2 data-i18n="success_h2">All set!</h2>
+    <p style="color:var(--text);font-size:15px;margin:0 0 6px"><b id="s-name">Customer</b>, <span data-i18n="success_p1">your waiver is on file.</span></p>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 18px"><span data-i18n="success_p2_a">A copy has been emailed to</span> <span id="s-email">you</span>. <span data-i18n="success_p2_b">You won't need to sign again on future visits.</span></p>
+    <div style="background:#f3efff;padding:14px;border-radius:10px;font-size:13px;color:var(--purple)" data-i18n="success_thanks">
       💜 Thank you for trusting us with your pet. Now please hand the tablet back to our staff!
     </div>
   </div>
@@ -328,6 +342,166 @@
 </div>
 
 <script>
+/* ═══════════════════════ i18n ═══════════════════════ */
+
+const I18N = {
+  en: {
+    title: "🐾 Shiny Paws Service Agreement",
+    subtitle: "Please read, fill in, and sign below. Takes about 60 seconds.",
+    info_h2: "Your information",
+    lookup_banner: "✅ Welcome back! We found your previous info. Feel free to update anything that's changed.",
+    l_fname: "First name", l_lname: "Last name",
+    l_phone: "Phone", hint_phone: "We use this to look up returning customers.",
+    l_email: "Email", l_address: "Address (optional)",
+    pet_h2: "Pet & emergency info",
+    l_petnames: "Pet name(s)", ph_petnames: "e.g. Buddy, Luna",
+    l_petbreed: "Breed(s) / approx. weight", ph_petbreed: "e.g. Cocker Spaniel, 25 lbs",
+    l_vet: "Veterinarian name + phone", ph_vet: "Dr. Smith, (310) 555-0199",
+    l_emergency: "Emergency contact", ph_emergency: "Name + phone",
+    l_medical: "Known allergies, sensitivities, conditions, or behavioral notes",
+    ph_medical: "Type 'none' if nothing to disclose.",
+    hint_medical: 'Required. Type "none" if you have nothing to disclose.',
+    agree_h2: "Service Agreement & Liability Release",
+    scroll_hint: "↓ Scroll to read full agreement ↓",
+    legal_note: "Translations are provided for convenience. The English version above is the legally binding agreement.",
+    check_agree: '<b>I have read, understand, and agree</b> to all terms above. I am the lawful owner of the pet(s) listed and have authority to enter this agreement. <span class="req">*</span>',
+    check_vax: 'I confirm my pet\'s vaccinations are <b>current</b> and I can provide proof if asked. <span class="req">*</span>',
+    check_photo: '📸 <b>Opt out of photos</b>',
+    sign_h2: "Sign here",
+    sign_subtitle: 'Sign with your finger, stylus, or <b>click-and-drag with your mouse</b>. No touchscreen? Use "Type to sign" instead.',
+    mode_draw: "✍️ Draw signature", mode_type: "⌨️ Type to sign",
+    sig_placeholder: "✍️ Click-and-drag here to sign",
+    sig_unsigned: "Not signed yet", sig_clear: "Clear",
+    ph_sig_typed: "Type your full name",
+    sig_typed_disclaimer: "By typing your name, you agree this is your legal electronic signature.",
+    submit_text: "Submit & complete",
+    submit_hint: "By submitting, you agree to the terms above. A copy will be emailed to you.",
+    success_h2: "All set!",
+    success_p1: "your waiver is on file.",
+    success_p2_a: "A copy has been emailed to", success_p2_b: "You won't need to sign again on future visits.",
+    success_thanks: "💜 Thank you for trusting us with your pet. Now please hand the tablet back to our staff!"
+  },
+  es: {
+    title: "🐾 Acuerdo de Servicio de Shiny Paws",
+    subtitle: "Por favor lea, complete y firme abajo. Toma unos 60 segundos.",
+    info_h2: "Su información",
+    lookup_banner: "✅ ¡Bienvenido de vuelta! Encontramos su información anterior. Actualice lo que haya cambiado.",
+    l_fname: "Nombre", l_lname: "Apellido",
+    l_phone: "Teléfono", hint_phone: "Lo usamos para identificar clientes que regresan.",
+    l_email: "Correo electrónico", l_address: "Dirección (opcional)",
+    pet_h2: "Información de la mascota y emergencias",
+    l_petnames: "Nombre(s) de la mascota", ph_petnames: "p. ej. Buddy, Luna",
+    l_petbreed: "Raza(s) / peso aprox.", ph_petbreed: "p. ej. Cocker Spaniel, 11 kg",
+    l_vet: "Veterinario (nombre y teléfono)", ph_vet: "Dr. Smith, (310) 555-0199",
+    l_emergency: "Contacto de emergencia", ph_emergency: "Nombre y teléfono",
+    l_medical: "Alergias, sensibilidades, condiciones o notas de comportamiento conocidas",
+    ph_medical: "Escriba 'ninguno' si no hay nada que declarar.",
+    hint_medical: 'Obligatorio. Escriba "ninguno" si no hay nada que declarar.',
+    agree_h2: "Acuerdo de Servicio y Exención de Responsabilidad",
+    scroll_hint: "↓ Desplácese para leer el acuerdo completo ↓",
+    legal_note: "Las traducciones se proporcionan por conveniencia. La versión en inglés arriba es el acuerdo legalmente vinculante.",
+    check_agree: '<b>He leído, entendido y acepto</b> todos los términos anteriores. Soy el dueño legal de la(s) mascota(s) y tengo autoridad para firmar este acuerdo. <span class="req">*</span>',
+    check_vax: 'Confirmo que las vacunas de mi mascota están <b>al día</b> y puedo presentar pruebas si me las piden. <span class="req">*</span>',
+    check_photo: '📸 <b>No quiero que tomen fotos</b>',
+    sign_h2: "Firme aquí",
+    sign_subtitle: 'Firme con el dedo, lápiz óptico, o <b>haga clic y arrastre con el ratón</b>. ¿Sin pantalla táctil? Use "Escribir para firmar".',
+    mode_draw: "✍️ Dibujar firma", mode_type: "⌨️ Escribir para firmar",
+    sig_placeholder: "✍️ Haga clic y arrastre aquí para firmar",
+    sig_unsigned: "Aún no firmado", sig_clear: "Borrar",
+    ph_sig_typed: "Escriba su nombre completo",
+    sig_typed_disclaimer: "Al escribir su nombre, acepta que esta es su firma electrónica legal.",
+    submit_text: "Enviar y completar",
+    submit_hint: "Al enviar, acepta los términos anteriores. Le enviaremos una copia por correo.",
+    success_h2: "¡Listo!",
+    success_p1: "su exención está registrada.",
+    success_p2_a: "Se envió una copia a", success_p2_b: "No necesitará firmar de nuevo en visitas futuras.",
+    success_thanks: "💜 Gracias por confiarnos a su mascota. ¡Por favor devuelva la tableta al personal!"
+  },
+  zh: {
+    title: "🐾 Shiny Paws 服务协议",
+    subtitle: "请阅读、填写并在下方签字。大约需要 60 秒。",
+    info_h2: "您的信息",
+    lookup_banner: "✅ 欢迎回来！我们找到了您之前的信息。如有变动，请随意更新。",
+    l_fname: "名", l_lname: "姓",
+    l_phone: "电话", hint_phone: "我们用它来识别回头客。",
+    l_email: "电子邮箱", l_address: "地址（选填）",
+    pet_h2: "宠物与紧急联系信息",
+    l_petnames: "宠物姓名", ph_petnames: "例如 Buddy、Luna",
+    l_petbreed: "品种 / 大约体重", ph_petbreed: "例如 可卡犬，11 公斤",
+    l_vet: "兽医姓名及电话", ph_vet: "Dr. Smith, (310) 555-0199",
+    l_emergency: "紧急联系人", ph_emergency: "姓名 + 电话",
+    l_medical: "已知过敏、敏感、疾病或行为问题",
+    ph_medical: "若无，请填写\"无\"。",
+    hint_medical: '必填。若无，请填写"无"。',
+    agree_h2: "服务协议与责任豁免",
+    scroll_hint: "↓ 滚动查看完整协议 ↓",
+    legal_note: "翻译仅供方便阅读。上方英文版本为具有法律约束力的协议。",
+    check_agree: '<b>我已阅读、理解并同意</b>以上所有条款。我是所列宠物的合法主人，有权签署本协议。<span class="req">*</span>',
+    check_vax: '我确认我的宠物疫苗接种<b>已是最新</b>，如被要求可出示证明。<span class="req">*</span>',
+    check_photo: '📸 <b>不同意拍照</b>',
+    sign_h2: "请在此签名",
+    sign_subtitle: '可以用手指、触控笔，或<b>用鼠标点击并拖动</b>签名。没有触屏？请使用"输入签名"。',
+    mode_draw: "✍️ 手写签名", mode_type: "⌨️ 输入签名",
+    sig_placeholder: "✍️ 点击并拖动以签名",
+    sig_unsigned: "尚未签名", sig_clear: "清除",
+    ph_sig_typed: "输入您的全名",
+    sig_typed_disclaimer: "输入您的姓名即表示您同意这是您的合法电子签名。",
+    submit_text: "提交并完成",
+    submit_hint: "提交即表示您同意以上条款。副本将通过电子邮件发送给您。",
+    success_h2: "完成！",
+    success_p1: "您的豁免书已存档。",
+    success_p2_a: "副本已发送至", success_p2_b: "下次来访无需再次签署。",
+    success_thanks: "💜 感谢您将宠物托付给我们。请把平板交回给我们的员工！"
+  }
+};
+
+let currentLang = 'en';
+
+function setLang(lang) {
+  if (!I18N[lang]) lang = 'en';
+  currentLang = lang;
+  try { localStorage.setItem('waiverLang', lang); } catch(e){}
+  const dict = I18N[lang];
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = dict[el.dataset.i18n];
+    if (v != null) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = dict[el.dataset.i18nHtml];
+    if (v != null) el.innerHTML = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = dict[el.dataset.i18nPh];
+    if (v != null) el.setAttribute('placeholder', v);
+  });
+  // Active button state
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  // Show the legal note on non-English
+  const note = document.getElementById('legal-note');
+  if (note) note.style.display = (lang === 'en') ? 'none' : 'block';
+  // If a signature status element shows the "signed as" line, keep dynamic part
+  const ts = document.getElementById('sig-typed-status');
+  if (ts) {
+    const v = (document.getElementById('sig-typed-input') || {}).value || '';
+    if (v.trim()) ts.textContent = '✅ ' + (lang === 'es' ? 'Firmado como "' : lang === 'zh' ? '已签名为 "' : 'Signed as "') + v + '"';
+  }
+  const sg = document.getElementById('sig-status');
+  if (sg && sg.textContent.trim() && !/Signed|Firmado|已签名/.test(sg.textContent)) {
+    sg.textContent = dict.sig_unsigned;
+  }
+}
+
+// Restore language on load
+(function initLang(){
+  let saved = 'en';
+  try { saved = localStorage.getItem('waiverLang') || 'en'; } catch(e){}
+  // Apply once DOM is parsed enough — this script is at end-of-body so it's safe now
+  setTimeout(() => setLang(saved), 0);
+})();
+
 /* ═══════════════════════ STATE ═══════════════════════ */
 
 const FIREBASE_DB = 'https://shiny-paws-default-rtdb.firebaseio.com';
@@ -558,28 +732,38 @@ async function submitWaiver() {
     locale: navigator.language || ''
   };
 
-  console.log('PREVIEW MODE — would submit waiver:', record);
-
-  // ─── PREVIEW MODE: don't actually write to Firebase yet ───
-  // When going live, uncomment:
-  // try {
-  //   await fetch(FIREBASE_DB + '/waivers/' + phone + '.json', {
-  //     method: 'PUT',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify(record)
-  //   });
-  //   await fetch(FIREBASE_DB + '/customers/' + phone + '.json', {
-  //     method: 'PATCH',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({
-  //       fname: record.fname, lname: record.lname, email: record.email,
-  //       address: record.address, waiverSignedAt: record.waiverSignedAt
-  //     })
-  //   });
-  // } catch (e) { alert('Save failed — please try again or ask staff for help.'); console.error(e); btn.disabled = false; btn.innerHTML = '<span>Submit & complete</span>'; isSubmitting = false; return; }
-
-  // Simulate network delay
-  await new Promise(r => setTimeout(r, 800));
+  // Write to Firebase: full waiver record + flag the customer as signed so admin sees it.
+  try {
+    await fetch(FIREBASE_DB + '/waivers/' + phone + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record)
+    });
+    await fetch(FIREBASE_DB + '/customers/' + phone + '.json', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fname: record.fname,
+        lname: record.lname,
+        email: record.email,
+        phone: record.phone,
+        address: record.address,
+        petNames: record.petNames,
+        petBreed: record.petBreed,
+        vet: record.vet,
+        emergencyContact: record.emergencyContact,
+        waiverSignedAt: record.waiverSignedAt,
+        waiverVersion: record.waiverVersion
+      })
+    });
+  } catch (e) {
+    alert('Save failed. Please try again or ask staff for help.');
+    console.error(e);
+    btn.disabled = false;
+    btn.innerHTML = '<span>Submit & complete</span>';
+    isSubmitting = false;
+    return;
+  }
 
   // Show success
   document.getElementById('s-name').textContent = record.fname;

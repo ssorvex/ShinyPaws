@@ -546,7 +546,7 @@ html,body{
     <span class="loader-paw">🐾</span><span class="loader-paw">🐾</span>
   </div>
   <div class="loader-brand">Shiny Paws</div>
-  <div class="loader-sub">Premium Grooming &amp; Daycare</div>
+  <div class="loader-sub">Master Grooming &middot; Daycare You Can Watch Live</div>
   <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
 </div>
 <div id="bottom-nav">
@@ -567,7 +567,7 @@ html,body{
       <span class="hl-name">Shiny Paws</span>
       <span class="hl-star">✦</span>
     </div>
-    <div class="hl-sub">Premium Grooming &amp; Daycare &middot; Los Angeles</div>
+    <div class="hl-sub">South Bay&rsquo;s Master Groomer &middot; Live Camera Daycare &middot; Gardena, CA</div>
     <div class="hl-line"></div>
   </div>
   <div id="bubble">Hey! I&rsquo;m Shinny! 🐾 Welcome to Shiny Paws!</div>
@@ -612,7 +612,7 @@ html,body{
 <div class="overlay" id="ov-daycare">
   <div class="card"><button class="c-close" onclick="closeOverlay('daycare')">✕</button>
     <h2>Dog Day Care</h2>
-    <p>A safe, fun and loving environment for your furry friend to play, socialize, and relax while you&rsquo;re away.</p>
+    <p>Drop off, then watch them play. Live cameras let you check in anytime, so your dog gets a full day of socializing and you get peace of mind.</p>
     <p class="grm-section-label">Pick a stay</p>
     <div class="grm-sizes" id="dc-options"></div>
     <p class="grm-section-label">Add-ons <span style="font-weight:500;font-size:.74rem;color:var(--purp-m);">(optional, tap to select)</span></p>
@@ -629,7 +629,7 @@ html,body{
 <div class="overlay" id="ov-grooming">
   <div class="card"><button class="c-close" onclick="closeOverlay('grooming')">✕</button>
     <h2>Grooming</h2>
-    <p>Pampering for your pet so they look &amp; feel their best 💜</p>
+    <p>Hand scissored by a master groomer with 15+ years of experience. Calm, careful, and finished so your dog walks out looking their best 💜</p>
 
     <p class="grm-section-label" style="margin-top:6px;">Pick a service</p>
     <div class="grm-tiers">
@@ -674,13 +674,13 @@ html,body{
 <div class="overlay" id="ov-booking">
   <div class="card"><button class="c-close" onclick="closeOverlay('booking')">✕</button>
     <h2>Book an Appointment</h2>
-    <p>Ready to pamper your furry friend? Fill out below or give us a call!</p>
+    <p>Pick a time online in under a minute. Pay at pickup, no deposit today.</p>
     <input class="inp" type="text" placeholder="Your Name">
     <input class="inp" type="text" placeholder="Dog Name &amp; Breed">
     <select class="inp" id="booking-service-sel">
       <option value="">Select a Service</option>
       <option>Bath &amp; Dry</option><option>Full Groom</option><option>Nail Trim</option>
-      <option>Day Care (Half Day)</option><option>Day Care (Full Day)</option><option>Overnight Stay</option>
+      <option>Day Care (Half Day)</option><option>Day Care (Full Day)</option>
     </select>
     <input class="inp" type="date">
     <button class="cta" onclick="dialPhone()">Confirm &mdash; Call Us</button>
@@ -1652,8 +1652,7 @@ var DC = { option:null, addons:[] };
 var DC_OPTIONS = [
   {label:'1 Hour',             price:15, value:'Day Care - 1 Hour',     icon:'⏰'},
   {label:'Half Day',           price:28, value:'Day Care - Half Day',   icon:'🌤️'},
-  {label:'Full Day',           price:45, value:'Day Care - Full Day',   icon:'☀️'},
-  {label:'Overnight Boarding', price:75, value:'Overnight Boarding',    icon:'🌙'}
+  {label:'Full Day',           price:45, value:'Day Care - Full Day',   icon:'☀️'}
 ];
 
 function renderDcOptions() {

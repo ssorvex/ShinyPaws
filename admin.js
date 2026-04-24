@@ -652,6 +652,67 @@ async function sendMultiChannelReminder(appointment, appointmentId) {
     return false;
 }
 
+// ==================== SCHEDULE CONTROLS (closed days + clear future) ====================
+function todayIso() {
+    const d = new Date(); d.setHours(0,0,0,0);
+    return d.toISOString().slice(0,10);
+}
+
+function renderClosedDays(map) {
+    const el = document.getElementById('closedDaysList');
+    if (!el) return;
+    const entries = Object.entries(map || {}).filter(function(e){ return e[1] }).map(function(e){ return e[0] }).sort();
+    if (!entries.length) { el.innerHTML = '<span style="color:#7B5EA7">No days blocked.</span>'; return; }
+    el.innerHTML = entries.map(function(d){
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f3efff;border-radius:8px;margin-bottom:6px">' +
+                 '<span>' + d + '</span>' +
+                 '<button type="button" class="btn-delete" style="padding:4px 10px;font-size:12px" onclick="removeClosedDay(\'' + d + '\')">Unblock</button>' +
+               '</div>';
+    }).join('');
+}
+
+function watchClosedDays() {
+    db.ref('closedDays').on('value', function(snap){ renderClosedDays(snap.val() || {}); });
+}
+
+function addClosedDay() {
+    const input = document.getElementById('closeDayInput');
+    const date = input.value;
+    if (!date) { alert('Pick a date first.'); return; }
+    db.ref('closedDays/' + date).set(true).then(function(){
+        showNotification && showNotification('Day blocked: ' + date, 'success');
+        input.value = '';
+    }).catch(function(err){ alert('Failed to block day: ' + err.message); });
+}
+
+function removeClosedDay(date) {
+    if (!confirm('Unblock ' + date + '? Customers will be able to book again.')) return;
+    db.ref('closedDays/' + date).remove().catch(function(err){ alert('Failed to unblock: ' + err.message); });
+}
+
+async function clearFutureAppointments() {
+    const cutoff = todayIso();
+    if (!confirm('Delete ALL appointments dated ' + cutoff + ' or later?\n\nThis cannot be undone.')) return;
+    if (!confirm('Last chance. Really delete all future appointments?')) return;
+    try {
+        const snap = await db.ref('appointments').once('value');
+        const all = snap.val() || {};
+        const toDelete = Object.entries(all).filter(function(e){
+            const d = (e[1] && e[1].date) || '';
+            return d >= cutoff;
+        });
+        if (!toDelete.length) { alert('No future appointments to delete.'); return; }
+        const updates = {};
+        toDelete.forEach(function(e){ updates['appointments/' + e[0]] = null; });
+        await db.ref().update(updates);
+        alert('Deleted ' + toDelete.length + ' future appointment(s).');
+    } catch (err) {
+        alert('Delete failed: ' + err.message);
+    }
+}
+
+watchClosedDays();
+
 // ==================== EVENT LISTENERS ====================
 document.getElementById("appointmentDate").addEventListener("change", updateTimeSlots);
 document.getElementById("service").addEventListener("change", updateTimeSlots);

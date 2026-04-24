@@ -47,7 +47,7 @@ exports.handler = async (event) => {
   if (!p.customerEmail) return cors(400, { error: 'customerEmail required' });
 
   const resend  = new Resend(apiKey);
-  const subject = `✓ Your ${BUSINESS_NAME} appointment is confirmed — ${p.date || ''} ${p.time || ''}`.trim();
+  const subject = `✓ Your ${BUSINESS_NAME} appointment is confirmed for ${p.date || ''} ${p.time || ''}`.trim();
   const total   = typeof p.total === 'number' ? '$' + p.total : (p.total || '');
 
   try {
@@ -76,8 +76,8 @@ function renderHtml(p, total) {
   const ref        = p.bookingRef   || '';
   const waiverLine = p.needsWaiver
     ? `<p style="margin:18px 0 0;padding:14px;background:#fff8e6;border:1px solid #f5c969;border-radius:8px;color:#704a00;font-size:14px">
-         📄 <b>First visit?</b> Please sign our quick liability waiver before your appointment —
-         takes 30 seconds: <a href="${BUSINESS_SITE}/waiver.html" style="color:#b8002b;font-weight:700">Sign now →</a>
+         📄 <b>First visit?</b> Please sign our quick liability waiver before your appointment.
+         Takes 30 seconds: <a href="${BUSINESS_SITE}/waiver.html" style="color:#b8002b;font-weight:700">Sign now →</a>
          (Or use our iPad when you arrive.)
        </p>`
     : '';
@@ -103,13 +103,13 @@ function renderHtml(p, total) {
     </table>
 
     <p style="margin:0;padding:14px;background:#e6f5ec;border:1px solid #b6dcc4;border-radius:8px;color:#1f7a40;font-size:14px">
-      💳 <b>Pay at pickup</b> — no charge today. Card or cash at the store after ${escapeHtml(pet)}'s service.
+      💳 <b>Pay at pickup.</b> No charge today. Card or cash at the store after ${escapeHtml(pet)}'s service.
     </p>
 
     ${waiverLine}
 
     <p style="margin:18px 0 0;padding:14px;background:#fbeaea;border:1px solid #f5c0c0;border-radius:8px;color:#8c1c1c;font-size:13px">
-      ⚠️ <b>Need to reschedule?</b> No problem — just call ${BUSINESS_PHONE} at least 2 hours before your appointment.
+      ⚠️ <b>Need to reschedule?</b> No problem. Just call ${BUSINESS_PHONE} at least 2 hours before your appointment.
       Late cancels or no-shows will be charged a one-time $25 fee on your next visit.
     </p>
 
@@ -139,7 +139,7 @@ Date:      ${p.date || ''}
 Time:      ${p.time || ''}
 Total:     ${total}
 ${p.bookingRef ? 'Reference: ' + p.bookingRef + '\n' : ''}
-💳 Pay at pickup — no charge today.
+💳 Pay at pickup. No charge today.
 
 ${waiver}Need to reschedule? Call ${BUSINESS_PHONE} at least 2 hours ahead. No-shows or late cancels will be charged a one-time $25 fee on your next visit.
 
