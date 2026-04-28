@@ -345,12 +345,21 @@ body.intro-showing #topbar{display:none !important;}
 }
 /* OVERLAYS */
 .overlay{position:fixed;inset:0;background:rgba(61,32,96,.42);backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);z-index:200;display:none;align-items:center;justify-content:center;padding:16px;}
+  -webkit-backdrop-filter:blur(12px);z-index:200;display:none;align-items:center;justify-content:center;
+  padding:16px;
+  /* Reserve space for the fixed #bottom-nav so cards never sit behind it on Android */
+  padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));
+  padding-top:calc(16px + env(safe-area-inset-top,0px));}
 .overlay.on{display:flex;}
 .card{background:linear-gradient(150deg,rgba(255,252,255,.97),rgba(240,228,255,.97));
   border:1px solid rgba(255,255,255,.65);border-radius:26px;padding:clamp(18px,4vw,34px);
   padding-bottom:clamp(28px,6vw,48px);
-  max-width:490px;width:100%;max-height:88vh;overflow-y:auto;
+  max-width:490px;width:100%;
+  /* dvh shrinks with Android URL bar; vh fallback for older browsers */
+  max-height:88vh;
+  max-height:calc(100dvh - 110px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
   box-shadow:0 24px 64px rgba(61,32,96,.25),0 0 0 1px rgba(255,255,255,.8);
   position:relative;animation:cardIn .38s cubic-bezier(.34,1.2,.64,1);}
 .c-close{position:absolute;top:13px;right:16px;font-size:20px;cursor:pointer;
@@ -668,7 +677,7 @@ html,body{
       <div id="grm-summary-text"></div>
     </div>
 
-    <button class="cta" id="grm-book-btn" onclick="bookGrooming()" style="opacity:.5;pointer-events:none;">Continue to Checkout</button>
+    <button class="cta" id="grm-book-btn" onclick="bookGrooming()" style="opacity:.5;pointer-events:none;position:sticky;bottom:0;z-index:5;box-shadow:0 -8px 24px rgba(255,252,255,.95),0 4px 20px rgba(61,32,96,.28);">Continue to Checkout</button>
   </div>
 </div>
 <div class="overlay" id="ov-booking">
